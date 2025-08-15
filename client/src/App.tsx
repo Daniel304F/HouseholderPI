@@ -1,18 +1,15 @@
-import { NavLink, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css'
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Header from './layouts/Header';
 
 
   function AppShell() {
   return (
-    <div className="min-h-dvh">
-      <nav className="p-3 border-b flex gap-3">
-        <NavLink to="/" className="hover:underline">Home</NavLink>
-        <NavLink to="/login" className="hover:underline">Login</NavLink>
-        <NavLink to="/signup" className="hover:underline">Signup</NavLink>
-      </nav>
+    <div className=" min-h-dvh">
+      <Header></Header>
       <main className="p-4">
         <Outlet />
       </main>
