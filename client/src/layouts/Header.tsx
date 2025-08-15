@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 export default function Header() {
     return ( 
-        <header className="bg-gray-900 border-b border-gray-800">
+        <header className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 border-b border-blue-900 shadow-lg">
                 <div className="flex flex-row justify-between items-center h-16 p-0.5">
 
                     <div className="flex items-center space-x-3">
@@ -11,34 +11,23 @@ export default function Header() {
                             alt="householderPI ICON" 
                             className="h-16 w-16"
                         />
-                        <h1 className="text-xl font-bold text-white">
+                        <h1 className="text-3xl font-bold text-white">
                             HouseHolderPI
                         </h1>
                     </div>
 
 
-                    <nav className="flex items-center space-x-4">
+                    <nav className="flex items-center space-x-4 m-3">
                         <NavLink 
-                            to="/signup" 
-                            className={({isActive}) => 
-                                `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                    isActive 
-                                        ? 'text-cyan-400 bg-gray-800' 
-                                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                                }`
-                            }
+                            to="/signup"
+                            className="px-4 py-2 rounded-lg bg-white text-indigo-600 font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition"
                         >
                             Registrieren
                         </NavLink>
                         <NavLink 
                             to="/login" 
-                            className={({isActive}) => 
-                                `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                    isActive 
-                                        ? 'bg-cyan-500 text-gray-900' 
-                                        : 'bg-cyan-500 text-gray-900 hover:bg-cyan-400'
-                                }`
-                            }
+                            className="px-4 py-2 rounded-lg bg-white text-indigo-600 font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition"
+                        
                         >
                             Anmelden
                         </NavLink>
