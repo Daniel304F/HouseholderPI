@@ -1,3 +1,7 @@
+import Sidebar from "../layouts/Sidebar";
+
 export default function Home() {
-    return <h1>Hallo Welt!</h1>
+    return (
+        <Sidebar></Sidebar>
+    )
 }
