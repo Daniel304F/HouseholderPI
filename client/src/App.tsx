@@ -8,10 +8,10 @@ import Header from './layouts/Header';
 
   function AppShell() {
   return (
-    <div className=" min-h-dvh">
+    <div className="text-gray-800 min-h-dvh">
       <Header></Header>
-      <main className="p-4">
-        <Outlet />
+      <main className="p-4 relative">
+        <Outlet /> 
       </main>
     </div>
   );
