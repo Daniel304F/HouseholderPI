@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   return (
     <>
 
-      <div className={`absolute top-0 left-0 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      <div className={`absolute bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         {/* Sidebar Header */}
@@ -51,12 +51,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         </div>
         <span className="font-semibold text-gray-800">Deine Bereiche</span>
       </div>
-          <button 
-            onClick={onClose}
-            className="lg:hidden p-1 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-800" />
-          </button>
+            {isOpen && 
+            <button 
+                onClick={onClose}
+                className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+            >
+                <X className="w-5 h-5 text-gray-800" />
+            </button>}
         </div>
 
         {/* Navigation Menu */}

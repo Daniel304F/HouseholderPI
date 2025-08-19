@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 export default function Header() {
     return ( 
-        <header className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 border-b border-blue-900 shadow-lg">
+        <header className='bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 border-b border-blue-900 shadow-lg shrink-0'>
                 <div className="flex flex-row justify-between items-center h-16 p-0.5">
 
                     <div className="flex items-center space-x-3">
