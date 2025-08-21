@@ -24,7 +24,6 @@ import { HouseHolderButton } from './components/HouseHolderButton';
 return (
   <div className="min-h-screen flex flex-col text-gray-800">
     <Header/>
-
     <main className="pt-16 min-h-[calc(100vh-4rem)] relative">
       <div className="absolute left-0 top-4">
         {!sidebarOpen ? <HouseHolderButton className='ml-2' title="Deine Bereiche" onClick={openSidebar} /> : <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />}
