@@ -1,4 +1,5 @@
 import { Users, Brain, Shield, CheckCircle, ArrowRight } from "lucide-react";
+import ImageSlider from "../components/ImageSlider";
 
 export default function Home() {
     const features = [
@@ -23,6 +24,21 @@ export default function Home() {
             description: "Keine Diskussionen mehr, wer den Müll rausbringt - HouseHolderPI sorgt für klare, faire Regeln."
         }
     ];
+
+    const images = [
+        {
+            url: './image1.png',
+            alt: 'Picture of cleaning up a room'
+        },
+        {
+            url: './image2.png',
+            alt: 'Picture of finishing tasks'
+        },
+        {
+            url: './image3.png',
+            alt: 'Picture of a clean room'
+        }
+    ]
 
     return (
         <div className="min-h-screen bg-white">
@@ -72,6 +88,11 @@ export default function Home() {
                         );
                     })}
                 </div>
+
+                <div>
+                    <ImageSlider images={images} />
+                </div>
+
 
                 <div className="text-center">
                     <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 rounded-2xl p-8 text-white max-w-2xl mx-auto">

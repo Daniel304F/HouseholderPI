@@ -43,7 +43,6 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               den Überblick über deine Aktivitäten.
             </p>
             
-            {/* Contact Info */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-sm text-blue-100">
                 <Mail className="w-4 h-4" />
@@ -60,7 +59,6 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             </div>
           </div>
 
-          {/* Navigation Links */}
           <div>
             <h3 className="font-semibold text-white mb-4">Navigation</h3>
             <ul className="space-y-3">
@@ -78,7 +76,6 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             </ul>
           </div>
 
-          {/* Legal Links */}
           <div>
             <h3 className="font-semibold text-white mb-4">Rechtliches</h3>
             <ul className="space-y-3">
@@ -94,11 +91,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             </ul>
           </div>
 
-          {/* GitHub & Newsletter */}
           <div>
             <h3 className="font-semibold text-white mb-4">Entwicklung</h3>
             
-            {/* GitHub Link */}
             <div className="mb-6">
               <a
                 href="https://github.com/Daniel304F"
@@ -114,7 +109,6 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               </p>
             </div>
 
-            {/* Newsletter Signup */}
             <div>
               <h4 className="font-medium text-white mb-2 text-sm">Newsletter abonnieren</h4>
               <div className="flex space-x-2">
