@@ -27,15 +27,15 @@ export default function Home() {
 
     const images = [
         {
-            url: './image1.png',
+            url: './Image1.png',
             alt: 'Picture of cleaning up a room'
         },
         {
-            url: './image2.png',
+            url: './Image2.png',
             alt: 'Picture of finishing tasks'
         },
         {
-            url: './image3.png',
+            url: './Image3.png',
             alt: 'Picture of a clean room'
         }
     ]
@@ -89,8 +89,10 @@ export default function Home() {
                     })}
                 </div>
 
-                <div>
-                    <ImageSlider images={images} />
+                <div className="flex justify-center py-12">
+                    <div className="w-full max-w-4xl">
+                        <ImageSlider images={images} />
+                    </div>
                 </div>
 
 
