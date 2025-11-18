@@ -1,91 +1,96 @@
-import { Users, Brain, Shield, CheckCircle, ArrowRight } from "lucide-react";
-import ImageSlider from "../components/ImageSlider";
+import { Users, Brain, Shield, CheckCircle, ArrowRight } from 'lucide-react'
+import ImageSlider from '../components/ImageSlider'
 
 export default function Home() {
     const features = [
         {
             icon: Users,
-            title: "Gruppen erstellen & Aufgaben teilen:",
-            description: "Lade deine WG-Bewohner ein und legt gemeinsam fest, was im Haushalt zu tun ist."
+            title: 'Gruppen erstellen & Aufgaben teilen:',
+            description:
+                'Lade deine WG-Bewohner ein und legt gemeinsam fest, was im Haushalt zu tun ist.',
         },
         {
             icon: Brain,
-            title: "Faire Aufgabenverteilung dank KI:",
-            description: "Ein intelligentes LLM erstellt automatisch einen Wochenplan, der Rücksicht auf die Zeitkapazitäten aller nimmt."
+            title: 'Faire Aufgabenverteilung dank KI:',
+            description:
+                'Ein intelligentes LLM erstellt automatisch einen Wochenplan, der Rücksicht auf die Zeitkapazitäten aller nimmt.',
         },
         {
             icon: Shield,
-            title: "Selbst gehostet & datensicher:",
-            description: "Läuft direkt auf deinem Raspberry PI - volle Kontrolle über deine Daten."
+            title: 'Selbst gehostet & datensicher:',
+            description:
+                'Läuft direkt auf deinem Raspberry PI - volle Kontrolle über deine Daten.',
         },
         {
             icon: CheckCircle,
-            title: "Stressfreier WG-Alltag:",
-            description: "Keine Diskussionen mehr, wer den Müll rausbringt - HouseHolderPI sorgt für klare, faire Regeln."
-        }
-    ];
+            title: 'Stressfreier WG-Alltag:',
+            description:
+                'Keine Diskussionen mehr, wer den Müll rausbringt - HouseHolder sorgt für klare, faire Regeln.',
+        },
+    ]
 
     const images = [
         {
             url: './Image1.png',
-            alt: 'Picture of cleaning up a room'
+            alt: 'Picture of cleaning up a room',
         },
         {
             url: './Image2.png',
-            alt: 'Picture of finishing tasks'
+            alt: 'Picture of finishing tasks',
         },
         {
             url: './Image3.png',
-            alt: 'Picture of a clean room'
-        }
+            alt: 'Picture of a clean room',
+        },
     ]
 
     return (
         <div className="min-h-screen bg-white">
-            <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 text-center py-16">
+            <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 py-16 text-center">
                 <div className="container mx-auto px-6">
-                    <div className="flex justify-center items-center mb-6">
-                        <h1 className="text-4xl md:text-5xl font-bold text-white">
-                            Willkommen bei HouseHolderPI!
+                    <div className="mb-6 flex items-center justify-center">
+                        <h1 className="text-4xl font-bold text-white md:text-5xl">
+                            Willkommen bei HouseHolder!
                         </h1>
                     </div>
-                    
-                    <div className="max-w-4xl mx-auto">
-                        <p className="text-xl md:text-2xl text-blue-100 leading-relaxed">
-                            Mit HouseHolderPI wird das Chaos im WG-Alltag zur Vergangenheit. Unsere Plattform organisiert 
-                            Haushaltsaufgaben fair und transparent - individuell abgestimmt auf die verfügbare Zeit jedes Mitglieds.
+
+                    <div className="mx-auto max-w-4xl">
+                        <p className="text-xl leading-relaxed text-blue-100 md:text-2xl">
+                            Mit HouseHolder wird das Chaos im WG-Alltag zur
+                            Vergangenheit. Unsere Plattform organisiert
+                            Haushaltsaufgaben fair und transparent - individuell
+                            abgestimmt auf die verfügbare Zeit jedes Mitglieds.
                         </p>
                     </div>
                 </div>
             </div>
 
-
             <div className="container mx-auto px-6 py-16">
-                <div className="grid md:grid-cols-2 gap-8 mb-16">
+                <div className="mb-16 grid gap-8 md:grid-cols-2">
                     {features.map((feature, index) => {
-                        const IconComponent = feature.icon;
+                        const IconComponent = feature.icon
                         return (
-                            <div 
+                            <div
                                 key={index}
-                                className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 hover:transform hover:scale-105"
+                                className="rounded-xl border border-gray-200 bg-gray-50 p-6 transition-all duration-300 hover:scale-105 hover:transform hover:shadow-lg"
                             >
                                 <div className="flex items-start space-x-4">
                                     <div className="flex-shrink-0">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                            <IconComponent className="w-6 h-6 text-white" />
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+                                            <IconComponent className="h-6 w-6 text-white" />
                                         </div>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                        <h3 className="mb-2 text-lg font-semibold text-gray-900">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-gray-600 leading-relaxed">
+                                        <p className="leading-relaxed text-gray-600">
                                             {feature.description}
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                        );
+                        )
                     })}
                 </div>
 
@@ -95,21 +100,21 @@ export default function Home() {
                     </div>
                 </div>
 
-
                 <div className="text-center">
-                    <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 rounded-2xl p-8 text-white max-w-2xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-4">
+                    <div className="mx-auto max-w-2xl rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 p-8 text-white">
+                        <h2 className="mb-4 text-2xl font-bold">
                             Bereit für eine organisierte WG?
                         </h2>
-                        <p className="text-blue-100 mb-6">
-                            Starte noch heute und bringe Ordnung in euren Haushalt!
+                        <p className="mb-6 text-blue-100">
+                            Starte noch heute und bringe Ordnung in euren
+                            Haushalt!
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center group">
+                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                            <button className="group flex items-center justify-center rounded-lg bg-white px-6 py-3 font-semibold text-purple-600 transition-colors duration-200 hover:bg-gray-100">
                                 Jetzt registrieren
-                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                             </button>
-                            <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200">
+                            <button className="rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-white/10">
                                 Mehr erfahren
                             </button>
                         </div>
@@ -117,5 +122,5 @@ export default function Home() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
