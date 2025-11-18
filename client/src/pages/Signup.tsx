@@ -114,7 +114,7 @@ export default function Signup() {
                     </div>
 
                     <p className="mt-4 text-center text-sm text-gray-600">
-                        Schon ein Konto?{' '}
+                        Schon ein Konto?
                         <a
                             href="/login"
                             className="font-medium text-blue-500 hover:underline"
