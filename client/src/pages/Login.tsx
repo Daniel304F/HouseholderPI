@@ -3,16 +3,16 @@ import Input from '../components/Input'
 
 export default function Login() {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-fuchsia-100/30 to-white px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-100">
+        <div className="from-primary-100/30 flex min-h-screen items-center justify-center bg-gradient-to-b to-white px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-neutral-100">
                 <div className="mb-6 text-center">
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-600">
+                    <div className="bg-primary-100 text-primary-600 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl">
                         🔐
                     </div>
-                    <h1 className="text-3xl font-extrabold text-gray-900">
+                    <h1 className="text-3xl font-extrabold text-neutral-900">
                         Anmelden
                     </h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-neutral-600">
                         Willkommen zurück bei HouseHolderPI
                     </p>
                 </div>
@@ -45,16 +45,16 @@ export default function Login() {
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-2.5 px-3 text-sm text-gray-500 hover:text-fuchsia-600"
+                                className="hover:text-primary-600 absolute inset-y-0 right-2.5 px-3 text-sm text-neutral-500"
                             ></button>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-2 text-sm text-gray-600">
+                        <label className="flex items-center gap-2 text-sm text-neutral-600">
                             <input
                                 type="checkbox"
-                                className="h-4 w-4 rounded border-gray-300 text-fuchsia-600 focus:ring-blue-500"
+                                className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-neutral-300"
                                 id="remember"
                             />
                             Angemeldet bleiben
@@ -78,11 +78,11 @@ export default function Login() {
                         />
                     </div>
 
-                    <p className="mt-4 text-center text-sm text-gray-600">
+                    <p className="mt-4 text-center text-sm text-neutral-600">
                         Neu hier?{' '}
                         <a
                             href="/signup"
-                            className="font-medium text-blue-500 hover:underline"
+                            className="text-primary-600 font-medium hover:underline"
                         >
                             Konto erstellen
                         </a>

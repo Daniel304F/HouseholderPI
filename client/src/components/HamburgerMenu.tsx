@@ -14,7 +14,7 @@ export default function HamburgerMenu() {
         <>
             <button
                 onClick={toggleMenu}
-                className="p-2 text-white hover:text-indigo-200 sm:hidden"
+                className="hover:text-primary-200 p-2 text-white sm:hidden"
                 aria-label="Toggle navigation"
             >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -24,13 +24,13 @@ export default function HamburgerMenu() {
             <nav className="hidden items-center space-x-4 sm:flex">
                 <NavLink
                     to="/signup"
-                    className="rounded-lg bg-white px-4 py-2 font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+                    className="text-primary-600 hover:bg-primary-50 hover:text-primary-700 rounded-lg bg-white px-4 py-2 font-semibold transition"
                 >
                     Registrieren
                 </NavLink>
                 <NavLink
                     to="/login"
-                    className="rounded-lg bg-white px-4 py-2 font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+                    className="text-primary-600 hover:bg-primary-50 hover:text-primary-700 rounded-lg bg-white px-4 py-2 font-semibold transition"
                 >
                     Anmelden
                 </NavLink>
@@ -39,19 +39,19 @@ export default function HamburgerMenu() {
             {/* Geöffnet wenn Bildschirm Klein ist */}
             {isMenuOpen && (
                 <div
-                    className={`absolute top-16 ${isMenuOpen ? 'right-0' : '-right-64'} flex h-1/4 flex-col gap-4 rounded-md bg-amber-300 pt-2 transition-all duration-300 ease-out`}
+                    className={`absolute top-16 ${isMenuOpen ? 'right-0' : '-right-64'} bg-accent-300 flex h-1/4 flex-col gap-4 rounded-md pt-2 transition-all duration-300 ease-out`}
                 >
                     <NavLink
                         to="/signup"
                         onClick={toggleMenu}
-                        className="rounded-lg bg-white px-4 py-2 text-center font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+                        className="text-primary-600 hover:bg-primary-50 hover:text-primary-700 rounded-lg bg-white px-4 py-2 text-center font-semibold transition"
                     >
                         Registrieren
                     </NavLink>
                     <NavLink
                         to="/login"
                         onClick={toggleMenu}
-                        className="rounded-lg bg-white px-4 py-2 text-center font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+                        className="text-primary-600 hover:bg-primary-50 hover:text-primary-700 rounded-lg bg-white px-4 py-2 text-center font-semibold transition"
                     >
                         Anmelden
                     </NavLink>
