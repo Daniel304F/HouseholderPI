@@ -1,4 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { navItems } from './navItems'
+import { HeaderNavigationItem } from './HeaderNavigationItem'
 
 export const HeaderNavigation = () => {
     const navigate = useNavigate()
@@ -16,7 +18,15 @@ export const HeaderNavigation = () => {
                         <span className="red">HouseHolder</span>
                     </div>
 
-                    <nav></nav>
+                    <nav>
+                        {navItems.map((item) => (
+                            <HeaderNavigationItem
+                                {...item}
+                                onClick={handleNavigate}
+                                isActive={location.pathname === item.path}
+                            ></HeaderNavigationItem>
+                        ))}
+                    </nav>
                 </div>
             </div>
         </header>
