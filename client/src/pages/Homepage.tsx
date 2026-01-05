@@ -3,10 +3,14 @@ import { HeroImage } from '../components/HeroImage'
 import { Headline } from '../components/ui/Headline'
 import { Button } from '../components/ui/Button'
 import { LogIn } from 'lucide-react'
+import { GridCardLayout } from '../layouts/GridCardLayout'
+import { Card } from '../components/ui/Card'
 
 const headlineTitle = 'Gemeinsam wohnen, entspannt leben'
 const headlineSubtitle =
     'Schluss mit Diskussionen über den Abwasch. HouseHolder macht die Aufgabenverteilung in deiner WG fair, transparent und sogar ein bisschen spaßig.'
+
+const cards = [{ id: 1, title: 'hello world!' }]
 
 export const Homepage = () => {
     const navigate = useNavigate()
@@ -29,6 +33,13 @@ export const Homepage = () => {
                         Jetzt loslegen
                     </Button>
                 </Headline>
+                <section className="px-6 py-12">
+                    <GridCardLayout>
+                        {cards.map((card) => (
+                            <Card key={card.id} title={card.title}></Card>
+                        ))}
+                    </GridCardLayout>
+                </section>
             </div>
         </>
     )
