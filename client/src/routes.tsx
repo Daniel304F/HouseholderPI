@@ -10,6 +10,18 @@ export const routes: RouteObject[] = [
                 path: '/',
                 element: <Homepage />,
             },
+            // {
+            //     path: '/login',
+            //     element: <LoginPage />
+            // },
+            // {
+            //     path: '/register',
+            //     element: <RegisterPage />
+            // },
+            // {
+            //     path: '/dashboard',
+            //     element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+            // },
         ],
     },
 ]
