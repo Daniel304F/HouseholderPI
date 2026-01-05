@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
 import { Homepage } from './pages/Homepage'
 import { Login } from './pages/Login'
+import { Register } from './pages/Register'
 
 export const routes: RouteObject[] = [
     {
@@ -15,10 +16,10 @@ export const routes: RouteObject[] = [
                 path: '/login',
                 element: <Login />,
             },
-            // {
-            //     path: '/register',
-            //     element: <RegisterPage />
-            // },
+            {
+                path: '/register',
+                element: <Register />,
+            },
             // {
             //     path: '/dashboard',
             //     element: <ProtectedRoute><Dashboard /></ProtectedRoute>

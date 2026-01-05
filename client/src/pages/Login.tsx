@@ -1,3 +1,112 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { Headline } from '../components/ui/Headline'
+import { LogIn } from 'lucide-react'
+
 export const Login = () => {
-    return <>Hello Login!</>
+    const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+        {}
+    )
+
+    const validate = () => {
+        const newErrors: { email?: string; password?: string } = {}
+        let isValid = true
+
+        if (!email) {
+            newErrors.email = 'E-Mail ist erforderlich.'
+            isValid = false
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Bitte gib eine gültige E-Mail ein.'
+            isValid = false
+        }
+
+        if (!password) {
+            newErrors.password = 'Passwort ist erforderlich.'
+            isValid = false
+        }
+
+        setErrors(newErrors)
+        return isValid
+    }
+    // login handler
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (validate()) {
+            // gültig
+            setIsLoading(true)
+            // TODO:api anbieten
+        }
+    }
+
+    return (
+        <div className="flex w-full items-center justify-center py-12">
+            <div className="w-full max-w-md space-y-8">
+                <div className="text-center">
+                    <Headline
+                        title="Willkommen zurück!"
+                        subtitle="Logge dich ein, um deinen Putzplan zu sehen."
+                    />
+                </div>
+                <Card title="Login">
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <Input
+                            label="E-Mail Adresse"
+                            type="email"
+                            placeholder="deine-mail@beispiel.de"
+                            required
+                            autoFocus
+                            onChange={(e) => {
+                                setEmail(e.target.value)
+                            }}
+                            error={errors.email}
+                        />
+                        <Input
+                            label="Passwort"
+                            type="password"
+                            placeholder="••••••••"
+                            required
+                            onChange={(e) => {
+                                setPassword(e.target.value)
+                                if (errors.password)
+                                    setErrors({
+                                        ...errors,
+                                        password: undefined,
+                                    })
+                            }}
+                            error={errors.password}
+                        />
+
+                        <div className="pt-2">
+                            <Button
+                                fullWidth
+                                type="submit"
+                                isLoading={isLoading}
+                                icon={<LogIn size={18} />}
+                            >
+                                Einloggen
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+
+                <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+                    Noch kein Konto?{' '}
+                    <Link
+                        to="/register"
+                        className="text-brand-600 dark:text-brand-400 font-medium hover:underline"
+                    >
+                        Jetzt registrieren
+                    </Link>
+                </p>
+            </div>
+        </div>
+    )
 }
