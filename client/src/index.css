@@ -147,3 +147,16 @@ a:hover {
 .dark a:hover {
     color: var(--color-brand-300);
 }
+
+.hide-scrollbar {
+    /* Für Firefox */
+    scrollbar-width: none;
+
+    /* Für Internet Explorer und Edge (Legacy) */
+    -ms-overflow-style: none;
+}
+
+/* Für Chrome, Safari und Opera */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}

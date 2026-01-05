@@ -3,5 +3,9 @@ export interface CardProps {
 }
 
 export const Card = ({ title }: CardProps) => {
-    return <>Card</>
+    return (
+        <>
+            <div></div>
+        </>
+    )
 }
