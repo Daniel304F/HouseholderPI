@@ -35,7 +35,7 @@ export const HeaderNavigation = () => {
                                 <HeaderNavigationItem
                                     key={item.id}
                                     {...item}
-                                    onClick={() => handleNavigate}
+                                    onClick={handleNavigate}
                                     isActive={location.pathname === item.path}
                                 />
                             ))}

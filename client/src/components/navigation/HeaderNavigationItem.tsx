@@ -1,3 +1,5 @@
+import { NavItem } from '../ui/navItem'
+
 interface HeaderNavigationItemProps {
     id: string
     label: string
@@ -22,13 +24,9 @@ export const HeaderNavigationItem = ({
     onClick,
 }: HeaderNavigationItemProps) => {
     return (
-        <button
+        <NavItem
+            variant={isActive ? 'active' : 'default'}
             onClick={() => onClick(path)}
-            className={`flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200 ${
-                isActive
-                    ? 'bg-brand-100 text-brand-700'
-                    : 'text-secondary hover:bg-muted hover:text-primary'
-            } `}
         >
             <Icon
                 size={20}
@@ -37,6 +35,6 @@ export const HeaderNavigationItem = ({
                 strokeWidth={isActive && !canFill ? 2.5 : 2}
             />
             <span className="text-sm font-medium">{label}</span>
-        </button>
+        </NavItem>
     )
 }
