@@ -11,10 +11,12 @@ export const AppLayout = () => {
             <div className="flex h-screen w-full flex-col">
                 {!isMobile && <HeaderNavigation />}
 
-                <main
-                    className={`mx-auto max-w-5xl flex-1 overflow-y-auto ${isMobile ? 'pb-20' : 'p-4'} hide-scrollbar`}
-                >
-                    <Outlet />
+                <main className="hide-scrollbar w-full flex-1 overflow-y-auto">
+                    <div
+                        className={`mx-auto max-w-5xl ${isMobile ? 'pb-20' : 'p-4'}`}
+                    >
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </HeaderProvider>
