@@ -1,5 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { HeroImage } from '../components/HeroImage'
+import { Headline } from '../components/ui/Headline'
+
+const headlineTitle = 'Gemeinsam wohnen, entspannt leben'
+const headlineSubtitle =
+    'Schluss mit Diskussionen über den Abwasch. HouseHolder macht die Aufgabenverteilung in deiner WG fair, transparent und sogar ein bisschen spaßig.'
 
 export const Homepage = () => {
     const navigate = useNavigate()
@@ -12,6 +17,10 @@ export const Homepage = () => {
                     alt="Glückliche WG-Mitbewohner im Wohnzimmer"
                     subtitle="Bild mit Nano Banana Pro generiert."
                 ></HeroImage>
+                <Headline
+                    title={headlineTitle}
+                    subtitle={headlineSubtitle}
+                ></Headline>
             </div>
         </>
     )
