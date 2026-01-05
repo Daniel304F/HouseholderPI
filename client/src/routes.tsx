@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
 import { Homepage } from './pages/Homepage'
+import { Login } from './pages/Login'
 
 export const routes: RouteObject[] = [
     {
@@ -10,10 +11,10 @@ export const routes: RouteObject[] = [
                 path: '/',
                 element: <Homepage />,
             },
-            // {
-            //     path: '/login',
-            //     element: <LoginPage />
-            // },
+            {
+                path: '/login',
+                element: <Login />,
+            },
             // {
             //     path: '/register',
             //     element: <RegisterPage />
