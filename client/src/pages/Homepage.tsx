@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { LogIn, BarChart3, Medal, CalendarDays } from 'lucide-react'
 import { GridCardLayout } from '../layouts/GridCardLayout'
 import { Card } from '../components/ui/Card'
+import { ImageSlider } from '../components/ImageSlider'
 
 const headlineTitle = 'WG-Leben, aber professionell'
 const headlineSubtitle =
@@ -32,6 +33,12 @@ const features = [
             'Erstellt Aufgaben blitzschnell (gerne auch mit Beweisfoto!) und synchronisiert alles direkt mit eurem Kalender.',
         icon: <CalendarDays className="text-brand-600 dark:text-brand-400" />,
     },
+]
+
+const sliderImages = [
+    { url: '/mascot1.png', alt: 'HouseHolder Maskottchen 1' },
+    { url: '/mascot2.png', alt: 'HouseHolder Maskottchen 2' },
+    { url: '/mascot3.png', alt: 'HouseHolder Maskottchen 3' },
 ]
 
 export const Homepage = () => {
@@ -70,6 +77,7 @@ export const Homepage = () => {
                         ))}
                     </GridCardLayout>
                 </section>
+                <ImageSlider images={sliderImages}></ImageSlider>
             </div>
         </>
     )
