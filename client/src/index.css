@@ -1,24 +1,251 @@
 @import 'tailwindcss';
 
+/* ========================================
+   HouseHolder Design System
+   ======================================== */
+
+@theme {
+    /* ------------------------------------------
+       Brand / Primary - Mint Green (Hue: 147°)
+       ------------------------------------------ */
+    --color-brand-50: hsl(147, 78%, 97%);
+    --color-brand-100: hsl(147, 78%, 93%);
+    --color-brand-200: hsl(147, 78%, 89%);
+    --color-brand-300: hsl(147, 72%, 78%);
+    --color-brand-400: hsl(148, 65%, 63%);
+    --color-brand-500: hsl(149, 58%, 50%);
+    --color-brand-600: hsl(150, 62%, 42%);
+    --color-brand-700: hsl(151, 66%, 34%);
+    --color-brand-800: hsl(152, 70%, 26%);
+    --color-brand-900: hsl(153, 74%, 18%);
+    --color-brand-950: hsl(154, 78%, 10%);
+
+    /* ------------------------------------------
+       Success - Green (Hue: 142°)
+       ------------------------------------------ */
+    --color-success-50: hsl(142, 76%, 97%);
+    --color-success-100: hsl(142, 72%, 92%);
+    --color-success-200: hsl(142, 68%, 84%);
+    --color-success-300: hsl(142, 64%, 72%);
+    --color-success-400: hsl(142, 58%, 58%);
+    --color-success-500: hsl(142, 54%, 46%);
+    --color-success-600: hsl(143, 58%, 38%);
+    --color-success-700: hsl(144, 62%, 30%);
+    --color-success-800: hsl(145, 66%, 24%);
+    --color-success-900: hsl(146, 70%, 18%);
+    --color-success-950: hsl(147, 74%, 10%);
+
+    /* ------------------------------------------
+       Warning - Amber (Hue: 45°)
+       ------------------------------------------ */
+    --color-warning-50: hsl(48, 96%, 97%);
+    --color-warning-100: hsl(48, 92%, 90%);
+    --color-warning-200: hsl(47, 88%, 80%);
+    --color-warning-300: hsl(46, 84%, 68%);
+    --color-warning-400: hsl(44, 80%, 56%);
+    --color-warning-500: hsl(42, 78%, 48%);
+    --color-warning-600: hsl(38, 82%, 42%);
+    --color-warning-700: hsl(34, 86%, 34%);
+    --color-warning-800: hsl(30, 88%, 26%);
+    --color-warning-900: hsl(26, 90%, 20%);
+    --color-warning-950: hsl(22, 92%, 12%);
+
+    /* ------------------------------------------
+       Error / Danger - Red (Hue: 0°)
+       ------------------------------------------ */
+    --color-error-50: hsl(0, 86%, 97%);
+    --color-error-100: hsl(0, 82%, 93%);
+    --color-error-200: hsl(0, 78%, 86%);
+    --color-error-300: hsl(0, 74%, 74%);
+    --color-error-400: hsl(0, 70%, 60%);
+    --color-error-500: hsl(0, 68%, 50%);
+    --color-error-600: hsl(358, 72%, 44%);
+    --color-error-700: hsl(356, 76%, 36%);
+    --color-error-800: hsl(354, 80%, 28%);
+    --color-error-900: hsl(352, 84%, 22%);
+    --color-error-950: hsl(350, 88%, 14%);
+
+    /* ------------------------------------------
+       Info - Blue (Hue: 210°)
+       ------------------------------------------ */
+    --color-info-50: hsl(210, 80%, 97%);
+    --color-info-100: hsl(210, 76%, 92%);
+    --color-info-200: hsl(210, 72%, 84%);
+    --color-info-300: hsl(210, 68%, 72%);
+    --color-info-400: hsl(210, 64%, 58%);
+    --color-info-500: hsl(210, 60%, 48%);
+    --color-info-600: hsl(212, 64%, 40%);
+    --color-info-700: hsl(214, 68%, 32%);
+    --color-info-800: hsl(216, 72%, 26%);
+    --color-info-900: hsl(218, 76%, 20%);
+    --color-info-950: hsl(220, 80%, 12%);
+
+    /* ------------------------------------------
+       Neutral - Slate with Brand Tint
+       ------------------------------------------ */
+    --color-neutral-50: hsl(147, 10%, 98%);
+    --color-neutral-100: hsl(147, 8%, 95%);
+    --color-neutral-200: hsl(147, 6%, 90%);
+    --color-neutral-300: hsl(147, 5%, 82%);
+    --color-neutral-400: hsl(147, 4%, 64%);
+    --color-neutral-500: hsl(147, 3%, 46%);
+    --color-neutral-600: hsl(147, 4%, 38%);
+    --color-neutral-700: hsl(147, 5%, 30%);
+    --color-neutral-800: hsl(147, 6%, 22%);
+    --color-neutral-900: hsl(147, 8%, 14%);
+    --color-neutral-950: hsl(147, 10%, 8%);
+}
+
+/* ========================================
+   Semantic Colors (Light Mode Default)
+   ======================================== */
+
+:root {
+    /* Text Colors */
+    --text-primary: hsl(147, 8%, 14%);
+    --text-secondary: hsl(147, 4%, 38%);
+    --text-tertiary: hsl(147, 3%, 46%);
+    --text-disabled: hsl(147, 4%, 64%);
+    --text-inverse: hsl(147, 10%, 98%);
+
+    /* Interactive Text */
+    --text-link: hsl(150, 62%, 42%);
+    --text-link-hover: hsl(151, 66%, 34%);
+    --text-error: hsl(358, 72%, 44%);
+    --text-success: hsl(143, 58%, 38%);
+    --text-warning: hsl(38, 82%, 42%);
+    --text-info: hsl(212, 64%, 40%);
+
+    /* Background Colors */
+    --bg-page: hsl(147, 10%, 98%);
+    --bg-surface: hsl(147, 8%, 95%);
+    --bg-muted: hsl(147, 6%, 90%);
+    --bg-inverse: hsl(147, 8%, 14%);
+
+    /* Border Colors */
+    --border-default: hsl(147, 6%, 90%);
+    --border-strong: hsl(147, 5%, 82%);
+}
+
+/* ========================================
+   Dark Mode (Class-based)
+   ======================================== */
+
+.dark {
+    /* Text Colors */
+    --text-primary: hsl(147, 10%, 98%);
+    --text-secondary: hsl(147, 4%, 64%);
+    --text-tertiary: hsl(147, 3%, 46%);
+    --text-disabled: hsl(147, 4%, 38%);
+    --text-inverse: hsl(147, 8%, 14%);
+
+    /* Interactive Text */
+    --text-link: hsl(148, 65%, 63%);
+    --text-link-hover: hsl(147, 72%, 78%);
+    --text-error: hsl(0, 70%, 60%);
+    --text-success: hsl(142, 58%, 58%);
+    --text-warning: hsl(44, 80%, 56%);
+    --text-info: hsl(210, 64%, 58%);
+
+    /* Background Colors */
+    --bg-page: hsl(147, 10%, 8%);
+    --bg-surface: hsl(147, 8%, 14%);
+    --bg-muted: hsl(147, 6%, 22%);
+    --bg-inverse: hsl(147, 10%, 98%);
+
+    /* Border Colors */
+    --border-default: hsl(147, 6%, 22%);
+    --border-strong: hsl(147, 5%, 30%);
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+
 body {
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    color: var(--color-neutral-800);
-    color-scheme: light dark;
+    color: var(--text-primary);
+    background-color: var(--bg-page);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: var(--color-neutral-800);
-        background-color: #ffffff;
-    }
-    a:hover {
-        color: var(--color-primary-600);
-    }
-    button {
-        background-color: var(--color-neutral-50);
-    }
+/* ========================================
+   Semantic Utility Classes
+   ======================================== */
+
+/* Text */
+.text-primary {
+    color: var(--text-primary);
+}
+.text-secondary {
+    color: var(--text-secondary);
+}
+.text-tertiary {
+    color: var(--text-tertiary);
+}
+.text-disabled {
+    color: var(--text-disabled);
+}
+.text-inverse {
+    color: var(--text-inverse);
+}
+.text-link {
+    color: var(--text-link);
+}
+.text-link:hover {
+    color: var(--text-link-hover);
+}
+.text-error {
+    color: var(--text-error);
+}
+.text-success {
+    color: var(--text-success);
+}
+.text-warning {
+    color: var(--text-warning);
+}
+.text-info {
+    color: var(--text-info);
+}
+
+/* Backgrounds */
+.bg-page {
+    background-color: var(--bg-page);
+}
+.bg-surface {
+    background-color: var(--bg-surface);
+}
+.bg-muted {
+    background-color: var(--bg-muted);
+}
+.bg-inverse {
+    background-color: var(--bg-inverse);
+}
+
+/* Borders */
+.border-default {
+    border-color: var(--border-default);
+}
+.border-strong {
+    border-color: var(--border-strong);
+}
+
+/* ========================================
+   Link Styles
+   ======================================== */
+
+a {
+    color: var(--text-link);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: var(--text-link-hover);
 }

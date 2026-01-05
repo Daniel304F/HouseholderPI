@@ -1,4 +1,4 @@
-import { Home } from 'lucide-react'
+import { Home, LogIn } from 'lucide-react'
 
 interface NavItem {
     id: string
@@ -15,4 +15,11 @@ interface NavItem {
 
 export const navItems: NavItem[] = [
     { id: 'home', label: 'Home', path: '/', icon: Home, canFill: true },
+    {
+        id: 'login',
+        label: 'Login',
+        path: '/login',
+        icon: LogIn,
+        canFill: false,
+    },
 ]
