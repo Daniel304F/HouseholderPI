@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { useViewport } from '../hooks/useViewport'
 import { HeaderNavigation } from '../components/navigation/HeaderNavigation'
+import { Footer } from '../components/Footer'
 
 export const AppLayout = () => {
     const { isMobile } = useViewport()
@@ -17,6 +18,7 @@ export const AppLayout = () => {
                     >
                         <Outlet />
                     </div>
+                    {!isMobile && <Footer />}
                 </main>
             </div>
         </HeaderProvider>
