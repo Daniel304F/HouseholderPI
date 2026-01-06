@@ -1,4 +1,4 @@
-import { NavItem } from '../ui/navItem'
+import { NavItem } from '../NavItem'
 
 interface HeaderNavigationItemProps {
     id: string

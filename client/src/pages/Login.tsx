@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
-import { Headline } from '../components/ui/Headline'
+import { Card } from '../components/Card'
+import { Button } from '../components/Button'
+import { Input } from '../components/Input'
+import { Headline } from '../components/Headline'
 import { LogIn } from 'lucide-react'
 
 export const Login = () => {

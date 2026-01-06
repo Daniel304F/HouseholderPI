@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { HeroImage } from '../components/HeroImage'
-import { Headline } from '../components/ui/Headline'
-import { Button } from '../components/ui/Button'
+import { Headline } from '../components/Headline'
+import { Button } from '../components/Button'
 import { LogIn, BarChart3, Medal, CalendarDays } from 'lucide-react'
 import { GridCardLayout } from '../layouts/GridCardLayout'
-import { Card } from '../components/ui/Card'
+import { Card } from '../components/Card'
 import { ImageSlider } from '../components/ImageSlider'
 
 const headlineTitle = 'WG-Leben, aber professionell'
