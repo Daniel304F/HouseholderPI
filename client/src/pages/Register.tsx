@@ -1,78 +1,30 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
+import { Link, useNavigate } from 'react-router-dom'
+import { UserPlus } from 'lucide-react'
+
+import { PasswordInput } from '../components/auth/PasswordInput'
+import { PasswordRequirementsList } from '../components/auth/PasswordRequirementsList'
+import {
+    calculatePasswordStrength,
+    PASSWORD_REQUIREMENTS,
+} from '../utils/passwordUtils'
 import { Input } from '../components/Input'
+import { Card } from '../components/Card'
 import { Headline } from '../components/Headline'
-import { UserPlus, Eye, EyeOff, Check, X } from 'lucide-react'
-
-interface PasswordRequirement {
-    id: string
-    label: string
-    validator: (password: string) => boolean
-}
-
-const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
-    {
-        id: 'length',
-        label: 'Mindestens 8 Zeichen',
-        validator: (pw) => pw.length >= 8,
-    },
-    {
-        id: 'uppercase',
-        label: 'Ein Großbuchstabe',
-        validator: (pw) => /[A-Z]/.test(pw),
-    },
-    {
-        id: 'lowercase',
-        label: 'Ein Kleinbuchstabe',
-        validator: (pw) => /[a-z]/.test(pw),
-    },
-    {
-        id: 'number',
-        label: 'Eine Zahl',
-        validator: (pw) => /[0-9]/.test(pw),
-    },
-    {
-        id: 'special',
-        label: 'Ein Sonderzeichen (!@#$%^&*)',
-        validator: (pw) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
-    },
-]
-
-const getStrengthColor = (strength: number): string => {
-    if (strength === 0) return 'bg-neutral-300 dark:bg-neutral-600'
-    if (strength <= 2) return 'bg-error-500'
-    if (strength <= 3) return 'bg-warning-500'
-    if (strength <= 4) return 'bg-info-500'
-    return 'bg-success-500'
-}
-
-const getStrengthLabel = (strength: number): string => {
-    if (strength === 0) return ''
-    if (strength <= 2) return 'Schwach'
-    if (strength <= 3) return 'Mittel'
-    if (strength <= 4) return 'Gut'
-    return 'Stark'
-}
-
-const getStrengthLabelColor = (strength: number): string => {
-    if (strength === 0) return 'text-neutral-500'
-    if (strength <= 2) return 'text-error-500'
-    if (strength <= 3) return 'text-warning-600 dark:text-warning-400'
-    if (strength <= 4) return 'text-info-600 dark:text-info-400'
-    return 'text-success-600 dark:text-success-400'
-}
+import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter'
+import { Button } from '../components/Button'
 
 export const Register = () => {
+    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
+
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
     const [isPasswordFocused, setIsPasswordFocused] = useState(false)
+
     const [errors, setErrors] = useState<{
         name?: string
         email?: string
@@ -80,17 +32,10 @@ export const Register = () => {
         confirmPassword?: string
     }>({})
 
-    const passwordStrength = useMemo(() => {
-        return PASSWORD_REQUIREMENTS.filter((req) => req.validator(password))
-            .length
-    }, [password])
-
-    const requirementsMet = useMemo(() => {
-        return PASSWORD_REQUIREMENTS.map((req) => ({
-            ...req,
-            met: req.validator(password),
-        }))
-    }, [password])
+    const passwordStrength = useMemo(
+        () => calculatePasswordStrength(password),
+        [password]
+    )
 
     const validate = () => {
         const newErrors: typeof errors = {}
@@ -134,7 +79,11 @@ export const Register = () => {
 
         if (validate()) {
             setIsLoading(true)
-            // TODO: API anbinden
+            // TODO: API Call
+            setTimeout(() => {
+                setIsLoading(false)
+                navigate('/login')
+            }, 1500)
         }
     }
 
@@ -151,7 +100,6 @@ export const Register = () => {
                     <form onSubmit={handleRegister} className="space-y-4">
                         <Input
                             label="Name"
-                            type="text"
                             placeholder="Max Mustermann"
                             required
                             autoFocus
@@ -179,148 +127,48 @@ export const Register = () => {
                         />
 
                         <div className="space-y-2">
-                            <div className="relative">
-                                <Input
-                                    label="Passwort"
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="••••••••"
-                                    required
-                                    value={password}
-                                    onChange={(e) => {
-                                        setPassword(e.target.value)
-                                        if (errors.password)
-                                            setErrors({
-                                                ...errors,
-                                                password: undefined,
-                                            })
-                                    }}
-                                    onFocus={() => setIsPasswordFocused(true)}
-                                    onBlur={() => setIsPasswordFocused(false)}
-                                    error={errors.password}
-                                    className="pr-12"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                    className="absolute top-[38px] right-3 text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                                    aria-label={
-                                        showPassword
-                                            ? 'Passwort verbergen'
-                                            : 'Passwort anzeigen'
-                                    }
-                                >
-                                    {showPassword ? (
-                                        <EyeOff size={20} />
-                                    ) : (
-                                        <Eye size={20} />
-                                    )}
-                                </button>
-                            </div>
-
-                            {/* Password Strength Indicator */}
-                            {password.length > 0 && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex flex-1 gap-1">
-                                            {Array.from({ length: 5 }).map(
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                                                            index <
-                                                            passwordStrength
-                                                                ? getStrengthColor(
-                                                                      passwordStrength
-                                                                  )
-                                                                : 'bg-neutral-200 dark:bg-neutral-700'
-                                                        }`}
-                                                    />
-                                                )
-                                            )}
-                                        </div>
-                                        <span
-                                            className={`text-xs font-medium ${getStrengthLabelColor(passwordStrength)}`}
-                                        >
-                                            {getStrengthLabel(passwordStrength)}
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Password Requirements */}
-                            {(isPasswordFocused || password.length > 0) && (
-                                <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-800/50">
-                                    <p className="mb-2 text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                                        Passwort-Anforderungen:
-                                    </p>
-                                    <ul className="space-y-1">
-                                        {requirementsMet.map((req) => (
-                                            <li
-                                                key={req.id}
-                                                className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
-                                                    req.met
-                                                        ? 'text-success-600 dark:text-success-400'
-                                                        : 'text-neutral-500 dark:text-neutral-400'
-                                                }`}
-                                            >
-                                                {req.met ? (
-                                                    <Check
-                                                        size={14}
-                                                        className="flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <X
-                                                        size={14}
-                                                        className="flex-shrink-0"
-                                                    />
-                                                )}
-                                                <span>{req.label}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="relative">
-                            <Input
-                                label="Passwort bestätigen"
-                                type={showConfirmPassword ? 'text' : 'password'}
+                            <PasswordInput
+                                label="Passwort"
                                 placeholder="••••••••"
                                 required
-                                value={confirmPassword}
+                                value={password}
                                 onChange={(e) => {
-                                    setConfirmPassword(e.target.value)
-                                    if (errors.confirmPassword)
+                                    setPassword(e.target.value)
+                                    if (errors.password)
                                         setErrors({
                                             ...errors,
-                                            confirmPassword: undefined,
+                                            password: undefined,
                                         })
                                 }}
-                                error={errors.confirmPassword}
-                                className="pr-12"
+                                onFocus={() => setIsPasswordFocused(true)}
+                                onBlur={() => setIsPasswordFocused(false)}
+                                error={errors.password}
                             />
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowConfirmPassword(!showConfirmPassword)
-                                }
-                                className="absolute top-[38px] right-3 text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                                aria-label={
-                                    showConfirmPassword
-                                        ? 'Passwort verbergen'
-                                        : 'Passwort anzeigen'
-                                }
-                            >
-                                {showConfirmPassword ? (
-                                    <EyeOff size={20} />
-                                ) : (
-                                    <Eye size={20} />
-                                )}
-                            </button>
+
+                            <PasswordStrengthMeter
+                                strength={passwordStrength}
+                            />
+
+                            {(isPasswordFocused || password.length > 0) && (
+                                <PasswordRequirementsList password={password} />
+                            )}
                         </div>
+
+                        <PasswordInput
+                            label="Passwort bestätigen"
+                            placeholder="••••••••"
+                            required
+                            value={confirmPassword}
+                            onChange={(e) => {
+                                setConfirmPassword(e.target.value)
+                                if (errors.confirmPassword)
+                                    setErrors({
+                                        ...errors,
+                                        confirmPassword: undefined,
+                                    })
+                            }}
+                            error={errors.confirmPassword}
+                        />
 
                         <div className="pt-2">
                             <Button
