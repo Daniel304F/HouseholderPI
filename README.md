@@ -167,20 +167,6 @@ HouseHolder ist für Self-Hosting optimiert:
 
 Eine ausführliche Anleitung für das Deployment auf einem Raspberry Pi folgt.
 
-## Design System
-
-### Farben
-
-Die App verwendet ein semantisches Farbsystem basierend auf Tailwind CSS 4:
-
-| Rolle       | Farbe   | Verwendung                     |
-| ----------- | ------- | ------------------------------ |
-| **Primary** | Teal    | Hauptaktionen, aktive Elemente |
-| **Success** | Emerald | Erledigte Aufgaben, Erfolge    |
-| **Warning** | Amber   | Bald fällige Aufgaben          |
-| **Danger**  | Rose    | Überfällige Aufgaben, Löschen  |
-| **Neutral** | Slate   | Text, Hintergründe, Borders    |
-
 ## Lizenz
 
 MIT
