@@ -6,7 +6,6 @@ export interface User {
     name: string
     avatar?: string
     createdAt: string
-    updatedAt: string
 }
 
 export interface AuthTokens {
