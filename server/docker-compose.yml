@@ -9,3 +9,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secretpassword
       MONGO_INITDB_DATABASE: myappdb
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
