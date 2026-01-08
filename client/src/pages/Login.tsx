@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
@@ -7,7 +7,6 @@ import { Headline } from '../components/Headline'
 import { LogIn } from 'lucide-react'
 
 export const Login = () => {
-    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')

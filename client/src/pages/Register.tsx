@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 
 import { PasswordInput } from '../components/auth/PasswordInput'
@@ -13,11 +13,11 @@ import { Card } from '../components/Card'
 import { Headline } from '../components/Headline'
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter'
 import { Button } from '../components/Button'
+import { useRegister } from '../hooks/useAuth'
+import { getErrorMessage, isApiError } from '../lib/axios'
 
 export const Register = () => {
-    const navigate = useNavigate()
-    const [isLoading, setIsLoading] = useState(false)
-
+    const { mutate: register, isPending } = useRegister()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -73,20 +73,35 @@ export const Register = () => {
         setErrors(newErrors)
         return isValid
     }
-
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault()
 
         if (validate()) {
-            setIsLoading(true)
-            // TODO: API Call
-            setTimeout(() => {
-                setIsLoading(false)
-                navigate('/login')
-            }, 1500)
+            register(
+                { name, email, password },
+                {
+                    onError: (error) => {
+                        if (
+                            isApiError(error) &&
+                            error.response?.status === 409
+                        ) {
+                            // 409 Conflict: Email existiert schon
+                            setErrors((prev) => ({
+                                ...prev,
+                                email: 'Diese E-Mail Adresse wird bereits verwendet.',
+                            }))
+                        } else {
+                            // Allgemeiner Fehler
+                            setErrors((prev) => ({
+                                ...prev,
+                                general: getErrorMessage(error),
+                            }))
+                        }
+                    },
+                }
+            )
         }
     }
-
     return (
         <div className="flex w-full items-center justify-center py-12">
             <div className="w-full max-w-md space-y-8">
@@ -102,12 +117,16 @@ export const Register = () => {
                             label="Name"
                             placeholder="Max Mustermann"
                             required
+                            disabled={isPending}
                             autoFocus
                             value={name}
                             onChange={(e) => {
                                 setName(e.target.value)
                                 if (errors.name)
-                                    setErrors({ ...errors, name: undefined })
+                                    setErrors({
+                                        ...errors,
+                                        name: undefined,
+                                    })
                             }}
                             error={errors.name}
                         />
@@ -117,11 +136,15 @@ export const Register = () => {
                             type="email"
                             placeholder="deine-mail@beispiel.de"
                             required
+                            disabled={isPending}
                             value={email}
                             onChange={(e) => {
                                 setEmail(e.target.value)
                                 if (errors.email)
-                                    setErrors({ ...errors, email: undefined })
+                                    setErrors({
+                                        ...errors,
+                                        email: undefined,
+                                    })
                             }}
                             error={errors.email}
                         />
@@ -132,6 +155,7 @@ export const Register = () => {
                                 placeholder="••••••••"
                                 required
                                 value={password}
+                                disabled={isPending}
                                 onChange={(e) => {
                                     setPassword(e.target.value)
                                     if (errors.password)
@@ -159,6 +183,7 @@ export const Register = () => {
                             placeholder="••••••••"
                             required
                             value={confirmPassword}
+                            disabled={isPending}
                             onChange={(e) => {
                                 setConfirmPassword(e.target.value)
                                 if (errors.confirmPassword)
@@ -174,7 +199,7 @@ export const Register = () => {
                             <Button
                                 fullWidth
                                 type="submit"
-                                isLoading={isLoading}
+                                isLoading={isPending}
                                 icon={<UserPlus size={18} />}
                             >
                                 Registrieren
