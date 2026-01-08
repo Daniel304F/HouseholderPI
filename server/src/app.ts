@@ -13,7 +13,7 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 // Global error Handler
 app.use(errorHandler);
 
