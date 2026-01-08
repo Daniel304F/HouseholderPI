@@ -1,7 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useNavigate } from 'react-router-dom'
-import { type LoginRequest, authApi, type AuthResponse } from '../api/auth'
+import {
+    type LoginRequest,
+    authApi,
+    type AuthResponse,
+    type RegisterRequest,
+} from '../api/auth'
 
 export const useLogin = () => {
     const queryClient = useQueryClient()
@@ -26,6 +31,29 @@ export const useLogin = () => {
         },
         onError: (error) => {
             console.error('Login failed', error)
+        },
+    })
+}
+
+export const useRegister = () => {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+
+    return useMutation({
+        mutationFn: (data: RegisterRequest) => authApi.register(data),
+        onSuccess: (response) => {
+            localStorage.setItem(
+                'accessToken',
+                response.data.tokens.accessToken
+            )
+            localStorage.setItem(
+                'refreshToken',
+                response.data.tokens.refreshToken
+            )
+
+            queryClient.setQueryData(['user'], response.data.user)
+
+            navigate('/')
         },
     })
 }
