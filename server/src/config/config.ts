@@ -14,6 +14,16 @@ interface Config {
   bcrypt: {
     saltRounds: number;
   };
+  db: {
+    use: "mongodb" | "inmemory";
+    connect: {
+      host: string;
+      port: { mongodb: number };
+      user: string;
+      password: string;
+      database: string;
+    };
+  };
 }
 
 const config: Config = {
@@ -31,6 +41,18 @@ const config: Config = {
   },
   bcrypt: {
     saltRounds: Number(process.env["BCRYPT_SALT_ROUNDS"]) || 12,
+  },
+  db: {
+    use: (process.env["DB_USE"] as "mongodb" | "inmemory") || "mongodb",
+    connect: {
+      host: process.env["DB_HOST"] || "localhost",
+      port: {
+        mongodb: Number(process.env["DB_PORT"]) || 27017,
+      },
+      user: process.env["DB_USER"] || "admin",
+      password: process.env["DB_PASSWORD"] || "secretpassword",
+      database: process.env["DB_NAME"] || "myappdb",
+    },
   },
 };
 
