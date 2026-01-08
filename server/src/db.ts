@@ -32,7 +32,7 @@ async function connectToMongoDB() {
       username: config.db.connect.user,
       password: config.db.connect.password,
     },
-    authSource: config.db.connect.database,
+    authSource: config.db.connect.authSource,
   });
   try {
     await client.connect();

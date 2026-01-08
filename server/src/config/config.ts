@@ -22,6 +22,7 @@ interface Config {
       user: string;
       password: string;
       database: string;
+      authSource: string;
     };
   };
 }
@@ -52,6 +53,7 @@ const config: Config = {
       user: process.env["DB_USER"] || "admin",
       password: process.env["DB_PASSWORD"] || "secretpassword",
       database: process.env["DB_NAME"] || "myappdb",
+      authSource: process.env["DB_AUTH_SOURCE"] || "admin",
     },
   },
 };
