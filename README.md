@@ -45,8 +45,7 @@ Eine moderne Web-App zur Verwaltung von Haushaltsaufgaben in Wohngemeinschaften.
 | **Node.js**    | Runtime       |
 | **Express**    | Web-Framework |
 | **TypeScript** | Typsicherheit |
-| **Prisma**     | ORM           |
-| **SQLite**     | Datenbank     |
+| **MongoDB**    | Datenbank     |
 
 ### Tooling
 
