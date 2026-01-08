@@ -8,8 +8,8 @@ interface Config {
   jwt: {
     accessSecret: string;
     refreshSecret: string;
-    accessExpiresIn: string;
-    refreshExpiresIn: string;
+    accessExpiresIn: number;
+    refreshExpiresIn: number;
   };
   bcrypt: {
     saltRounds: number;
@@ -26,8 +26,8 @@ const config: Config = {
     refreshSecret:
       process.env["JWT_REFRESH_SECRET"] ||
       "dev-refresh-secret-change-in-production",
-    accessExpiresIn: process.env["JWT_ACCESS_EXPIRES_IN"] || "15m",
-    refreshExpiresIn: process.env["JWT_REFRESH_EXPIRES_IN"] || "7d",
+    accessExpiresIn: Number(process.env["JWT_ACCESS_EXPIRES_IN"]) || 3600,
+    refreshExpiresIn: Number(process.env["JWT_REFRESH_EXPIRES_IN"]) || 604800,
   },
   bcrypt: {
     saltRounds: Number(process.env["BCRYPT_SALT_ROUNDS"]) || 12,
