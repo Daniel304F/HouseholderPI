@@ -1,0 +1,136 @@
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useCallback,
+    type ReactNode,
+} from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+    authApi,
+    type User,
+    type LoginRequest,
+    type RegisterRequest,
+} from '../api/auth'
+
+interface AuthContextType {
+    user: User | null
+    isAuthenticated: boolean
+    isLoading: boolean
+    login: (data: LoginRequest) => Promise<void>
+    register: (data: RegisterRequest) => Promise<void>
+    logout: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+interface AuthProviderProps {
+    children: ReactNode
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const [user, setUser] = useState<User | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const queryClient = useQueryClient()
+
+    const isAuthenticated = !!user
+
+    // Token-Validierung beim App-Start
+    useEffect(() => {
+        const initializeAuth = async () => {
+            const accessToken = localStorage.getItem('accessToken')
+
+            if (!accessToken) {
+                setIsLoading(false)
+                return
+            }
+
+            try {
+                const userData = await authApi.getMe()
+                setUser(userData)
+            } catch {
+                // Token ungültig - aufräumen
+                localStorage.removeItem('accessToken')
+                localStorage.removeItem('refreshToken')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        initializeAuth()
+    }, [])
+
+    const login = useCallback(
+        async (data: LoginRequest) => {
+            const response = await authApi.login(data)
+
+            localStorage.setItem(
+                'accessToken',
+                response.data.tokens.accessToken
+            )
+            localStorage.setItem(
+                'refreshToken',
+                response.data.tokens.refreshToken
+            )
+
+            setUser(response.data.user)
+            queryClient.setQueryData(['user'], response.data.user)
+        },
+        [queryClient]
+    )
+
+    const register = useCallback(
+        async (data: RegisterRequest) => {
+            const response = await authApi.register(data)
+
+            localStorage.setItem(
+                'accessToken',
+                response.data.tokens.accessToken
+            )
+            localStorage.setItem(
+                'refreshToken',
+                response.data.tokens.refreshToken
+            )
+
+            setUser(response.data.user)
+            queryClient.setQueryData(['user'], response.data.user)
+        },
+        [queryClient]
+    )
+
+    const logout = useCallback(async () => {
+        try {
+            await authApi.logout()
+        } catch {
+        } finally {
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            setUser(null)
+            queryClient.clear()
+        }
+    }, [queryClient])
+
+    const value: AuthContextType = {
+        user,
+        isAuthenticated,
+        isLoading,
+        login,
+        register,
+        logout,
+    }
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext)
+
+    if (!context) {
+        throw new Error(
+            'useAuth muss innerhalb eines AuthProviders verwendet werden'
+        )
+    }
+
+    return context
+}
