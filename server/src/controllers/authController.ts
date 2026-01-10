@@ -9,9 +9,6 @@ import config from "../config/config.js";
 const getUserDAO = (req: Request) =>
   req.app.locals["userDAO"] as GenericDAO<User>;
 
-/**
- * Erstellt Auth-Response Objekt (ohne Passwort)
- */
 const createAuthResponse = (user: User) => {
   const { password: _, ...userWithoutPassword } = user as User;
   const tokens = jwtService.generateTokens(user.id, (user as User).email);
