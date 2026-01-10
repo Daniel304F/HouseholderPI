@@ -30,7 +30,7 @@ export const HeroImage = ({ src, alt, subtitle }: HeroImageProps) => {
                                 background: 'rgba(255, 255, 255, 0.7)',
                             }}
                         >
-                            <svg
+                            {/* <svg
                                 className="h-3 w-3 opacity-60"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ export const HeroImage = ({ src, alt, subtitle }: HeroImageProps) => {
                                     strokeWidth={2}
                                     d="M13 10V3L4 14h7v7l9-11h-7z"
                                 />
-                            </svg>
+                            </svg> */}
                             {subtitle}
                         </span>
                     </div>
