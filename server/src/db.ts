@@ -20,7 +20,7 @@ async function startMongoDB(app: Express) {
   app.locals["userDAO"] = new MongoGenericDAO<User>(db, "users");
 }
 
-async function startInMemoryDB(app: Express) {
+async function startInMemoryDB(_app: Express) {
   // TODO: DAOs erstellen und in app.locals ablegen
   //app.locals.userDAO = new InMemoryGenericDAO<User>();
 }
