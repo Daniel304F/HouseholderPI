@@ -8,7 +8,10 @@ interface GuestRouteProps {
     redirectTo?: string
 }
 
-export const GuestRoute = ({ children, redirectTo = '/' }: GuestRouteProps) => {
+export const GuestRoute = ({
+    children,
+    redirectTo = '/dashboard',
+}: GuestRouteProps) => {
     const { isAuthenticated, isLoading } = useAuth()
     const location = useLocation()
 
