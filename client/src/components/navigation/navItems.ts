@@ -1,4 +1,5 @@
-import { Home, LogIn } from 'lucide-react'
+import { Home, LogIn, LayoutDashboard, LogOut } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface NavItem {
     id: string
@@ -13,8 +14,11 @@ interface NavItem {
     canFill: boolean
 }
 
-export const navItems: NavItem[] = [
+const publicNavItems: NavItem[] = [
     { id: 'home', label: 'Home', path: '/', icon: Home, canFill: true },
+]
+
+const guestNavItems: NavItem[] = [
     {
         id: 'login',
         label: 'Login',
@@ -23,3 +27,31 @@ export const navItems: NavItem[] = [
         canFill: false,
     },
 ]
+
+const authNavItems: NavItem[] = [
+    {
+        id: 'dashboard',
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: LayoutDashboard,
+        canFill: true,
+    },
+]
+
+export const useNavItems = (): NavItem[] => {
+    const { isAuthenticated } = useAuth()
+
+    return [
+        ...publicNavItems,
+        ...(isAuthenticated ? authNavItems : guestNavItems),
+    ]
+}
+
+export const LogoutNavItem = {
+    id: 'logout',
+    label: 'Logout',
+    icon: LogOut,
+    canFill: false,
+}
+
+export type { NavItem }

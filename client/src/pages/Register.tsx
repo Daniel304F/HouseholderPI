@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 
 import { PasswordInput } from '../components/auth/PasswordInput'
@@ -11,12 +11,15 @@ import {
 import { Input } from '../components/Input'
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter'
 import { Button } from '../components/Button'
-import { useRegister } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 import { getErrorMessage, isApiError } from '../lib/axios'
 import { AuthFormLayout } from '../layouts/AuthFormLayout'
 
 export const Register = () => {
-    const { mutate: register, isPending } = useRegister()
+    const { register } = useAuth()
+    const navigate = useNavigate()
+
+    const [isLoading, setIsLoading] = useState(false)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -29,6 +32,7 @@ export const Register = () => {
         email?: string
         password?: string
         confirmPassword?: string
+        general?: string
     }>({})
 
     const passwordStrength = useMemo(
@@ -72,35 +76,31 @@ export const Register = () => {
         setErrors(newErrors)
         return isValid
     }
-    const handleRegister = (e: React.FormEvent) => {
-        e.preventDefault()
 
-        if (validate()) {
-            register(
-                { name, email, password },
-                {
-                    onError: (error) => {
-                        if (
-                            isApiError(error) &&
-                            error.response?.status === 409
-                        ) {
-                            // 409 Conflict: Email existiert schon
-                            setErrors((prev) => ({
-                                ...prev,
-                                email: 'Diese E-Mail Adresse wird bereits verwendet.',
-                            }))
-                        } else {
-                            // Allgemeiner Fehler
-                            setErrors((prev) => ({
-                                ...prev,
-                                general: getErrorMessage(error),
-                            }))
-                        }
-                    },
-                }
-            )
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setErrors({})
+
+        if (!validate()) return
+
+        setIsLoading(true)
+
+        try {
+            await register({ name, email, password })
+            navigate('/dashboard', { replace: true })
+        } catch (error) {
+            if (isApiError(error) && error.response?.status === 409) {
+                setErrors({
+                    email: 'Diese E-Mail Adresse wird bereits verwendet.',
+                })
+            } else {
+                setErrors({ general: getErrorMessage(error) })
+            }
+        } finally {
+            setIsLoading(false)
         }
     }
+
     return (
         <AuthFormLayout
             title="Konto erstellen"
@@ -119,11 +119,17 @@ export const Register = () => {
             }
         >
             <form onSubmit={handleRegister} className="space-y-4">
+                {errors.general && (
+                    <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-800 dark:bg-error-950 dark:text-error-400 rounded-lg border p-3 text-sm">
+                        {errors.general}
+                    </div>
+                )}
+
                 <Input
                     label="Name"
                     placeholder="Max Mustermann"
                     required
-                    disabled={isPending}
+                    disabled={isLoading}
                     autoFocus
                     value={name}
                     onChange={(e) => {
@@ -139,7 +145,7 @@ export const Register = () => {
                     type="email"
                     placeholder="deine-mail@beispiel.de"
                     required
-                    disabled={isPending}
+                    disabled={isLoading}
                     value={email}
                     onChange={(e) => {
                         setEmail(e.target.value)
@@ -155,7 +161,7 @@ export const Register = () => {
                         placeholder="••••••••"
                         required
                         value={password}
-                        disabled={isPending}
+                        disabled={isLoading}
                         onChange={(e) => {
                             setPassword(e.target.value)
                             if (errors.password)
@@ -178,7 +184,7 @@ export const Register = () => {
                     placeholder="••••••••"
                     required
                     value={confirmPassword}
-                    disabled={isPending}
+                    disabled={isLoading}
                     onChange={(e) => {
                         setConfirmPassword(e.target.value)
                         if (errors.confirmPassword)
@@ -191,7 +197,7 @@ export const Register = () => {
                     <Button
                         fullWidth
                         type="submit"
-                        isLoading={isPending}
+                        isLoading={isLoading}
                         icon={<UserPlus size={18} />}
                     >
                         Registrieren

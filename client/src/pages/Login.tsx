@@ -1,23 +1,33 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { LogIn } from 'lucide-react'
-import { useLogin } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 import { PasswordInput } from '../components/auth/PasswordInput'
 import { AuthFormLayout } from '../layouts/AuthFormLayout'
+import { isApiError, getErrorMessage } from '../lib/axios'
 
 export const Login = () => {
-    const { mutate: login, isPending } = useLogin()
+    const { login } = useAuth()
+    const navigate = useNavigate()
+    const location = useLocation()
 
+    const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-        {}
-    )
+    const [errors, setErrors] = useState<{
+        email?: string
+        password?: string
+        general?: string
+    }>({})
+
+    // Ursprüngliche URL für Redirect nach Login
+    const from =
+        (location.state as { from?: Location })?.from?.pathname || '/dashboard'
 
     const validate = () => {
-        const newErrors: { email?: string; password?: string } = {}
+        const newErrors: typeof errors = {}
         let isValid = true
 
         if (!email) {
@@ -36,12 +46,26 @@ export const Login = () => {
         setErrors(newErrors)
         return isValid
     }
-    // login handler
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault()
 
-        if (validate()) {
-            login({ email, password })
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setErrors({})
+
+        if (!validate()) return
+
+        setIsLoading(true)
+
+        try {
+            await login({ email, password })
+            navigate(from, { replace: true })
+        } catch (error) {
+            if (isApiError(error) && error.response?.status === 401) {
+                setErrors({ general: 'E-Mail oder Passwort ist falsch.' })
+            } else {
+                setErrors({ general: getErrorMessage(error) })
+            }
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -63,22 +87,34 @@ export const Login = () => {
             }
         >
             <form onSubmit={handleLogin} className="space-y-4">
+                {errors.general && (
+                    <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-800 dark:bg-error-950 dark:text-error-400 rounded-lg border p-3 text-sm">
+                        {errors.general}
+                    </div>
+                )}
+
                 <Input
                     label="E-Mail Adresse"
                     type="email"
                     placeholder="deine-mail@beispiel.de"
                     required
                     autoFocus
-                    disabled={isPending}
-                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    value={email}
+                    onChange={(e) => {
+                        setEmail(e.target.value)
+                        if (errors.email)
+                            setErrors({ ...errors, email: undefined })
+                    }}
                     error={errors.email}
                 />
+
                 <PasswordInput
                     label="Passwort"
-                    type="password"
                     placeholder="••••••••"
                     required
-                    disabled={isPending}
+                    disabled={isLoading}
+                    value={password}
                     onChange={(e) => {
                         setPassword(e.target.value)
                         if (errors.password)
@@ -91,7 +127,7 @@ export const Login = () => {
                     <Button
                         fullWidth
                         type="submit"
-                        isLoading={isPending}
+                        isLoading={isLoading}
                         icon={<LogIn size={18} />}
                     >
                         Einloggen
