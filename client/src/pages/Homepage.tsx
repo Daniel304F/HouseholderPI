@@ -50,7 +50,6 @@ export const Homepage = () => {
                 <HeroImage
                     src="cozy-wg.png"
                     alt="Glückliche WG-Mitbewohner im Wohnzimmer"
-                    subtitle="Created with ☕"
                 ></HeroImage>
                 <Headline title={headlineTitle} subtitle={headlineSubtitle}>
                     <Button
