@@ -9,12 +9,11 @@ import {
     PASSWORD_REQUIREMENTS,
 } from '../utils/passwordUtils'
 import { Input } from '../components/Input'
-import { Card } from '../components/Card'
-import { Headline } from '../components/Headline'
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter'
 import { Button } from '../components/Button'
 import { useRegister } from '../hooks/useAuth'
 import { getErrorMessage, isApiError } from '../lib/axios'
+import { AuthFormLayout } from '../layouts/AuthFormLayout'
 
 export const Register = () => {
     const { mutate: register, isPending } = useRegister()
@@ -103,112 +102,12 @@ export const Register = () => {
         }
     }
     return (
-        <div className="flex w-full items-center justify-center py-12">
-            <div className="w-full max-w-md space-y-8">
-                <div className="text-center">
-                    <Headline
-                        title="Konto erstellen"
-                        subtitle="Registriere dich, um mit deiner WG durchzustarten."
-                    />
-                </div>
-                <Card title="Registrierung">
-                    <form onSubmit={handleRegister} className="space-y-4">
-                        <Input
-                            label="Name"
-                            placeholder="Max Mustermann"
-                            required
-                            disabled={isPending}
-                            autoFocus
-                            value={name}
-                            onChange={(e) => {
-                                setName(e.target.value)
-                                if (errors.name)
-                                    setErrors({
-                                        ...errors,
-                                        name: undefined,
-                                    })
-                            }}
-                            error={errors.name}
-                        />
-
-                        <Input
-                            label="E-Mail Adresse"
-                            type="email"
-                            placeholder="deine-mail@beispiel.de"
-                            required
-                            disabled={isPending}
-                            value={email}
-                            onChange={(e) => {
-                                setEmail(e.target.value)
-                                if (errors.email)
-                                    setErrors({
-                                        ...errors,
-                                        email: undefined,
-                                    })
-                            }}
-                            error={errors.email}
-                        />
-
-                        <div className="space-y-2">
-                            <PasswordInput
-                                label="Passwort"
-                                placeholder="••••••••"
-                                required
-                                value={password}
-                                disabled={isPending}
-                                onChange={(e) => {
-                                    setPassword(e.target.value)
-                                    if (errors.password)
-                                        setErrors({
-                                            ...errors,
-                                            password: undefined,
-                                        })
-                                }}
-                                onFocus={() => setIsPasswordFocused(true)}
-                                onBlur={() => setIsPasswordFocused(false)}
-                                error={errors.password}
-                            />
-
-                            <PasswordStrengthMeter
-                                strength={passwordStrength}
-                            />
-
-                            {(isPasswordFocused || password.length > 0) && (
-                                <PasswordRequirementsList password={password} />
-                            )}
-                        </div>
-
-                        <PasswordInput
-                            label="Passwort bestätigen"
-                            placeholder="••••••••"
-                            required
-                            value={confirmPassword}
-                            disabled={isPending}
-                            onChange={(e) => {
-                                setConfirmPassword(e.target.value)
-                                if (errors.confirmPassword)
-                                    setErrors({
-                                        ...errors,
-                                        confirmPassword: undefined,
-                                    })
-                            }}
-                            error={errors.confirmPassword}
-                        />
-
-                        <div className="pt-2">
-                            <Button
-                                fullWidth
-                                type="submit"
-                                isLoading={isPending}
-                                icon={<UserPlus size={18} />}
-                            >
-                                Registrieren
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-
-                <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+        <AuthFormLayout
+            title="Konto erstellen"
+            subtitle="Registriere dich, um mit deiner WG durchzustarten."
+            cardTitle="Registrierung"
+            footer={
+                <>
                     Bereits ein Konto?{' '}
                     <Link
                         to="/login"
@@ -216,8 +115,89 @@ export const Register = () => {
                     >
                         Jetzt einloggen
                     </Link>
-                </p>
-            </div>
-        </div>
+                </>
+            }
+        >
+            <form onSubmit={handleRegister} className="space-y-4">
+                <Input
+                    label="Name"
+                    placeholder="Max Mustermann"
+                    required
+                    disabled={isPending}
+                    autoFocus
+                    value={name}
+                    onChange={(e) => {
+                        setName(e.target.value)
+                        if (errors.name)
+                            setErrors({ ...errors, name: undefined })
+                    }}
+                    error={errors.name}
+                />
+
+                <Input
+                    label="E-Mail Adresse"
+                    type="email"
+                    placeholder="deine-mail@beispiel.de"
+                    required
+                    disabled={isPending}
+                    value={email}
+                    onChange={(e) => {
+                        setEmail(e.target.value)
+                        if (errors.email)
+                            setErrors({ ...errors, email: undefined })
+                    }}
+                    error={errors.email}
+                />
+
+                <div className="space-y-2">
+                    <PasswordInput
+                        label="Passwort"
+                        placeholder="••••••••"
+                        required
+                        value={password}
+                        disabled={isPending}
+                        onChange={(e) => {
+                            setPassword(e.target.value)
+                            if (errors.password)
+                                setErrors({ ...errors, password: undefined })
+                        }}
+                        onFocus={() => setIsPasswordFocused(true)}
+                        onBlur={() => setIsPasswordFocused(false)}
+                        error={errors.password}
+                    />
+
+                    <PasswordStrengthMeter strength={passwordStrength} />
+
+                    {(isPasswordFocused || password.length > 0) && (
+                        <PasswordRequirementsList password={password} />
+                    )}
+                </div>
+
+                <PasswordInput
+                    label="Passwort bestätigen"
+                    placeholder="••••••••"
+                    required
+                    value={confirmPassword}
+                    disabled={isPending}
+                    onChange={(e) => {
+                        setConfirmPassword(e.target.value)
+                        if (errors.confirmPassword)
+                            setErrors({ ...errors, confirmPassword: undefined })
+                    }}
+                    error={errors.confirmPassword}
+                />
+
+                <div className="pt-2">
+                    <Button
+                        fullWidth
+                        type="submit"
+                        isLoading={isPending}
+                        icon={<UserPlus size={18} />}
+                    >
+                        Registrieren
+                    </Button>
+                </div>
+            </form>
+        </AuthFormLayout>
     )
 }

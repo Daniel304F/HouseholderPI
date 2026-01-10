@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Card } from '../components/Card'
 import { Headline } from '../components/Headline'
 
-interface FormLayoutProps {
+interface AuthFormLayoutProps {
     title: string
     subtitle: string
     cardTitle: string
@@ -16,7 +16,7 @@ export const AuthFormLayout = ({
     cardTitle,
     children,
     footer,
-}: FormLayoutProps) => {
+}: AuthFormLayoutProps) => {
     return (
         <div className="flex w-full items-center justify-center py-12">
             <div className="w-full max-w-md space-y-8">

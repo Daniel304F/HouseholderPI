@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
-import { Headline } from '../components/Headline'
 import { LogIn } from 'lucide-react'
 import { useLogin } from '../hooks/useAuth'
 import { PasswordInput } from '../components/auth/PasswordInput'
+import { AuthFormLayout } from '../layouts/AuthFormLayout'
 
 export const Login = () => {
     const { mutate: login, isPending } = useLogin()
@@ -47,59 +46,12 @@ export const Login = () => {
     }
 
     return (
-        <div className="flex w-full items-center justify-center py-12">
-            <div className="w-full max-w-md space-y-8">
-                <div className="text-center">
-                    <Headline
-                        title="Willkommen zurück!"
-                        subtitle="Logge dich ein, um deine Aufgaben zu sehen."
-                    />
-                </div>
-                <Card title="Login">
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <Input
-                            label="E-Mail Adresse"
-                            type="email"
-                            placeholder="deine-mail@beispiel.de"
-                            required
-                            autoFocus
-                            disabled={isPending}
-                            onChange={(e) => {
-                                setEmail(e.target.value)
-                            }}
-                            error={errors.email}
-                        />
-                        <PasswordInput
-                            label="Passwort"
-                            type="password"
-                            placeholder="••••••••"
-                            required
-                            disabled={isPending}
-                            onChange={(e) => {
-                                setPassword(e.target.value)
-                                if (errors.password)
-                                    setErrors({
-                                        ...errors,
-                                        password: undefined,
-                                    })
-                            }}
-                            error={errors.password}
-                        />
-
-                        <div className="pt-2">
-                            <Button
-                                fullWidth
-                                type="submit"
-                                isLoading={isPending}
-                                icon={<LogIn size={18} />}
-                            >
-                                Einloggen
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-
-                <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+        <AuthFormLayout
+            title="Willkommen zurück!"
+            subtitle="Logge dich ein, um deine Aufgaben zu sehen."
+            cardTitle="Login"
+            footer={
+                <>
                     Noch kein Konto?{' '}
                     <Link
                         to="/register"
@@ -107,8 +59,45 @@ export const Login = () => {
                     >
                         Jetzt registrieren
                     </Link>
-                </p>
-            </div>
-        </div>
+                </>
+            }
+        >
+            <form onSubmit={handleLogin} className="space-y-4">
+                <Input
+                    label="E-Mail Adresse"
+                    type="email"
+                    placeholder="deine-mail@beispiel.de"
+                    required
+                    autoFocus
+                    disabled={isPending}
+                    onChange={(e) => setEmail(e.target.value)}
+                    error={errors.email}
+                />
+                <PasswordInput
+                    label="Passwort"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    disabled={isPending}
+                    onChange={(e) => {
+                        setPassword(e.target.value)
+                        if (errors.password)
+                            setErrors({ ...errors, password: undefined })
+                    }}
+                    error={errors.password}
+                />
+
+                <div className="pt-2">
+                    <Button
+                        fullWidth
+                        type="submit"
+                        isLoading={isPending}
+                        icon={<LogIn size={18} />}
+                    >
+                        Einloggen
+                    </Button>
+                </div>
+            </form>
+        </AuthFormLayout>
     )
 }
