@@ -6,10 +6,10 @@ import {
     UserCircle,
     BarChart3,
     Settings,
-    Sidebar,
 } from 'lucide-react'
 import { useSidebar } from '../hooks/useSidebar'
 import {
+    Sidebar,
     SidebarSection,
     SidebarNavItem,
 } from '../components/navigation/Sidebar'

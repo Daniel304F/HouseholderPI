@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { PanelLeftClose, PanelLeft } from 'lucide-react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../../utils/cn'
 
 interface SidebarProps {
     children: ReactNode
