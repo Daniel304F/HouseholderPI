@@ -8,9 +8,7 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/refresh", authController.refresh);
 
-router.post("/logout", (_req, res) => {
-  res.status(200).json({ success: true, message: "Logged out" });
-});
+router.post("/logout", authController.logout);
 
 router.get("/me", authMiddleware, authController.getMe);
 

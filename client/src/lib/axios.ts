@@ -35,21 +35,21 @@ apiClient.interceptors.response.use(
             originalRequest._retry = true
 
             try {
-                const refreshToken = localStorage.getItem('refreshToken')
-                if (refreshToken) {
-                    const response = await axios.post(
-                        `${BASE_URL}/auth/refresh`,
-                        { refreshToken }
-                    )
-                    const { accessToken } = response.data
+                const response = await axios.post(
+                    `${BASE_URL}/auth/refresh`,
+                    {},
+                    { withCredentials: true }
+                )
 
-                    localStorage.setItem('accessToken', accessToken)
+                const { accessToken } = response.data
 
-                    if (originalRequest.headers) {
-                        originalRequest.headers.Authorization = `Bearer ${accessToken}`
-                    }
-                    return apiClient(originalRequest)
+                localStorage.setItem('accessToken', accessToken)
+
+                if (originalRequest.headers) {
+                    originalRequest.headers.Authorization = `Bearer ${accessToken}`
                 }
+
+                return apiClient(originalRequest)
             } catch (refreshError) {
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('refreshToken')

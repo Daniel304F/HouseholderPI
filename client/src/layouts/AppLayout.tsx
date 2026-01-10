@@ -10,8 +10,6 @@ export const AppLayout = () => {
 
     const isDashboard = location.pathname.startsWith('/dashboard')
 
-    console.log(isDashboard)
-
     return (
         <HeaderProvider>
             <div className="flex h-screen w-full flex-col">

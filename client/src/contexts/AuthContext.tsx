@@ -65,19 +65,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         async (data: LoginRequest) => {
             const response = await authApi.login(data)
             // console.log('Login response:', response)
-            // console.log('Tokens:', response.data?.tokens)
+            console.log('data:', response.data)
 
-            localStorage.setItem(
-                'accessToken',
-                response.data.tokens.accessToken
-            )
-            localStorage.setItem(
-                'refreshToken',
-                response.data.tokens.refreshToken
-            )
+            const { user, accessToken } = response.data
 
-            setUser(response.data.user)
-            queryClient.setQueryData(['user'], response.data.user)
+            localStorage.setItem('accessToken', accessToken)
+
+            setUser(user)
+            queryClient.setQueryData(['user'], user)
         },
         [queryClient]
     )
@@ -86,17 +81,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         async (data: RegisterRequest) => {
             const response = await authApi.register(data)
 
-            localStorage.setItem(
-                'accessToken',
-                response.data.tokens.accessToken
-            )
-            localStorage.setItem(
-                'refreshToken',
-                response.data.tokens.refreshToken
-            )
+            const { user, accessToken } = response.data
 
-            setUser(response.data.user)
-            queryClient.setQueryData(['user'], response.data.user)
+            localStorage.setItem('accessToken', accessToken)
+
+            setUser(user)
+            queryClient.setQueryData(['user'], user)
         },
         [queryClient]
     )
@@ -107,7 +97,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } catch {
         } finally {
             localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
             setUser(null)
             queryClient.clear()
         }

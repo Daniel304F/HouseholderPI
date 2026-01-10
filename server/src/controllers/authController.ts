@@ -5,19 +5,17 @@ import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { jwtService } from "../services/jwt.service.js";
 import config from "../config/config.js";
+import { CookieOptions } from "express";
+
+const cookieOptions: CookieOptions = {
+  httpOnly: true,
+  secure: process.env["NODE_ENV"] === "production",
+  sameSite: "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
 
 const getUserDAO = (req: Request) =>
   req.app.locals["userDAO"] as GenericDAO<User>;
-
-const createAuthResponse = (user: User) => {
-  const { password: _, ...userWithoutPassword } = user as User;
-  const tokens = jwtService.generateTokens(user.id, (user as User).email);
-
-  return {
-    user: userWithoutPassword,
-    tokens,
-  };
-};
 
 export const register = async (
   req: Request,
@@ -46,9 +44,19 @@ export const register = async (
       avatar: req.body.avatar,
     } as any);
 
+    const { accessToken, refreshToken } = jwtService.generateTokens(
+      newUser.id,
+      newUser.email
+    );
+
+    const { password: _, ...userWithoutPassword } = newUser;
+    res.cookie("refreshToken", refreshToken, cookieOptions);
     res.status(201).json({
       success: true,
-      data: createAuthResponse(newUser),
+      data: {
+        user: userWithoutPassword,
+        accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -76,9 +84,20 @@ export const login = async (
       return;
     }
 
+    const { accessToken, refreshToken } = jwtService.generateTokens(
+      user.id,
+      user.email
+    );
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+
     res.status(200).json({
       success: true,
-      data: createAuthResponse(user),
+      data: {
+        user: userWithoutPassword,
+        accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -91,14 +110,16 @@ export const refresh = async (
   _next: NextFunction
 ) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies["refreshToken"];
+
     if (!refreshToken) {
-      res.status(400).json({ message: "Refresh token required" });
+      res.status(401).json({ message: "Refresh token required" });
       return;
     }
 
     const decoded = jwtService.verifyRefreshToken(refreshToken);
     if (!decoded) {
+      res.clearCookie("refreshToken", cookieOptions);
       res.status(403).json({ message: "Invalid refresh token" });
       return;
     }
@@ -111,10 +132,7 @@ export const refresh = async (
       return;
     }
 
-    const accessToken = jwtService.generateAccessToken(
-      user.id,
-      (user as any).email
-    );
+    const accessToken = jwtService.generateAccessToken(user.id, user.email);
 
     res.status(200).json({
       success: true,
@@ -145,6 +163,27 @@ export const getMe = async (
     res.status(200).json({
       success: true,
       data: userWithoutPassword,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env["NODE_ENV"] === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Erfolgreich ausgeloggt",
     });
   } catch (error) {
     next(error);
