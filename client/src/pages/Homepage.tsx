@@ -6,6 +6,7 @@ import { LogIn, BarChart3, Medal, CalendarDays } from 'lucide-react'
 import { GridCardLayout } from '../layouts/GridCardLayout'
 import { Card } from '../components/Card'
 import { ImageSlider } from '../components/ImageSlider'
+import { useAuth } from '../contexts/AuthContext'
 
 const headlineTitle = 'WG-Leben, aber professionell'
 const headlineSubtitle =
@@ -43,6 +44,9 @@ const sliderImages = [
 
 export const Homepage = () => {
     const navigate = useNavigate()
+    const { isAuthenticated } = useAuth()
+
+    const navigationPath = isAuthenticated ? '/dashboard' : '/login'
 
     return (
         <>
@@ -55,7 +59,7 @@ export const Homepage = () => {
                     <Button
                         variant="primary"
                         size="lg"
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate(navigationPath)}
                         icon={<LogIn size={20} />}
                     >
                         Jetzt loslegen
