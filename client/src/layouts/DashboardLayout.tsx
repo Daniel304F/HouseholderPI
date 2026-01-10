@@ -69,7 +69,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const isActive = (path: string) => location.pathname === path
 
     return (
-        <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+        <div className="flex h-full overflow-hidden">
             {/* Sidebar */}
             <Sidebar
                 width={width}
