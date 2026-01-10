@@ -5,9 +5,12 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { Headline } from '../components/Headline'
 import { LogIn } from 'lucide-react'
+import { useLogin } from '../hooks/useAuth'
+import { PasswordInput } from '../components/auth/PasswordInput'
 
 export const Login = () => {
-    const [isLoading, setIsLoading] = useState(false)
+    const { mutate: login, isPending } = useLogin()
+
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [errors, setErrors] = useState<{ email?: string; password?: string }>(
@@ -39,9 +42,7 @@ export const Login = () => {
         e.preventDefault()
 
         if (validate()) {
-            // gültig
-            setIsLoading(true)
-            // TODO:api anbieten
+            login({ email, password })
         }
     }
 
@@ -51,7 +52,7 @@ export const Login = () => {
                 <div className="text-center">
                     <Headline
                         title="Willkommen zurück!"
-                        subtitle="Logge dich ein, um deinen Putzplan zu sehen."
+                        subtitle="Logge dich ein, um deine Aufgaben zu sehen."
                     />
                 </div>
                 <Card title="Login">
@@ -62,16 +63,18 @@ export const Login = () => {
                             placeholder="deine-mail@beispiel.de"
                             required
                             autoFocus
+                            disabled={isPending}
                             onChange={(e) => {
                                 setEmail(e.target.value)
                             }}
                             error={errors.email}
                         />
-                        <Input
+                        <PasswordInput
                             label="Passwort"
                             type="password"
                             placeholder="••••••••"
                             required
+                            disabled={isPending}
                             onChange={(e) => {
                                 setPassword(e.target.value)
                                 if (errors.password)
@@ -87,7 +90,7 @@ export const Login = () => {
                             <Button
                                 fullWidth
                                 type="submit"
-                                isLoading={isLoading}
+                                isLoading={isPending}
                                 icon={<LogIn size={18} />}
                             >
                                 Einloggen
