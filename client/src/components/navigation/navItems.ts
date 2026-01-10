@@ -14,11 +14,10 @@ interface NavItem {
     canFill: boolean
 }
 
-const publicNavItems: NavItem[] = [
-    { id: 'home', label: 'Home', path: '/', icon: Home, canFill: true },
-]
+const publicNavItems: NavItem[] = []
 
 const guestNavItems: NavItem[] = [
+    { id: 'home', label: 'Home', path: '/', icon: Home, canFill: true },
     {
         id: 'login',
         label: 'Login',
