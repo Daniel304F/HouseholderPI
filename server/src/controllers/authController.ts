@@ -1,22 +1,25 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
-import config from "../config/config.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
+import { jwtService } from "../services/jwt.service.js";
+import config from "../config/config.js";
 
 const getUserDAO = (req: Request) =>
   req.app.locals["userDAO"] as GenericDAO<User>;
 
-const generateTokens = (user: User) => {
-  const accessToken = jwt.sign({ id: user.id }, config.jwt.accessSecret, {
-    expiresIn: config.jwt.accessExpiresIn,
-  });
-  const refreshToken = jwt.sign({ id: user.id }, config.jwt.refreshSecret, {
-    expiresIn: config.jwt.refreshExpiresIn,
-  });
-  return { accessToken, refreshToken };
+/**
+ * Erstellt Auth-Response Objekt (ohne Passwort)
+ */
+const createAuthResponse = (user: User) => {
+  const { password: _, ...userWithoutPassword } = user as User;
+  const tokens = jwtService.generateTokens(user.id, (user as User).email);
+
+  return {
+    user: userWithoutPassword,
+    tokens,
+  };
 };
 
 export const register = async (
@@ -46,16 +49,9 @@ export const register = async (
       avatar: req.body.avatar,
     } as any);
 
-    const tokens = generateTokens(newUser);
-
-    const { password: _, ...userWithoutPassword } = newUser as any;
-
     res.status(201).json({
       success: true,
-      data: {
-        user: userWithoutPassword,
-        tokens,
-      },
+      data: createAuthResponse(newUser),
     });
   } catch (error) {
     next(error);
@@ -78,21 +74,14 @@ export const login = async (
     }
 
     const isValid = await bcrypt.compare(password, (user as any).password);
-
     if (!isValid) {
       res.status(401).json({ message: "Invalid email or password" });
       return;
     }
 
-    const tokens = generateTokens(user);
-    const { password: _, ...userWithoutPassword } = user as any;
-
     res.status(200).json({
       success: true,
-      data: {
-        user: userWithoutPassword,
-        tokens,
-      },
+      data: createAuthResponse(user),
     });
   } catch (error) {
     next(error);
@@ -111,30 +100,34 @@ export const refresh = async (
       return;
     }
 
-    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as {
-      id: string;
-    };
+    const decoded = jwtService.verifyRefreshToken(refreshToken);
+    if (!decoded) {
+      res.status(403).json({ message: "Invalid refresh token" });
+      return;
+    }
 
     const userDAO = getUserDAO(req);
-    const user = await userDAO.findOne({ id: decoded.id } as any);
+    const user = await userDAO.findOne({ id: decoded.userId } as any);
 
     if (!user) {
       res.status(401).json({ message: "User not found" });
       return;
     }
 
-    const tokens = generateTokens(user);
+    const accessToken = jwtService.generateAccessToken(
+      user.id,
+      (user as any).email
+    );
 
     res.status(200).json({
       success: true,
-      data: {
-        accessToken: tokens.accessToken,
-      },
+      data: { accessToken },
     });
   } catch (error) {
     res.status(403).json({ message: "Invalid refresh token" });
   }
 };
+
 export const getMe = async (
   req: Request,
   res: Response,
@@ -142,11 +135,9 @@ export const getMe = async (
 ) => {
   try {
     const userId = (req as AuthenticatedRequest).userId;
-
-    const userDAO = req.app.locals["userDAO"];
+    const userDAO = getUserDAO(req);
 
     const user = await userDAO.findOne({ id: userId });
-
     if (!user) {
       res.status(404).json({ success: false, message: "User nicht gefunden" });
       return;

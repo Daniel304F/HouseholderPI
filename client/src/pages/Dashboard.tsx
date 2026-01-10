@@ -7,7 +7,7 @@ export const Dashboard = () => {
 
     return (
         <>
-            <div>Hello {user && user.name}</div>
+            <div>Hello {user && user.id}</div>
         </>
     )
 }
