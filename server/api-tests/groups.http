@@ -25,7 +25,10 @@ Content-Type: application/json
 }
 
 ### Token aus Login-Response extrahieren
-@authToken = {{login.response.body.accessToken}}
+# Dynamisch (nach Login):
+# @authToken = {{login.response.body.accessToken}}
+# Oder manuell setzen (zum Testen):
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZDA4ZTFlOS05MWNiLTRmOTktYWQ0Ny01YjE0M2M3NzRkNjkiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzY4OTQxMDczLCJleHAiOjE3Njg5NDQ2NzN9.3C8YCsi83AVQqiHi5FGnnfZFcXSApFG1Q7ctb4bIT2o
 
 ### ===== GROUPS =====
 
@@ -57,7 +60,7 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Neue WG Name"
+  "name": "Neue WG Names"
 }
 
 ### Gruppe per Invite-Code beitreten (anderer User)
