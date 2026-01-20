@@ -1,12 +1,30 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Settings } from 'lucide-react'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { useViewport } from '../hooks/useViewport'
 import { HeaderNavigation } from '../components/navigation/HeaderNavigation'
+import { BottomNavigation } from '../components/navigation/BottomNavigation'
 import { Footer } from '../components/Footer'
+
+const bottomNavItems = [
+    {
+        id: 'dashboard',
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: LayoutDashboard,
+    },
+    {
+        id: 'settings',
+        label: 'Einstellungen',
+        path: '/dashboard/settings',
+        icon: Settings,
+    },
+]
 
 export const AppLayout = () => {
     const { isMobile } = useViewport()
     const location = useLocation()
+    const navigate = useNavigate()
 
     const isDashboard = location.pathname.startsWith('/dashboard')
 
@@ -32,6 +50,17 @@ export const AppLayout = () => {
 
                     {!isMobile && <Footer />}
                 </main>
+
+                {isMobile && (
+                    <BottomNavigation
+                        items={bottomNavItems.map((item) => ({
+                            ...item,
+                            icon: <item.icon size={22} />,
+                        }))}
+                        activePath={location.pathname}
+                        onNavigate={navigate}
+                    />
+                )}
             </div>
         </HeaderProvider>
     )
