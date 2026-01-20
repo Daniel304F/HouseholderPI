@@ -2,6 +2,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
+import groupRoutes from "./routes/groupRoutes.js";
 import { loggerMiddleware } from "./middlewares/logger.js";
 import cookieParser from "cookie-parser";
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/groups", groupRoutes);
 // Global error Handler
 app.use(errorHandler);
 
