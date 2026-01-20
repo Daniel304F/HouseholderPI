@@ -1,12 +1,6 @@
 import { type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import {
-    ClipboardList,
-    Users,
-    UserCircle,
-    BarChart3,
-    Settings,
-} from 'lucide-react'
+import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
 import { useSidebar } from '../hooks/useSidebar'
 import { useViewport } from '../hooks/useViewport'
 import {
@@ -14,7 +8,6 @@ import {
     SidebarSection,
     SidebarNavItem,
 } from '../components/navigation/Sidebar'
-import { MobileHeader } from '../components/navigation/MobileHeader'
 
 interface DashboardLayoutProps {
     children?: ReactNode
@@ -47,15 +40,6 @@ const mainNavItems = [
     },
 ]
 
-const secondaryNavItems = [
-    {
-        id: 'settings',
-        label: 'Einstellungen',
-        path: '/dashboard/settings',
-        icon: Settings,
-    },
-]
-
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const navigate = useNavigate()
     const location = useLocation()
@@ -72,60 +56,36 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const isActive = (path: string) => location.pathname === path
 
     return (
-        <div className="flex h-full flex-col overflow-hidden">
-            {/* Mobile Header with Settings */}
-            {isMobile && <MobileHeader settingsPath="/dashboard/settings" />}
+        <div className="flex h-full flex-1 overflow-hidden">
+            {/* Sidebar - Desktop only */}
+            {!isMobile && (
+                <Sidebar
+                    width={width}
+                    isCollapsed={isCollapsed}
+                    isResizing={isResizing}
+                    onToggle={toggle}
+                    onResizeStart={startResizing}
+                >
+                    <SidebarSection title="Menü">
+                        {mainNavItems.map((item) => (
+                            <SidebarNavItem
+                                key={item.id}
+                                icon={<item.icon size={18} />}
+                                label={item.label}
+                                isActive={isActive(item.path)}
+                                onClick={() => navigate(item.path)}
+                            />
+                        ))}
+                    </SidebarSection>
+                </Sidebar>
+            )}
 
-            <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar - Desktop only */}
-                {!isMobile && (
-                    <Sidebar
-                        width={width}
-                        isCollapsed={isCollapsed}
-                        isResizing={isResizing}
-                        onToggle={toggle}
-                        onResizeStart={startResizing}
-                    >
-                        <div className="flex h-full flex-col gap-6">
-                            {/* Main Navigation */}
-                            <SidebarSection title="Menü">
-                                {mainNavItems.map((item) => (
-                                    <SidebarNavItem
-                                        key={item.id}
-                                        icon={<item.icon size={18} />}
-                                        label={item.label}
-                                        isActive={isActive(item.path)}
-                                        onClick={() => navigate(item.path)}
-                                    />
-                                ))}
-                            </SidebarSection>
-
-                            {/* Spacer */}
-                            <div className="flex-1" />
-
-                            {/* Secondary Navigation */}
-                            <SidebarSection>
-                                {secondaryNavItems.map((item) => (
-                                    <SidebarNavItem
-                                        key={item.id}
-                                        icon={<item.icon size={18} />}
-                                        label={item.label}
-                                        isActive={isActive(item.path)}
-                                        onClick={() => navigate(item.path)}
-                                    />
-                                ))}
-                            </SidebarSection>
-                        </div>
-                    </Sidebar>
-                )}
-
-                {/* Main Content Area */}
-                <main className="flex-1 overflow-y-auto">
-                    <div className={`h-full ${isMobile ? 'p-4 pb-20' : 'p-6'}`}>
-                        {children ?? <Outlet />}
-                    </div>
-                </main>
-            </div>
+            {/* Main Content Area */}
+            <main className="flex-1 overflow-y-auto">
+                <div className={`h-full ${isMobile ? 'p-4 pb-20' : 'p-6'}`}>
+                    {children ?? <Outlet />}
+                </div>
+            </main>
         </div>
     )
 }

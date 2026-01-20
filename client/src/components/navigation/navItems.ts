@@ -1,4 +1,4 @@
-import { Home, LogIn, LayoutDashboard, LogOut } from 'lucide-react'
+import { Home, LogIn, LayoutDashboard, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface NavItem {
@@ -34,6 +34,13 @@ const authNavItems: NavItem[] = [
         path: '/dashboard',
         icon: LayoutDashboard,
         canFill: true,
+    },
+    {
+        id: 'settings',
+        label: 'Einstellungen',
+        path: '/dashboard/settings',
+        icon: Settings,
+        canFill: false,
     },
 ]
 

@@ -3,6 +3,7 @@ import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { useViewport } from '../hooks/useViewport'
 import { HeaderNavigation } from '../components/navigation/HeaderNavigation'
+import { MobileHeader } from '../components/navigation/MobileHeader'
 import { BottomNavigation } from '../components/navigation/BottomNavigation'
 import { Footer } from '../components/Footer'
 
@@ -44,6 +45,9 @@ export const AppLayout = () => {
         <HeaderProvider>
             <div className="flex h-screen w-full flex-col">
                 {!isMobile && <HeaderNavigation />}
+                {isMobile && isDashboard && (
+                    <MobileHeader settingsPath="/dashboard/settings" />
+                )}
 
                 <main
                     className={`hide-scrollbar flex flex-1 flex-col ${
