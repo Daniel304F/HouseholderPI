@@ -8,11 +8,13 @@ import {
     Settings,
 } from 'lucide-react'
 import { useSidebar } from '../hooks/useSidebar'
+import { useViewport } from '../hooks/useViewport'
 import {
     Sidebar,
     SidebarSection,
     SidebarNavItem,
 } from '../components/navigation/Sidebar'
+import { TabNavigation } from '../components/navigation/TabNavigation'
 
 interface DashboardLayoutProps {
     children: ReactNode
@@ -57,6 +59,7 @@ const secondaryNavItems = [
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const navigate = useNavigate()
     const location = useLocation()
+    const { isMobile } = useViewport()
 
     const { width, isCollapsed, isResizing, toggle, startResizing } =
         useSidebar({
@@ -68,52 +71,66 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     const isActive = (path: string) => location.pathname === path
 
+    const tabItems = mainNavItems.map((item) => ({
+        ...item,
+        icon: <item.icon size={16} />,
+    }))
+
     return (
-        <div className="flex h-full overflow-hidden">
-            {/* Sidebar */}
-            <Sidebar
-                width={width}
-                isCollapsed={isCollapsed}
-                isResizing={isResizing}
-                onToggle={toggle}
-                onResizeStart={startResizing}
-            >
-                <div className="flex h-full flex-col gap-6">
-                    {/* Main Navigation */}
-                    <SidebarSection title="Menü">
-                        {mainNavItems.map((item) => (
-                            <SidebarNavItem
-                                key={item.id}
-                                icon={<item.icon size={18} />}
-                                label={item.label}
-                                isActive={isActive(item.path)}
-                                onClick={() => navigate(item.path)}
-                            />
-                        ))}
-                    </SidebarSection>
+        <div className="flex h-full flex-col overflow-hidden">
+            {/* Mobile Tab Navigation */}
+            {isMobile && <TabNavigation items={tabItems} />}
 
-                    {/* Spacer */}
-                    <div className="flex-1" />
+            <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar - Desktop only */}
+                {!isMobile && (
+                    <Sidebar
+                        width={width}
+                        isCollapsed={isCollapsed}
+                        isResizing={isResizing}
+                        onToggle={toggle}
+                        onResizeStart={startResizing}
+                    >
+                        <div className="flex h-full flex-col gap-6">
+                            {/* Main Navigation */}
+                            <SidebarSection title="Menü">
+                                {mainNavItems.map((item) => (
+                                    <SidebarNavItem
+                                        key={item.id}
+                                        icon={<item.icon size={18} />}
+                                        label={item.label}
+                                        isActive={isActive(item.path)}
+                                        onClick={() => navigate(item.path)}
+                                    />
+                                ))}
+                            </SidebarSection>
 
-                    {/* Secondary Navigation */}
-                    <SidebarSection>
-                        {secondaryNavItems.map((item) => (
-                            <SidebarNavItem
-                                key={item.id}
-                                icon={<item.icon size={18} />}
-                                label={item.label}
-                                isActive={isActive(item.path)}
-                                onClick={() => navigate(item.path)}
-                            />
-                        ))}
-                    </SidebarSection>
-                </div>
-            </Sidebar>
+                            {/* Spacer */}
+                            <div className="flex-1" />
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto">
-                <div className="h-full p-6">{children}</div>
-            </main>
+                            {/* Secondary Navigation */}
+                            <SidebarSection>
+                                {secondaryNavItems.map((item) => (
+                                    <SidebarNavItem
+                                        key={item.id}
+                                        icon={<item.icon size={18} />}
+                                        label={item.label}
+                                        isActive={isActive(item.path)}
+                                        onClick={() => navigate(item.path)}
+                                    />
+                                ))}
+                            </SidebarSection>
+                        </div>
+                    </Sidebar>
+                )}
+
+                {/* Main Content Area */}
+                <main className="flex-1 overflow-y-auto">
+                    <div className={`h-full ${isMobile ? 'p-4 pb-20' : 'p-6'}`}>
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
     )
 }
