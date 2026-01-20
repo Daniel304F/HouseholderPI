@@ -1,10 +1,10 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = {{$dotenv AUTH_TOKEN}}
 
 ### ===== AUTH (zuerst einloggen um Token zu bekommen) =====
 
 ### Register (einmalig)
+# @name register
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -14,7 +14,8 @@ Content-Type: application/json
   "name": "Test User"
 }
 
-### Login (Token aus Response-Cookie oder Body kopieren)
+### Login (Token wird automatisch gespeichert)
+# @name login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -23,9 +24,13 @@ Content-Type: application/json
   "password": "Test1234!"
 }
 
+### Token aus Login-Response extrahieren
+@authToken = {{login.response.body.accessToken}}
+
 ### ===== GROUPS =====
 
 ### Neue Gruppe erstellen
+# @name createGroup
 POST {{baseUrl}}/groups
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -34,16 +39,20 @@ Authorization: Bearer {{authToken}}
   "name": "Meine WG"
 }
 
+### Gruppe ID aus createGroup speichern
+@groupId = {{createGroup.response.body.data.id}}
+@inviteCode = {{createGroup.response.body.data.inviteCode}}
+
 ### Alle meine Gruppen abrufen
 GET {{baseUrl}}/groups
 Authorization: Bearer {{authToken}}
 
-### Gruppe per ID abrufen (ID ersetzen!)
-GET {{baseUrl}}/groups/GROUP_ID_HERE
+### Gruppe per ID abrufen
+GET {{baseUrl}}/groups/{{groupId}}
 Authorization: Bearer {{authToken}}
 
 ### Gruppe aktualisieren
-PATCH {{baseUrl}}/groups/GROUP_ID_HERE
+PATCH {{baseUrl}}/groups/{{groupId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -51,25 +60,30 @@ Authorization: Bearer {{authToken}}
   "name": "Neue WG Name"
 }
 
-### Gruppe per Invite-Code beitreten
+### Gruppe per Invite-Code beitreten (anderer User)
 POST {{baseUrl}}/groups/join
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "inviteCode": "INVITE_CODE_HERE"
+  "inviteCode": "{{inviteCode}}"
 }
 
 ### Gruppe verlassen
-POST {{baseUrl}}/groups/GROUP_ID_HERE/leave
+POST {{baseUrl}}/groups/{{groupId}}/leave
 Authorization: Bearer {{authToken}}
 
 ### Invite-Code neu generieren
-POST {{baseUrl}}/groups/GROUP_ID_HERE/regenerate-invite
+# @name regenerateInvite
+POST {{baseUrl}}/groups/{{groupId}}/regenerate-invite
 Authorization: Bearer {{authToken}}
 
-### Mitglied Rolle ändern
-PATCH {{baseUrl}}/groups/GROUP_ID_HERE/members/MEMBER_USER_ID
+### Neuer Invite-Code
+@newInviteCode = {{regenerateInvite.response.body.data.inviteCode}}
+
+### Mitglied Rolle ändern (memberId = UserId des Mitglieds)
+@memberId = MEMBER_USER_ID_HERE
+PATCH {{baseUrl}}/groups/{{groupId}}/members/{{memberId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -79,9 +93,9 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Mitglied entfernen
-DELETE {{baseUrl}}/groups/GROUP_ID_HERE/members/MEMBER_USER_ID
+DELETE {{baseUrl}}/groups/{{groupId}}/members/{{memberId}}
 Authorization: Bearer {{authToken}}
 
 ### Gruppe löschen (nur Owner)
-DELETE {{baseUrl}}/groups/GROUP_ID_HERE
+DELETE {{baseUrl}}/groups/{{groupId}}
 Authorization: Bearer {{authToken}}
