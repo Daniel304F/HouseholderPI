@@ -25,6 +25,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const capitalizeFirstLetter = (str: string): string =>
+    str.charAt(0).toUpperCase() + str.slice(1)
+
+const normalizeUser = (user: User): User => ({
+    ...user,
+    name: capitalizeFirstLetter(user.name),
+})
+
 interface AuthProviderProps {
     children: ReactNode
 }
@@ -48,7 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             try {
                 const userData = await authApi.getMe()
-                setUser(userData)
+                setUser(normalizeUser(userData))
             } catch {
                 // Token ungültig - aufräumen
                 localStorage.removeItem('accessToken')
@@ -71,8 +79,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             localStorage.setItem('accessToken', accessToken)
 
-            setUser(user)
-            queryClient.setQueryData(['user'], user)
+            setUser(normalizeUser(user))
+            queryClient.setQueryData(['user'], normalizeUser(user))
         },
         [queryClient]
     )
@@ -85,8 +93,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             localStorage.setItem('accessToken', accessToken)
 
-            setUser(user)
-            queryClient.setQueryData(['user'], user)
+            setUser(normalizeUser(user))
+            queryClient.setQueryData(['user'], normalizeUser(user))
         },
         [queryClient]
     )
