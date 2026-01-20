@@ -1,0 +1,87 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = {{$dotenv AUTH_TOKEN}}
+
+### ===== AUTH (zuerst einloggen um Token zu bekommen) =====
+
+### Register (einmalig)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test1234!",
+  "name": "Test User"
+}
+
+### Login (Token aus Response-Cookie oder Body kopieren)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test1234!"
+}
+
+### ===== GROUPS =====
+
+### Neue Gruppe erstellen
+POST {{baseUrl}}/groups
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Meine WG"
+}
+
+### Alle meine Gruppen abrufen
+GET {{baseUrl}}/groups
+Authorization: Bearer {{authToken}}
+
+### Gruppe per ID abrufen (ID ersetzen!)
+GET {{baseUrl}}/groups/GROUP_ID_HERE
+Authorization: Bearer {{authToken}}
+
+### Gruppe aktualisieren
+PATCH {{baseUrl}}/groups/GROUP_ID_HERE
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Neue WG Name"
+}
+
+### Gruppe per Invite-Code beitreten
+POST {{baseUrl}}/groups/join
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "inviteCode": "INVITE_CODE_HERE"
+}
+
+### Gruppe verlassen
+POST {{baseUrl}}/groups/GROUP_ID_HERE/leave
+Authorization: Bearer {{authToken}}
+
+### Invite-Code neu generieren
+POST {{baseUrl}}/groups/GROUP_ID_HERE/regenerate-invite
+Authorization: Bearer {{authToken}}
+
+### Mitglied Rolle ändern
+PATCH {{baseUrl}}/groups/GROUP_ID_HERE/members/MEMBER_USER_ID
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "role": "admin",
+  "isActiveResident": true
+}
+
+### Mitglied entfernen
+DELETE {{baseUrl}}/groups/GROUP_ID_HERE/members/MEMBER_USER_ID
+Authorization: Bearer {{authToken}}
+
+### Gruppe löschen (nur Owner)
+DELETE {{baseUrl}}/groups/GROUP_ID_HERE
+Authorization: Bearer {{authToken}}
