@@ -7,20 +7,13 @@ import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { ProtectedRoute } from './pages/ProtectedRoute'
 import { GuestRoute } from './pages/GuestRoute'
-
-// Lazy load dashboard pages (optional, für bessere Performance)
-// import { Tasks } from './pages/dashboard/Tasks'
-// import { Groups } from './pages/dashboard/Groups'
-// import { Friends } from './pages/dashboard/Friends'
-// import { Stats } from './pages/dashboard/Stats'
-// import { Settings } from './pages/dashboard/Settings'
+import { Groups } from './pages/dashboard/Groups'
 
 // Placeholder-Komponenten (ersetze diese durch echte Pages)
-const Tasks = () => <div>Meine Aufgaben</div>
-const Groups = () => <div>Meine Gruppen</div>
-const Friends = () => <div>Meine Freunde</div>
-const Stats = () => <div>Statistiken</div>
-const Settings = () => <div>Einstellungen</div>
+const Tasks = () => <div className="p-4">Meine Aufgaben - Coming Soon</div>
+const Friends = () => <div className="p-4">Meine Freunde - Coming Soon</div>
+const Stats = () => <div className="p-4">Statistiken - Coming Soon</div>
+const Settings = () => <div className="p-4">Einstellungen - Coming Soon</div>
 
 export const routes: RouteObject[] = [
     {

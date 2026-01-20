@@ -5,7 +5,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    children: ReactNode
+    children?: ReactNode
     variant?: ButtonVariant
     size?: ButtonSize
     fullWidth?: boolean
