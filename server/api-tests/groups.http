@@ -1,104 +1,203 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
 
-### ===== AUTH (zuerst einloggen um Token zu bekommen) =====
+###############################################################################
+#                          USER 1 (Owner) - AUTH                              #
+###############################################################################
 
-### Register (einmalig)
-# @name register
+### Register User 1 (einmalig)
+# @name registerUser1
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "test@example.com",
+  "email": "owner@example.com",
   "password": "Test1234!",
-  "name": "Test User"
+  "name": "Owner User"
 }
 
-### Login (Token wird automatisch gespeichert)
-# @name login
+### Login User 1
+# @name loginUser1
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "test@example.com",
+  "email": "owner@example.com",
   "password": "Test1234!"
 }
 
-### Token aus Login-Response extrahieren
-# Dynamisch (nach Login):
-# @authToken = {{login.response.body.accessToken}}
-# Oder manuell setzen (zum Testen):
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZDA4ZTFlOS05MWNiLTRmOTktYWQ0Ny01YjE0M2M3NzRkNjkiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzY4OTQxMDczLCJleHAiOjE3Njg5NDQ2NzN9.3C8YCsi83AVQqiHi5FGnnfZFcXSApFG1Q7ctb4bIT2o
+### User 1 Token (nach Login hier einfügen)
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMGQ1ZmU1Ni05YTgyLTQ4N2QtYWI5MC1mZTg3MTNlY2FkNmIiLCJlbWFpbCI6Im93bmVyQGV4YW1wbGUuY29tIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2ODk0MTU0NywiZXhwIjoxNzY4OTQ1MTQ3fQ.kJ3Tl3c-0cHQnodl8_bfctoEprJwWtlJxJvbZI4isGU
 
-### ===== GROUPS =====
+### User 1 ID (UUID aus Token)
+@user1Id = b0d5fe56-9a82-487d-ab90-fe8713ecad6b
 
-### Neue Gruppe erstellen
+###############################################################################
+#                         USER 2 (Member) - AUTH                              #
+###############################################################################
+
+### Register User 2 (einmalig)
+# @name registerUser2
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "Test1234!",
+  "name": "Member User"
+}
+
+### Login User 2
+# @name loginUser2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "Test1234!"
+}
+
+### User 2 Token (nach Login hier einfügen)
+@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3N2EwNzEyNi0zYmExLTQ4ZWEtOWVhNi1jNzYyZWUyZmJiZDEiLCJlbWFpbCI6Im1lbWJlckBleGFtcGxlLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3Njg5NDE1NzgsImV4cCI6MTc2ODk0NTE3OH0.aWBiL3hWHxfe3hMuwd-eUl3Sl_GDhuK7bgK7HoIkl6g
+
+### User 2 ID (UUID aus Token)
+@user2Id = 77a07126-3ba1-48ea-9ea6-c762ee2fbbd1
+
+###############################################################################
+#                              GROUPS - CRUD                                  #
+###############################################################################
+
+### 1. Neue Gruppe erstellen (als User 1 / Owner)
 # @name createGroup
 POST {{baseUrl}}/groups
 Content-Type: application/json
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
 {
   "name": "Meine WG"
 }
 
-### Gruppe ID aus createGroup speichern
-@groupId = {{createGroup.response.body.data.id}}
-@inviteCode = {{createGroup.response.body.data.inviteCode}}
+### Gruppe Variablen (nach createGroup aus Response kopieren!)
+### Response: data.id → groupId, data.inviteCode → inviteCode
+@groupId = a593fc74-2f5e-4282-8345-11d5079c509e
+@inviteCode = EBE36DDF
 
-### Alle meine Gruppen abrufen
+### 2. Alle meine Gruppen abrufen (User 1)
 GET {{baseUrl}}/groups
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
-### Gruppe per ID abrufen
+### 3. Gruppe per ID abrufen
 GET {{baseUrl}}/groups/{{groupId}}
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
-### Gruppe aktualisieren
+### 4. Gruppe aktualisieren (nur Owner/Admin)
 PATCH {{baseUrl}}/groups/{{groupId}}
 Content-Type: application/json
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
 {
-  "name": "Neue WG Names"
+  "name": "Unsere coole WG"
 }
 
-### Gruppe per Invite-Code beitreten (anderer User)
+###############################################################################
+#                         INVITE & MITGLIEDSCHAFT                             #
+###############################################################################
+
+### 5. User 2 tritt Gruppe bei (per Invite-Code)
 POST {{baseUrl}}/groups/join
 Content-Type: application/json
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user2Token}}
 
 {
   "inviteCode": "{{inviteCode}}"
 }
 
-### Gruppe verlassen
-POST {{baseUrl}}/groups/{{groupId}}/leave
-Authorization: Bearer {{authToken}}
+### 6. Gruppe abrufen - jetzt mit 2 Mitgliedern
+GET {{baseUrl}}/groups/{{groupId}}
+Authorization: Bearer {{user1Token}}
 
-### Invite-Code neu generieren
+### 7. User 2 sieht seine Gruppen
+GET {{baseUrl}}/groups
+Authorization: Bearer {{user2Token}}
+
+### 8. Invite-Code neu generieren (Owner)
 # @name regenerateInvite
 POST {{baseUrl}}/groups/{{groupId}}/regenerate-invite
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
-### Neuer Invite-Code
-@newInviteCode = {{regenerateInvite.response.body.data.inviteCode}}
+### Neuer Invite-Code (nach regenerateInvite hier einfügen)
+@newInviteCode = 5AFE3CE6
 
-### Mitglied Rolle ändern (memberId = UserId des Mitglieds)
-@memberId = MEMBER_USER_ID_HERE
-PATCH {{baseUrl}}/groups/{{groupId}}/members/{{memberId}}
+###############################################################################
+#                         MITGLIEDER VERWALTEN                                #
+###############################################################################
+
+### 9. Mitglied (User 2) zum Admin befördern
+PATCH {{baseUrl}}/groups/{{groupId}}/members/{{user2Id}}
 Content-Type: application/json
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
 
 {
   "role": "admin",
   "isActiveResident": true
 }
 
-### Mitglied entfernen
-DELETE {{baseUrl}}/groups/{{groupId}}/members/{{memberId}}
-Authorization: Bearer {{authToken}}
+### 10. Mitglied Status prüfen
+GET {{baseUrl}}/groups/{{groupId}}
+Authorization: Bearer {{user1Token}}
+
+### 11. Mitglied (User 2) wieder zum Member degradieren
+PATCH {{baseUrl}}/groups/{{groupId}}/members/{{user2Id}}
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "role": "member"
+}
+
+### 12. User 2 verlässt die Gruppe freiwillig
+POST {{baseUrl}}/groups/{{groupId}}/leave
+Authorization: Bearer {{user2Token}}
+
+### 13. User 2 tritt erneut bei (für weitere Tests)
+### HINWEIS: Falls du Request 8 (Regenerate) ausgeführt hast, nutze {{newInviteCode}} statt {{inviteCode}}!
+POST {{baseUrl}}/groups/join
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "inviteCode": "{{newInviteCode}}"
+}
+
+### 14. Owner entfernt Mitglied (User 2)
+DELETE {{baseUrl}}/groups/{{groupId}}/members/{{user2Id}}
+Authorization: Bearer {{user1Token}}
+
+###############################################################################
+#                              EDGE CASES                                     #
+###############################################################################
+
+### Owner versucht Gruppe zu verlassen (sollte 400 geben)
+POST {{baseUrl}}/groups/{{groupId}}/leave
+Authorization: Bearer {{user1Token}}
+
+### User 2 versucht ohne Mitgliedschaft Gruppe abzurufen (sollte 403 geben)
+GET {{baseUrl}}/groups/{{groupId}}
+Authorization: Bearer {{user2Token}}
+
+### Ungültiger Invite-Code (sollte 404 geben)
+POST {{baseUrl}}/groups/join
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "inviteCode": "INVALID123"
+}
+
+###############################################################################
+#                           CLEANUP / LÖSCHEN                                 #
+###############################################################################
 
 ### Gruppe löschen (nur Owner)
 DELETE {{baseUrl}}/groups/{{groupId}}
-Authorization: Bearer {{authToken}}
+Authorization: Bearer {{user1Token}}
