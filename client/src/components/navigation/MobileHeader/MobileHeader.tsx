@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Settings } from 'lucide-react'
 import { cn } from '../../../utils/cn'
+import { useHeaderContext } from '../../../contexts/HeaderContext'
 
 interface MobileHeaderProps {
     settingsPath: string
@@ -13,6 +14,7 @@ export const MobileHeader = ({
 }: MobileHeaderProps) => {
     const navigate = useNavigate()
     const location = useLocation()
+    const { title, subtitle } = useHeaderContext()
 
     const isActive = location.pathname === settingsPath
 
@@ -27,11 +29,22 @@ export const MobileHeader = ({
             )}
         >
             {/* Logo / Title */}
-            <div className="flex items-center gap-2">
-                <div className="from-brand-500 to-brand-600 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
-                    <span className="text-sm font-bold text-white">H</span>
+            <div className="flex items-center gap-2.5">
+                <img
+                    src="/householderPI.svg"
+                    alt="Householder Logo"
+                    className="h-8 w-8"
+                />
+                <div className="flex flex-col">
+                    <h1 className="text-text text-lg leading-tight font-semibold">
+                        {title || 'Householder'}
+                    </h1>
+                    {subtitle && (
+                        <span className="text-text-muted text-xs">
+                            {subtitle}
+                        </span>
+                    )}
                 </div>
-                <h1 className="text-text text-lg font-semibold">Householder</h1>
             </div>
 
             {/* Settings Button */}
@@ -42,8 +55,8 @@ export const MobileHeader = ({
                     'flex h-10 w-10 items-center justify-center rounded-full',
                     'transition-all duration-200',
                     isActive
-                        ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/50 dark:text-brand-400'
-                        : 'text-text-muted hover:bg-surface-hover hover:text-text active:scale-95'
+                        ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300'
+                        : 'text-text-muted hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950 dark:hover:text-brand-400 active:scale-95'
                 )}
             >
                 <Settings size={20} />
