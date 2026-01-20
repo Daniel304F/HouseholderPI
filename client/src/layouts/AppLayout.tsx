@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Settings } from 'lucide-react'
+import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { useViewport } from '../hooks/useViewport'
 import { HeaderNavigation } from '../components/navigation/HeaderNavigation'
@@ -8,16 +8,28 @@ import { Footer } from '../components/Footer'
 
 const bottomNavItems = [
     {
-        id: 'dashboard',
-        label: 'Dashboard',
-        path: '/dashboard',
-        icon: LayoutDashboard,
+        id: 'tasks',
+        label: 'Aufgaben',
+        path: '/dashboard/tasks',
+        icon: ClipboardList,
     },
     {
-        id: 'settings',
-        label: 'Einstellungen',
-        path: '/dashboard/settings',
-        icon: Settings,
+        id: 'groups',
+        label: 'Gruppen',
+        path: '/dashboard/groups',
+        icon: Users,
+    },
+    {
+        id: 'friends',
+        label: 'Freunde',
+        path: '/dashboard/friends',
+        icon: UserCircle,
+    },
+    {
+        id: 'stats',
+        label: 'Statistiken',
+        path: '/dashboard/stats',
+        icon: BarChart3,
     },
 ]
 

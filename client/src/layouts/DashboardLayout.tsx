@@ -14,7 +14,7 @@ import {
     SidebarSection,
     SidebarNavItem,
 } from '../components/navigation/Sidebar'
-import { TabNavigation } from '../components/navigation/TabNavigation'
+import { MobileHeader } from '../components/navigation/MobileHeader'
 
 interface DashboardLayoutProps {
     children: ReactNode
@@ -23,19 +23,19 @@ interface DashboardLayoutProps {
 const mainNavItems = [
     {
         id: 'tasks',
-        label: 'Meine Aufgaben',
+        label: 'Aufgaben',
         path: '/dashboard/tasks',
         icon: ClipboardList,
     },
     {
         id: 'groups',
-        label: 'Meine Gruppen',
+        label: 'Gruppen',
         path: '/dashboard/groups',
         icon: Users,
     },
     {
         id: 'friends',
-        label: 'Meine Freunde',
+        label: 'Freunde',
         path: '/dashboard/friends',
         icon: UserCircle,
     },
@@ -71,15 +71,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     const isActive = (path: string) => location.pathname === path
 
-    const tabItems = mainNavItems.map((item) => ({
-        ...item,
-        icon: <item.icon size={16} />,
-    }))
-
     return (
         <div className="flex h-full flex-col overflow-hidden">
-            {/* Mobile Tab Navigation */}
-            {isMobile && <TabNavigation items={tabItems} />}
+            {/* Mobile Header with Settings */}
+            {isMobile && <MobileHeader settingsPath="/dashboard/settings" />}
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar - Desktop only */}
