@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, RequestHandler } from "express";
 import * as groupController from "../controllers/groupController.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
@@ -20,60 +20,60 @@ router.use(authMiddleware);
 router.post(
   "/",
   validateResource(createGroupSchema),
-  groupController.createGroup
+  groupController.createGroup as RequestHandler,
 );
 
-router.get("/", groupController.getMyGroups);
+router.get("/", groupController.getMyGroups as RequestHandler);
 
 router.get(
   "/:groupId",
   validateResource(groupIdParamSchema),
-  groupController.getGroup
+  groupController.getGroup as RequestHandler,
 );
 
 router.patch(
   "/:groupId",
   validateResource(updateGroupSchema),
-  groupController.updateGroup
+  groupController.updateGroup as RequestHandler,
 );
 
 router.delete(
   "/:groupId",
   validateResource(groupIdParamSchema),
-  groupController.deleteGroup
+  groupController.deleteGroup as RequestHandler,
 );
 
 // Gruppe beitreten/verlassen
 router.post(
   "/join",
   validateResource(joinGroupSchema),
-  groupController.joinGroup
+  groupController.joinGroup as RequestHandler,
 );
 
 router.post(
   "/:groupId/leave",
   validateResource(groupIdParamSchema),
-  groupController.leaveGroup
+  groupController.leaveGroup as RequestHandler,
 );
 
 // Invite-Code regenerieren
 router.post(
   "/:groupId/regenerate-invite",
   validateResource(groupIdParamSchema),
-  groupController.regenerateInviteCode
+  groupController.regenerateInviteCode as RequestHandler,
 );
 
 // Mitglieder verwalten
 router.patch(
   "/:groupId/members/:memberId",
   validateResource(updateMemberSchema),
-  groupController.updateMember
+  groupController.updateMember as RequestHandler,
 );
 
 router.delete(
   "/:groupId/members/:memberId",
   validateResource(removeMemberSchema),
-  groupController.removeMember
+  groupController.removeMember as RequestHandler,
 );
 
 export default router;

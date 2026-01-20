@@ -35,10 +35,10 @@ export const createGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { name, picture } = req.body;
 
     const newGroup = await groupDAO.create({
@@ -73,10 +73,10 @@ export const getMyGroups = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
 
     const allGroups = await groupDAO.findAll();
 
@@ -111,10 +111,10 @@ export const getGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId } = req.params;
 
     const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
@@ -147,10 +147,10 @@ export const updateGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId } = req.params;
     const { name, picture } = req.body;
 
@@ -198,10 +198,10 @@ export const deleteGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId } = req.params;
 
     const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
@@ -216,7 +216,9 @@ export const deleteGroup = async (
       return;
     }
 
-    await groupDAO.delete(groupId);
+    if (groupId) {
+      await groupDAO.delete(groupId);
+    }
 
     res.status(200).json({
       success: true,
@@ -235,10 +237,10 @@ export const joinGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { inviteCode } = req.body;
 
     const group = await groupDAO.findOne({
@@ -293,10 +295,10 @@ export const leaveGroup = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId } = req.params;
 
     const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
@@ -351,10 +353,10 @@ export const regenerateInviteCode = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId } = req.params;
 
     const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
@@ -393,10 +395,10 @@ export const updateMember = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId, memberId } = req.params;
     const { role, isActiveResident } = req.body;
 
@@ -419,7 +421,7 @@ export const updateMember = async (
       return;
     }
 
-    const targetMember = group.members[memberIndex];
+    const targetMember = group.members[memberIndex]!;
 
     // Owner-Rolle kann nicht geändert werden
     if (targetMember.role === "owner" && role) {
@@ -462,10 +464,10 @@ export const removeMember = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
-    const userId = req.user!.id;
+    const userId = req.userId;
     const { groupId, memberId } = req.params;
 
     const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);

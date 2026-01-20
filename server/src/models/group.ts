@@ -31,6 +31,6 @@ export interface GroupListItem {
   name: string;
   memberCount: number;
   activeResidentsCount: number;
-  picture?: string;
+  picture: string | undefined;
   role: GroupMember["role"];
 }
