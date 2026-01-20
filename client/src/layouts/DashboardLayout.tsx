@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
     ClipboardList,
     Users,
@@ -17,7 +17,7 @@ import {
 import { MobileHeader } from '../components/navigation/MobileHeader'
 
 interface DashboardLayoutProps {
-    children: ReactNode
+    children?: ReactNode
 }
 
 const mainNavItems = [
@@ -122,7 +122,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 {/* Main Content Area */}
                 <main className="flex-1 overflow-y-auto">
                     <div className={`h-full ${isMobile ? 'p-4 pb-20' : 'p-6'}`}>
-                        {children}
+                        {children ?? <Outlet />}
                     </div>
                 </main>
             </div>
