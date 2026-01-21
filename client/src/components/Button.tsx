@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline'
 type ButtonSize = 'sm' | 'md' | 'lg'
+type IconPosition = 'left' | 'right'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children?: ReactNode
@@ -10,6 +11,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize
     fullWidth?: boolean
     icon?: ReactNode
+    iconPosition?: IconPosition
     isLoading?: boolean
 }
 
@@ -55,6 +57,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             size = 'md',
             fullWidth = false,
             icon,
+            iconPosition = 'left',
             isLoading = false,
             className = '',
             disabled,
@@ -63,6 +66,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         },
         ref
     ) => {
+        const iconElement = icon && !isLoading && (
+            <span
+                className={
+                    children
+                        ? iconPosition === 'left'
+                            ? 'mr-2 flex-shrink-0'
+                            : 'ml-2 flex-shrink-0'
+                        : ''
+                }
+            >
+                {icon}
+            </span>
+        )
+
         return (
             <button
                 ref={ref}
@@ -71,15 +88,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 className={` ${baseClasses} ${variantStyles[variant]} ${sizeStyles[size]} ${fullWidth ? 'w-full' : ''} ${className} `}
                 {...props}
             >
-                {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : icon ? (
-                    <span className={children ? 'mr-2 flex-shrink-0' : ''}>
-                        {icon}
-                    </span>
-                ) : null}
-
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {iconPosition === 'left' && iconElement}
                 {children}
+                {iconPosition === 'right' && iconElement}
             </button>
         )
     }
