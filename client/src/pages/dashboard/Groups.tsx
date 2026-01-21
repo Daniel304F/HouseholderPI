@@ -8,16 +8,12 @@ import {
     GroupsEmptyState,
     CreateGroupModal,
     JoinGroupModal,
-    GroupDetailModal,
 } from '../../components/groups'
-import { groupsApi, type Group } from '../../api/groups'
-import { useAuth } from '../../contexts/AuthContext'
+import { groupsApi } from '../../api/groups'
 
 const groupsQueryKey = ['groups'] as const
 
 export const Groups = () => {
-    const { user } = useAuth()
-    const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showJoinModal, setShowJoinModal] = useState(false)
 
@@ -31,20 +27,6 @@ export const Groups = () => {
         queryKey: groupsQueryKey,
         queryFn: groupsApi.getMyGroups,
     })
-
-    const handleGroupClick = async (groupId: string) => {
-        try {
-            const group = await groupsApi.getGroup(groupId)
-            setSelectedGroup(group)
-        } catch {
-            // Error handling
-        }
-    }
-
-    const handleUpdated = () => {
-        refetch()
-        setSelectedGroup(null)
-    }
 
     // Loading State
     if (isLoading) {
@@ -121,11 +103,7 @@ export const Groups = () => {
             ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {groups.map((group) => (
-                        <GroupCard
-                            key={group.id}
-                            group={group}
-                            onClick={() => handleGroupClick(group.id)}
-                        />
+                        <GroupCard key={group.id} group={group} />
                     ))}
                 </div>
             )}
@@ -140,12 +118,6 @@ export const Groups = () => {
                 isOpen={showJoinModal}
                 onClose={() => setShowJoinModal(false)}
                 onJoined={() => refetch()}
-            />
-            <GroupDetailModal
-                group={selectedGroup}
-                onClose={() => setSelectedGroup(null)}
-                onUpdated={handleUpdated}
-                currentUserId={user?.id || ''}
             />
         </div>
     )

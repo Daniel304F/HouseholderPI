@@ -8,6 +8,7 @@ import { Register } from './pages/Register'
 import { ProtectedRoute } from './pages/ProtectedRoute'
 import { GuestRoute } from './pages/GuestRoute'
 import { Groups } from './pages/dashboard/Groups'
+import { GroupDetail } from './pages/dashboard/GroupDetail'
 
 // Placeholder-Komponenten (ersetze diese durch echte Pages)
 const Tasks = () => <div className="p-4">Meine Aufgaben - Coming Soon</div>
@@ -58,6 +59,10 @@ export const routes: RouteObject[] = [
                     {
                         path: 'groups',
                         element: <Groups />,
+                    },
+                    {
+                        path: 'groups/:groupId',
+                        element: <GroupDetail />,
                     },
                     {
                         path: 'friends',

@@ -1,19 +1,18 @@
-import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { cn } from '../utils/cn'
 
 type IconButtonVariant = 'default' | 'ghost'
 
 interface IconButtonProps {
-    icon: LucideIcon
+    icon: ReactNode
     onClick: () => void
-    size?: number
     variant?: IconButtonVariant
     className?: string
-    ariaLabel?: string
+    'aria-label'?: string
 }
 
 const baseStyles = cn(
-    'cursor-pointer rounded-full p-1.5',
+    'cursor-pointer rounded-full p-2',
     'transition-all duration-200',
     'focus:outline-none focus:ring-2 focus:ring-brand-500/20'
 )
@@ -34,12 +33,11 @@ const variantStyles: Record<IconButtonVariant, string> = {
 }
 
 export const IconButton = ({
-    icon: Icon,
+    icon,
     onClick,
-    size = 14,
     variant = 'default',
     className,
-    ariaLabel,
+    'aria-label': ariaLabel,
 }: IconButtonProps) => {
     return (
         <button
@@ -48,7 +46,7 @@ export const IconButton = ({
             className={cn(baseStyles, variantStyles[variant], className)}
             aria-label={ariaLabel}
         >
-            <Icon size={size} />
+            {icon}
         </button>
     )
 }

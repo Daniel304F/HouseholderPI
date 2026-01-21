@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Users } from 'lucide-react'
 import type { GroupListItem } from '../../api/groups'
 import { cn } from '../../utils/cn'
@@ -5,7 +6,6 @@ import { RoleBadge } from './RoleBadge'
 
 interface GroupCardProps {
     group: GroupListItem
-    onClick: () => void
 }
 
 const avatarBaseStyles = cn(
@@ -28,9 +28,9 @@ const cardStyles = cn(
     'active:translate-y-0 active:shadow-md'
 )
 
-export const GroupCard = ({ group, onClick }: GroupCardProps) => {
+export const GroupCard = ({ group }: GroupCardProps) => {
     return (
-        <button onClick={onClick} className={cardStyles}>
+        <Link to={`/dashboard/groups/${group.id}`} className={cardStyles}>
             {/* Group Avatar */}
             <div className={cn(avatarBaseStyles, 'group-hover:scale-105')}>
                 {group.picture ? (
@@ -57,6 +57,6 @@ export const GroupCard = ({ group, onClick }: GroupCardProps) => {
 
             {/* Role Badge */}
             <RoleBadge role={group.role} />
-        </button>
+        </Link>
     )
 }

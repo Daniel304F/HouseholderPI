@@ -48,11 +48,10 @@ export const CreateGroupModal = ({
                         Neue Gruppe erstellen
                     </h2>
                     <IconButton
-                        icon={X}
+                        icon={<X className="size-5" />}
                         onClick={handleClose}
-                        size={20}
                         variant="ghost"
-                        ariaLabel="Modal schließen"
+                        aria-label="Modal schließen"
                     />
                 </div>
 
