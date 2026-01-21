@@ -11,6 +11,7 @@ export interface GroupMember {
 export interface Group {
     id: string
     name: string
+    description?: string
     inviteCode: string
     members: GroupMember[]
     activeResidentsCount: number

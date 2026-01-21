@@ -5,27 +5,34 @@ import {
     Settings,
     Plus,
     Users,
-    CheckCircle2,
-    Clock,
+    LayoutGrid,
+    BarChart3,
+    MessageSquare,
+    Search,
+    Filter,
+    Share2,
+    UserPlus,
     AlertCircle,
 } from 'lucide-react'
 import { Button } from '../../components/Button'
 import { IconButton } from '../../components/IconButton'
 import { groupsApi } from '../../api/groups'
 import { cn } from '../../utils/cn'
-import { TaskCard, TaskCardSkeleton } from '../../components/tasks'
 import { GroupDetailModal } from '../../components/groups'
+import { ContentTabs, type Tab } from '../../components/ContentTabs'
+import { KanbanBoard, type ColumnStatus } from '../../components/board'
 import { useAuth } from '../../contexts/AuthContext'
 import { useState } from 'react'
+import type { Task } from '../../components/tasks'
 
 // Temporäre Mock-Daten für Aufgaben
-const mockTasks = [
+const mockTasks: Task[] = [
     {
         id: '1',
         title: 'Küche putzen',
         description: 'Arbeitsflächen abwischen, Boden wischen',
-        status: 'pending' as const,
-        priority: 'high' as const,
+        status: 'pending',
+        priority: 'high',
         assignedTo: 'Max',
         dueDate: new Date(Date.now() + 86400000).toISOString(),
     },
@@ -33,8 +40,8 @@ const mockTasks = [
         id: '2',
         title: 'Müll rausbringen',
         description: 'Gelber Sack und Restmüll',
-        status: 'in-progress' as const,
-        priority: 'medium' as const,
+        status: 'in-progress',
+        priority: 'medium',
         assignedTo: 'Anna',
         dueDate: new Date(Date.now() + 172800000).toISOString(),
     },
@@ -42,8 +49,8 @@ const mockTasks = [
         id: '3',
         title: 'Bad reinigen',
         description: 'Toilette, Waschbecken, Dusche',
-        status: 'completed' as const,
-        priority: 'low' as const,
+        status: 'completed',
+        priority: 'low',
         assignedTo: 'Tom',
         dueDate: new Date(Date.now() - 86400000).toISOString(),
     },
@@ -51,10 +58,45 @@ const mockTasks = [
         id: '4',
         title: 'Einkaufen gehen',
         description: 'Milch, Brot, Eier, Käse',
-        status: 'pending' as const,
-        priority: 'medium' as const,
+        status: 'pending',
+        priority: 'medium',
         assignedTo: null,
         dueDate: new Date(Date.now() + 259200000).toISOString(),
+    },
+    {
+        id: '5',
+        title: 'Wäsche waschen',
+        description: 'Buntwäsche, 40 Grad',
+        status: 'in-progress',
+        priority: 'low',
+        assignedTo: 'Lisa',
+        dueDate: new Date(Date.now() + 86400000).toISOString(),
+    },
+    {
+        id: '6',
+        title: 'Fenster putzen',
+        description: 'Alle Fenster im Wohnzimmer',
+        status: 'pending',
+        priority: 'low',
+        assignedTo: null,
+        dueDate: new Date(Date.now() + 604800000).toISOString(),
+    },
+]
+
+// Tabs für die Navigation
+const tabs: Tab[] = [
+    { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
+    {
+        id: 'stats',
+        label: 'Statistiken',
+        icon: <BarChart3 className="size-4" />,
+        disabled: true,
+    },
+    {
+        id: 'messages',
+        label: 'Messages',
+        icon: <MessageSquare className="size-4" />,
+        disabled: true,
     },
 ]
 
@@ -63,6 +105,8 @@ export const GroupDetail = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
     const [showSettingsModal, setShowSettingsModal] = useState(false)
+    const [activeTab, setActiveTab] = useState('board')
+    const [searchQuery, setSearchQuery] = useState('')
 
     const {
         data: group,
@@ -75,12 +119,14 @@ export const GroupDetail = () => {
         enabled: !!groupId,
     })
 
-    // Aufgaben-Statistiken berechnen
-    const stats = {
-        total: mockTasks.length,
-        pending: mockTasks.filter((t) => t.status === 'pending').length,
-        inProgress: mockTasks.filter((t) => t.status === 'in-progress').length,
-        completed: mockTasks.filter((t) => t.status === 'completed').length,
+    const handleTaskClick = (task: Task) => {
+        // TODO: Open task detail modal
+        console.log('Task clicked:', task)
+    }
+
+    const handleAddTask = (status: ColumnStatus) => {
+        // TODO: Open add task modal with pre-selected status
+        console.log('Add task to:', status)
     }
 
     if (isLoading) {
@@ -91,23 +137,21 @@ export const GroupDetail = () => {
                     <div className="size-10 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700" />
                     <div className="flex-1 space-y-2">
                         <div className="h-7 w-48 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                        <div className="h-5 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+                        <div className="h-5 w-64 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
                     </div>
                 </div>
 
-                {/* Stats Skeleton */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {/* Tabs Skeleton */}
+                <div className="h-12 w-80 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700" />
+
+                {/* Board Skeleton */}
+                <div className="flex gap-4 overflow-hidden">
                     {Array.from({ length: 4 }).map((_, i) => (
                         <div
                             key={i}
-                            className="h-20 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700"
+                            className="h-96 w-72 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700"
                         />
                     ))}
-                </div>
-
-                {/* Tasks Skeleton */}
-                <div className="space-y-3">
-                    <TaskCardSkeleton count={4} />
                 </div>
             </div>
         )
@@ -134,132 +178,203 @@ export const GroupDetail = () => {
     const isAdmin =
         currentMember?.role === 'owner' || currentMember?.role === 'admin'
 
+    // Member avatars for display
+    const displayMembers = group.members.slice(0, 4)
+    const extraMemberCount = Math.max(0, group.members.length - 4)
+
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <IconButton
-                    icon={<ArrowLeft className="size-5" />}
-                    onClick={() => navigate('/dashboard/groups')}
-                    variant="ghost"
-                    aria-label="Zurück zu Gruppen"
-                />
-
-                <div className="flex flex-1 items-center gap-4">
-                    {/* Group Avatar */}
-                    <div
-                        className={cn(
-                            'flex size-12 items-center justify-center rounded-xl',
-                            'bg-brand-100 dark:bg-brand-900/30'
-                        )}
-                    >
-                        {group.picture ? (
-                            <img
-                                src={group.picture}
-                                alt={group.name}
-                                className="size-full rounded-xl object-cover"
-                            />
-                        ) : (
-                            <Users className="text-brand-600 dark:text-brand-400 size-6" />
-                        )}
-                    </div>
-
-                    {/* Group Info */}
-                    <div className="min-w-0 flex-1">
-                        <h1 className="truncate text-xl font-bold text-neutral-900 sm:text-2xl dark:text-white">
-                            {group.name}
-                        </h1>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                            {group.members.length} Mitglieder •{' '}
-                            {group.activeResidentsCount} aktiv
-                        </p>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                    {isAdmin && (
-                        <IconButton
-                            icon={<Settings className="size-5" />}
-                            onClick={() => setShowSettingsModal(true)}
-                            variant="ghost"
-                            aria-label="Gruppeneinstellungen"
-                        />
-                    )}
-                    <Button
-                        onClick={() => {
-                            /* TODO: Add task modal */
-                        }}
-                        icon={<Plus className="size-5" />}
-                    >
-                        <span className="hidden sm:inline">Aufgabe</span>
-                    </Button>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                    label="Gesamt"
-                    value={stats.total}
-                    icon={<CheckCircle2 className="size-5" />}
-                    color="brand"
-                />
-                <StatCard
-                    label="Offen"
-                    value={stats.pending}
-                    icon={<AlertCircle className="size-5" />}
-                    color="warning"
-                />
-                <StatCard
-                    label="In Arbeit"
-                    value={stats.inProgress}
-                    icon={<Clock className="size-5" />}
-                    color="info"
-                />
-                <StatCard
-                    label="Erledigt"
-                    value={stats.completed}
-                    icon={<CheckCircle2 className="size-5" />}
-                    color="success"
-                />
-            </div>
-
-            {/* Tasks Section */}
+        <div className="flex h-full flex-col space-y-6">
+            {/* Header Section */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                        Aufgaben
-                    </h2>
-                    {/* TODO: Filter/Sort controls */}
+                {/* Top Row: Back button, Title, Actions */}
+                <div className="flex items-start gap-4">
+                    <IconButton
+                        icon={<ArrowLeft className="size-5" />}
+                        onClick={() => navigate('/dashboard/groups')}
+                        variant="ghost"
+                        aria-label="Zurück zu Gruppen"
+                    />
+
+                    <div className="min-w-0 flex-1">
+                        {/* Group Name & Meta */}
+                        <div className="flex items-center gap-3">
+                            {group.picture ? (
+                                <img
+                                    src={group.picture}
+                                    alt={group.name}
+                                    className="size-10 rounded-xl object-cover"
+                                />
+                            ) : (
+                                <div
+                                    className={cn(
+                                        'flex size-10 items-center justify-center rounded-xl',
+                                        'bg-brand-100 dark:bg-brand-900/30'
+                                    )}
+                                >
+                                    <Users className="text-brand-600 dark:text-brand-400 size-5" />
+                                </div>
+                            )}
+                            <div>
+                                <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl dark:text-white">
+                                    {group.name}
+                                </h1>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    {group.members.length} Mitglieder •{' '}
+                                    {group.activeResidentsCount} aktive Bewohner
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        {group.description && (
+                            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                {group.description}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Right Side: Members & Actions */}
+                    <div className="flex items-center gap-4">
+                        {/* Member Avatars */}
+                        <div className="hidden items-center sm:flex">
+                            <div className="flex -space-x-2">
+                                {displayMembers.map((member) => (
+                                    <div
+                                        key={member.userId}
+                                        className={cn(
+                                            'flex size-8 items-center justify-center rounded-full',
+                                            'bg-brand-100 dark:bg-brand-900/30',
+                                            'border-2 border-white dark:border-neutral-900',
+                                            'text-brand-600 dark:text-brand-400 text-xs font-medium'
+                                        )}
+                                    >
+                                        {member.userId.charAt(0).toUpperCase()}
+                                    </div>
+                                ))}
+                                {extraMemberCount > 0 && (
+                                    <div
+                                        className={cn(
+                                            'flex size-8 items-center justify-center rounded-full',
+                                            'bg-neutral-200 dark:bg-neutral-700',
+                                            'border-2 border-white dark:border-neutral-900',
+                                            'text-xs font-medium text-neutral-600 dark:text-neutral-400'
+                                        )}
+                                    >
+                                        +{extraMemberCount}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    /* TODO: Share */
+                                }}
+                                icon={<Share2 className="size-4" />}
+                                className="hidden sm:flex"
+                            >
+                                Teilen
+                            </Button>
+                            {isAdmin && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSettingsModal(true)}
+                                    icon={<Settings className="size-4" />}
+                                >
+                                    <span className="hidden sm:inline">
+                                        Einstellungen
+                                    </span>
+                                </Button>
+                            )}
+                            <Button
+                                onClick={() => {
+                                    /* TODO: Invite */
+                                }}
+                                icon={<UserPlus className="size-4" />}
+                            >
+                                <span className="hidden sm:inline">
+                                    Einladen
+                                </span>
+                            </Button>
+                        </div>
+                    </div>
                 </div>
 
-                {mockTasks.length === 0 ? (
-                    <div
-                        className={cn(
-                            'flex flex-col items-center justify-center gap-4 rounded-xl py-12',
-                            'border border-dashed border-neutral-300 dark:border-neutral-600'
-                        )}
-                    >
-                        <CheckCircle2 className="size-12 text-neutral-400" />
-                        <p className="text-neutral-500 dark:text-neutral-400">
-                            Noch keine Aufgaben vorhanden
-                        </p>
-                        <Button icon={<Plus className="size-5" />}>
-                            Erste Aufgabe erstellen
+                {/* Tabs & Toolbar */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Tab Navigation */}
+                    <ContentTabs
+                        tabs={tabs}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                    />
+
+                    {/* Toolbar */}
+                    <div className="flex items-center gap-2">
+                        {/* Search */}
+                        <div
+                            className={cn(
+                                'flex items-center gap-2 rounded-lg px-3 py-2',
+                                'bg-neutral-100 dark:bg-neutral-800',
+                                'border border-transparent',
+                                'focus-within:border-brand-500 focus-within:ring-brand-500/20 focus-within:ring-2'
+                            )}
+                        >
+                            <Search className="size-4 text-neutral-400" />
+                            <input
+                                type="text"
+                                placeholder="Aufgabe suchen..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={cn(
+                                    'w-40 bg-transparent text-sm outline-none',
+                                    'text-neutral-900 dark:text-white',
+                                    'placeholder:text-neutral-400'
+                                )}
+                            />
+                        </div>
+
+                        {/* Filter Button */}
+                        <Button
+                            variant="secondary"
+                            icon={<Filter className="size-4" />}
+                        >
+                            <span className="hidden sm:inline">Filter</span>
+                        </Button>
+
+                        {/* Add Task Button */}
+                        <Button
+                            onClick={() => handleAddTask('pending')}
+                            icon={<Plus className="size-4" />}
+                        >
+                            <span className="hidden sm:inline">
+                                Neue Aufgabe
+                            </span>
                         </Button>
                     </div>
-                ) : (
-                    <div className="space-y-3">
-                        {mockTasks.map((task) => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onClick={() => {
-                                    /* TODO: Open task detail */
-                                }}
-                            />
-                        ))}
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="min-h-0 flex-1">
+                {activeTab === 'board' && (
+                    <KanbanBoard
+                        tasks={mockTasks}
+                        onTaskClick={handleTaskClick}
+                        onAddTask={handleAddTask}
+                    />
+                )}
+                {activeTab === 'stats' && (
+                    <div className="flex items-center justify-center py-12 text-neutral-500">
+                        Statistiken - Coming Soon
+                    </div>
+                )}
+                {activeTab === 'messages' && (
+                    <div className="flex items-center justify-center py-12 text-neutral-500">
+                        Messages - Coming Soon
                     </div>
                 )}
             </div>
@@ -274,54 +389,6 @@ export const GroupDetail = () => {
                 }}
                 currentUserId={user?.id || ''}
             />
-        </div>
-    )
-}
-
-// Stat Card Component
-interface StatCardProps {
-    label: string
-    value: number
-    icon: React.ReactNode
-    color: 'brand' | 'warning' | 'info' | 'success'
-}
-
-const colorStyles = {
-    brand: 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400',
-    warning:
-        'bg-warning-50 dark:bg-warning-900/20 text-warning-600 dark:text-warning-400',
-    info: 'bg-info-50 dark:bg-info-900/20 text-info-600 dark:text-info-400',
-    success:
-        'bg-success-50 dark:bg-success-900/20 text-success-600 dark:text-success-400',
-}
-
-const StatCard = ({ label, value, icon, color }: StatCardProps) => {
-    return (
-        <div
-            className={cn(
-                'flex items-center gap-3 rounded-xl p-4',
-                'bg-white dark:bg-neutral-800',
-                'border border-neutral-200 dark:border-neutral-700',
-                'transition-all duration-300',
-                'hover:-translate-y-0.5 hover:shadow-md'
-            )}
-        >
-            <div
-                className={cn(
-                    'flex size-10 items-center justify-center rounded-lg',
-                    colorStyles[color]
-                )}
-            >
-                {icon}
-            </div>
-            <div>
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                    {value}
-                </p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {label}
-                </p>
-            </div>
         </div>
     )
 }
