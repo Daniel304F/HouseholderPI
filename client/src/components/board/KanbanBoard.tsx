@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { cn } from '../../utils/cn'
+import { useViewport } from '../../hooks/useViewport'
 import {
     KanbanColumn,
     type KanbanColumnData,
     type ColumnStatus,
 } from './KanbanColumn'
+import { ColumnSelector } from './ColumnSelector'
 import type { Task } from '../tasks'
 
 interface KanbanBoardProps {
@@ -16,7 +19,6 @@ interface KanbanBoardProps {
 const columns: { id: ColumnStatus; title: string }[] = [
     { id: 'pending', title: 'To Do' },
     { id: 'in-progress', title: 'In Progress' },
-    { id: 'review', title: 'In Review' },
     { id: 'completed', title: 'Completed' },
 ]
 
@@ -26,16 +28,12 @@ export const KanbanBoard = ({
     onAddTask,
     className,
 }: KanbanBoardProps) => {
+    const { isMobile, isTablet } = useViewport()
+    const [activeColumn, setActiveColumn] = useState<ColumnStatus>('pending')
+
     // Group tasks by status
     const getColumnData = (columnId: ColumnStatus): KanbanColumnData => {
-        // Map 'review' to tasks that might have that status, or filter by other logic
-        const columnTasks = tasks.filter((task) => {
-            if (columnId === 'review') {
-                // For now, we don't have 'review' status in Task, so this column will be empty
-                return false
-            }
-            return task.status === columnId
-        })
+        const columnTasks = tasks.filter((task) => task.status === columnId)
 
         return {
             id: columnId,
@@ -45,6 +43,56 @@ export const KanbanBoard = ({
         }
     }
 
+    // Get task counts for column selector
+    const columnsWithCounts = columns.map((col) => ({
+        ...col,
+        taskCount: getColumnData(col.id).tasks.length,
+    }))
+
+    // Mobile View: Single column with selector
+    if (isMobile) {
+        return (
+            <div className={cn('flex flex-col gap-4', className)}>
+                {/* Column Selector */}
+                <ColumnSelector
+                    columns={columnsWithCounts}
+                    activeColumn={activeColumn}
+                    onColumnChange={setActiveColumn}
+                />
+
+                {/* Single Column Display */}
+                <div className="min-h-0 flex-1">
+                    <KanbanColumn
+                        column={getColumnData(activeColumn)}
+                        onTaskClick={onTaskClick}
+                        onAddTask={onAddTask}
+                        isMobile
+                    />
+                </div>
+            </div>
+        )
+    }
+
+    // Tablet View: 2x2 Grid with scroll
+    if (isTablet) {
+        return (
+            <div className={cn('flex flex-col gap-4', className)}>
+                <div className="grid grid-cols-2 gap-3">
+                    {columns.map((column) => (
+                        <KanbanColumn
+                            key={column.id}
+                            column={getColumnData(column.id)}
+                            onTaskClick={onTaskClick}
+                            onAddTask={onAddTask}
+                            isCompact
+                        />
+                    ))}
+                </div>
+            </div>
+        )
+    }
+
+    // Desktop View: All columns horizontal
     return (
         <div
             className={cn(

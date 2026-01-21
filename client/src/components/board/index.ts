@@ -5,3 +5,4 @@ export {
     type ColumnStatus,
 } from './KanbanColumn'
 export { KanbanCard } from './KanbanCard'
+export { ColumnSelector } from './ColumnSelector'

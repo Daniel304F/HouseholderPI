@@ -304,56 +304,63 @@ export const GroupDetail = () => {
                 </div>
 
                 {/* Tabs & Toolbar */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Tab Navigation */}
+                <div className="flex flex-col gap-4">
+                    {/* Top: Tab Navigation */}
                     <ContentTabs
                         tabs={tabs}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                     />
 
-                    {/* Toolbar */}
-                    <div className="flex items-center gap-2">
-                        {/* Search */}
+                    {/* Bottom: Toolbar - stacks on mobile */}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        {/* Search - full width on mobile */}
                         <div
                             className={cn(
-                                'flex items-center gap-2 rounded-lg px-3 py-2',
+                                'flex flex-1 items-center gap-2 rounded-lg px-3 py-2',
                                 'bg-neutral-100 dark:bg-neutral-800',
                                 'border border-transparent',
                                 'focus-within:border-brand-500 focus-within:ring-brand-500/20 focus-within:ring-2'
                             )}
                         >
-                            <Search className="size-4 text-neutral-400" />
+                            <Search className="size-4 flex-shrink-0 text-neutral-400" />
                             <input
                                 type="text"
                                 placeholder="Aufgabe suchen..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={cn(
-                                    'w-40 bg-transparent text-sm outline-none',
+                                    'min-w-0 flex-1 bg-transparent text-sm outline-none',
                                     'text-neutral-900 dark:text-white',
                                     'placeholder:text-neutral-400'
                                 )}
                             />
                         </div>
 
-                        {/* Filter Button */}
-                        <Button
-                            variant="secondary"
-                            icon={<Filter className="size-4" />}
-                        >
-                            <span className="hidden sm:inline">Filter</span>
-                        </Button>
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
+                            {/* Filter Button */}
+                            <Button
+                                variant="secondary"
+                                icon={<Filter className="size-4" />}
+                                className="flex-1 sm:flex-none"
+                            >
+                                <span className="sm:hidden">Filter</span>
+                                <span className="hidden sm:inline">Filter</span>
+                            </Button>
 
-                        {/* Add Task Button */}
-                        <Button
-                            onClick={() => handleAddTask('pending')}
-                            icon={<Plus className="size-4" />}
-                        >
-                            <span className="hidden sm:inline">
-                                Neue Aufgabe
-                            </span>
-                        </Button>
+                            {/* Add Task Button */}
+                            <Button
+                                onClick={() => handleAddTask('pending')}
+                                icon={<Plus className="size-4" />}
+                                className="flex-1 sm:flex-none"
+                            >
+                                <span className="sm:hidden">Aufgabe</span>
+                                <span className="hidden sm:inline">
+                                    Neue Aufgabe
+                                </span>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
