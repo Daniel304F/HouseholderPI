@@ -6,10 +6,6 @@ import { Input } from '../Input'
 import { groupsApi, type Group } from '../../api/groups'
 import { cn } from '../../utils/cn'
 
-// ============================================================================
-// Types
-// ============================================================================
-
 interface CreateGroupData {
     name: string
     description: string
@@ -20,10 +16,6 @@ interface CreateGroupMultiStepProps {
     onComplete: (group: Group) => void
     onCancel: () => void
 }
-
-// ============================================================================
-// Main Component
-// ============================================================================
 
 export const CreateGroupMultiStep = ({
     onComplete,

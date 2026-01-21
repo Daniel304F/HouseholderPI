@@ -1,7 +1,11 @@
-import { useState, type ReactNode, createContext, useContext } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { Button } from '../Button'
+import {
+    MultiStepContext,
+    type MultiStepContextValue,
+} from '../../contexts/MultiStepContext'
 
 // ============================================================================
 // Types
@@ -13,30 +17,6 @@ export interface Step {
     description?: string
     content: ReactNode
     isValid?: boolean
-}
-
-interface MultiStepContextValue {
-    currentStep: number
-    totalSteps: number
-    goToStep: (step: number) => void
-    nextStep: () => void
-    prevStep: () => void
-    isFirstStep: boolean
-    isLastStep: boolean
-}
-
-// ============================================================================
-// Context
-// ============================================================================
-
-const MultiStepContext = createContext<MultiStepContextValue | null>(null)
-
-export const useMultiStep = () => {
-    const context = useContext(MultiStepContext)
-    if (!context) {
-        throw new Error('useMultiStep must be used within MultiStepProvider')
-    }
-    return context
 }
 
 // ============================================================================
@@ -109,12 +89,10 @@ export const MultiStep = ({
     return (
         <MultiStepContext.Provider value={contextValue}>
             <div className={cn('flex flex-col', className)}>
-                {/* Progress Indicator */}
                 <div className="mb-6">
                     <StepIndicator steps={steps} currentStep={currentStep} />
                 </div>
 
-                {/* Step Header */}
                 <div className="mb-6">
                     <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                         {currentStepData?.title}
@@ -126,12 +104,10 @@ export const MultiStep = ({
                     )}
                 </div>
 
-                {/* Step Content */}
                 <div className="min-h-[200px] flex-1">
                     {currentStepData?.content}
                 </div>
 
-                {/* Navigation */}
                 <div className="mt-6 flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-700">
                     <Button
                         type="button"
@@ -177,10 +153,6 @@ export const MultiStep = ({
     )
 }
 
-// ============================================================================
-// Step Indicator
-// ============================================================================
-
 interface StepIndicatorProps {
     steps: Step[]
     currentStep: number
@@ -196,7 +168,6 @@ const StepIndicator = ({ steps, currentStep }: StepIndicatorProps) => {
 
                 return (
                     <div key={step.id} className="flex items-center">
-                        {/* Step Circle */}
                         <div
                             className={cn(
                                 'flex size-8 items-center justify-center rounded-full text-sm font-medium',
@@ -215,7 +186,6 @@ const StepIndicator = ({ steps, currentStep }: StepIndicatorProps) => {
                             )}
                         </div>
 
-                        {/* Connector Line */}
                         {index < steps.length - 1 && (
                             <div
                                 className={cn(
