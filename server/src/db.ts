@@ -2,6 +2,7 @@ import { MongoClient } from "mongodb";
 import { MongoGenericDAO } from "./models/mongodb/mongo.dao.js";
 import { User } from "./models/user.js";
 import { Group } from "./models/group.js";
+import { Friendship } from "./models/friend.js";
 import type { Express } from "express";
 import config from "./config/config.js";
 
@@ -20,6 +21,10 @@ async function startMongoDB(app: Express) {
   const db = (await connectToMongoDB()).db(config.db.connect.database);
   app.locals["userDAO"] = new MongoGenericDAO<User>(db, "users");
   app.locals["groupDAO"] = new MongoGenericDAO<Group>(db, "groups");
+  app.locals["friendshipDAO"] = new MongoGenericDAO<Friendship>(
+    db,
+    "friendships",
+  );
 }
 
 async function startInMemoryDB(_app: Express) {
