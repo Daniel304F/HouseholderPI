@@ -1,5 +1,7 @@
-import { Users, UserPlus, Plus } from 'lucide-react'
+import { UserPlus, Plus } from 'lucide-react'
 import { Button } from '../Button'
+import { useViewport } from '../../hooks/useViewport'
+import { cn } from '../../utils/cn'
 
 interface GroupsEmptyStateProps {
     onCreateClick: () => void
@@ -10,11 +12,18 @@ export const GroupsEmptyState = ({
     onCreateClick,
     onJoinClick,
 }: GroupsEmptyStateProps) => {
+    const { isDesktop } = useViewport()
+
     return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="bg-brand-100 dark:bg-brand-900/30 mb-4 flex h-20 w-20 items-center justify-center rounded-full">
-                <Users className="text-brand-600 dark:text-brand-400 h-10 w-10" />
-            </div>
+            <img
+                src="/fallback-groups.png"
+                alt="Keine Gruppen"
+                className={cn(
+                    'mb-6 w-full object-contain',
+                    isDesktop ? 'max-w-4xl' : 'max-w-xs sm:max-w-sm md:max-w-md'
+                )}
+            />
             <h3 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-white">
                 Noch keine Gruppen
             </h3>
@@ -26,13 +35,13 @@ export const GroupsEmptyState = ({
                 <Button
                     variant="secondary"
                     onClick={onJoinClick}
-                    icon={<UserPlus className="h-5 w-5" />}
+                    icon={<UserPlus className="size-5" />}
                 >
                     Beitreten
                 </Button>
                 <Button
                     onClick={onCreateClick}
-                    icon={<Plus className="h-5 w-5" />}
+                    icon={<Plus className="size-5" />}
                 >
                     Erstellen
                 </Button>

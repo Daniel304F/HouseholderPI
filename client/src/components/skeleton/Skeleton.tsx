@@ -1,9 +1,5 @@
 import { cn } from '../../utils/cn'
 
-// ============================================================================
-// Types & Styles
-// ============================================================================
-
 export type SkeletonVariant = 'text' | 'circular' | 'rectangular' | 'rounded'
 export type SkeletonAnimation = 'pulse' | 'shimmer' | 'none'
 
@@ -37,10 +33,6 @@ export const animationStyles: Record<SkeletonAnimation, string> = {
         'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent',
     none: '',
 }
-
-// ============================================================================
-// Base Skeleton Component
-// ============================================================================
 
 export const Skeleton = ({
     width,
