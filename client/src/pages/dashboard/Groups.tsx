@@ -3,6 +3,7 @@ import { Plus, UserPlus } from 'lucide-react'
 import { Button } from '../../components/Button'
 import {
     GroupCard,
+    GroupCardSkeleton,
     GroupsEmptyState,
     CreateGroupModal,
     JoinGroupModal,
@@ -50,8 +51,19 @@ export const Groups = () => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="border-brand-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+            <div className="space-y-6">
+                {/* Header Skeleton */}
+                <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                        <div className="h-8 w-40 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+                        <div className="h-5 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+                    </div>
+                </div>
+
+                {/* Cards Skeleton */}
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <GroupCardSkeleton count={6} />
+                </div>
             </div>
         )
     }
