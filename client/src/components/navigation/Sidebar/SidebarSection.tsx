@@ -19,7 +19,7 @@ export const SidebarSection = ({
                     {title}
                 </h3>
             )}
-            <div className="space-y-0.5">{children}</div>
+            <div className="space-y-2">{children}</div>
         </div>
     )
 }

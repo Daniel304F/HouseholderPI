@@ -19,49 +19,67 @@ export const SidebarNavItem = ({
     return (
         <button
             onClick={onClick}
+            type="button"
             className={cn(
-                // Base Layout
-                'group relative flex w-full items-center gap-3 px-3 py-2.5',
+                // --- Base Layout ---
+                'group relative flex w-full items-center gap-3 px-3 py-2',
                 'text-left text-sm font-medium',
-                // Rounded & Overflow
-                'overflow-hidden rounded-xl',
-                // Transitions
+
+                // --- Cursor & Shape ---
+                'cursor-pointer rounded-lg outline-none', // <--- WICHTIG: cursor-pointer
+                'focus-visible:ring-brand-500/30 focus-visible:ring-2',
+
+                // --- Transitions ---
+                // Wir nutzen transition-all für weiche Farb- und Transform-Wechsel
                 'transition-all duration-200 ease-out',
-                // States
+
+                // --- States ---
                 isActive
                     ? [
-                          'from-brand-500/15 to-brand-500/5 bg-gradient-to-r',
+                          'bg-brand-50 dark:bg-brand-500/10',
                           'text-brand-700 dark:text-brand-300',
-                          'shadow-sm',
+                          'shadow-sm', // Leichter "Lift" Effekt für aktive Elemente
                       ]
                     : [
                           'text-neutral-600 dark:text-neutral-400',
-                          'hover:bg-neutral-100 dark:hover:bg-neutral-800/50',
+                          // HOVER EFFECTS:
+                          // 1. Hellerer Hintergrund
+                          'hover:bg-neutral-100 dark:hover:bg-neutral-800',
+                          // 2. Text wird dunkler (besserer Kontrast)
                           'hover:text-neutral-900 dark:hover:text-neutral-100',
+                          // 3. Optional: Ganz leichter "Schubser" nach rechts (micro interaction)
+                          // Wenn dir das zu unruhig ist, nimm 'hover:translate-x-0.5' raus
                           'hover:translate-x-1',
                       ]
             )}
         >
-            {/* Active Indicator Bar */}
+            {/* Active Indicator (Pill) */}
             <span
                 className={cn(
-                    'absolute top-1/2 left-0 h-6 w-1 -translate-y-1/2 rounded-r-full',
-                    'transition-all duration-200',
+                    'absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 rounded-r-full',
+                    'transition-all duration-300 ease-out', // Langsamere, edlere Animation
                     isActive
-                        ? 'bg-brand-500 opacity-100'
-                        : 'bg-brand-500 opacity-0 group-hover:opacity-50'
+                        ? 'bg-brand-500 scale-y-100 opacity-100'
+                        : 'bg-brand-400 scale-y-50 opacity-0' // Schrumpft beim Ausblenden
                 )}
             />
 
-            {/* Icon */}
+            {/* Icon Wrapper */}
             {icon && (
                 <span
                     className={cn(
                         'flex size-5 shrink-0 items-center justify-center',
-                        'transition-transform duration-200',
+                        'transition-all duration-200', // Icon animiert separat
                         isActive
-                            ? 'text-brand-600 dark:text-brand-400 scale-110'
-                            : 'text-neutral-500 group-hover:scale-110 dark:text-neutral-500'
+                            ? 'text-brand-600 dark:text-brand-400'
+                            : [
+                                  // Im inaktiven Zustand:
+                                  'text-neutral-400',
+                                  // Beim Hover des Buttons (group-hover):
+                                  // Icon wird grün (Vorschau auf Aktivierung) und wächst minimal
+                                  'group-hover:text-brand-500 group-hover:scale-110',
+                                  'dark:group-hover:text-brand-400 dark:text-neutral-500',
+                              ]
                     )}
                 >
                     {icon}
@@ -69,18 +87,18 @@ export const SidebarNavItem = ({
             )}
 
             {/* Label */}
-            <span className="flex-1 truncate">{label}</span>
+            <span className="flex-1 truncate tracking-tight">{label}</span>
 
             {/* Badge */}
             {badge !== undefined && (
                 <span
                     className={cn(
-                        'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5',
-                        'text-xs font-semibold',
-                        'transition-colors duration-200',
+                        'flex h-5 min-w-5 items-center justify-center rounded-md px-1.5',
+                        'text-[11px] leading-none font-bold',
+                        'transition-transform duration-200', // Badge bewegt sich auch leicht
                         isActive
-                            ? 'bg-brand-500/20 text-brand-700 dark:bg-brand-500/30 dark:text-brand-300'
-                            : 'group-hover:bg-brand-100 group-hover:text-brand-600 dark:group-hover:bg-brand-900/50 dark:group-hover:text-brand-400 bg-neutral-200/80 text-neutral-600 dark:bg-neutral-700/80 dark:text-neutral-400'
+                            ? 'bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300'
+                            : 'bg-neutral-100 text-neutral-600 group-hover:scale-105 group-hover:bg-white group-hover:shadow-sm dark:bg-neutral-800 dark:text-neutral-400'
                     )}
                 >
                     {badge}
