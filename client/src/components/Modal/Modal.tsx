@@ -1,12 +1,12 @@
 import { X } from 'lucide-react'
+import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut'
+import { IconButton } from '../IconButton'
 import {
     ModalHeight,
     ModalPosition,
-    ModalWidth,
     type ModalOptions,
+    ModalWidth,
 } from './types'
-import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut'
-import { IconButton } from '../IconButton'
 
 interface ModalProps {
     isOpen: boolean
