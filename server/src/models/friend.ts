@@ -13,7 +13,7 @@ export interface FriendshipResponse {
   friendId: string;
   friendName: string;
   friendEmail: string;
-  friendAvatar?: string;
+  friendAvatar: string | undefined;
   status: FriendshipStatus;
   isRequester: boolean;
   createdAt: string;
@@ -26,7 +26,7 @@ export interface FriendRequest {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
+    avatar: string | undefined;
   };
   createdAt: string;
 }
