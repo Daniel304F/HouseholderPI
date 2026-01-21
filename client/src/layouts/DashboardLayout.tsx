@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
 import { useSidebar } from '../hooks/useSidebar'
 import { useViewport } from '../hooks/useViewport'
+import { cn } from '../utils/cn'
 import {
     Sidebar,
     SidebarSection,
@@ -82,7 +83,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto">
-                <div className={`h-full ${isMobile ? 'p-4 pb-20' : 'p-6'}`}>
+                <div className={cn('h-full', isMobile ? 'p-4 pb-20' : 'p-6')}>
                     {children ?? <Outlet />}
                 </div>
             </main>

@@ -1,44 +1,57 @@
 import { Crown, Shield, User } from 'lucide-react'
 import type { GroupMember } from '../../api/groups'
+import { cn } from '../../utils/cn'
 
-interface RoleIconProps {
-    role: GroupMember['role']
+type Role = GroupMember['role']
+
+const roleConfig: Record<
+    Role,
+    { icon: typeof Crown; label: string; styles: string }
+> = {
+    owner: {
+        icon: Crown,
+        label: 'Owner',
+        styles: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    },
+    admin: {
+        icon: Shield,
+        label: 'Admin',
+        styles: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    },
+    member: {
+        icon: User,
+        label: 'Mitglied',
+        styles: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300',
+    },
 }
 
-export const RoleIcon = ({ role }: RoleIconProps) => {
-    switch (role) {
-        case 'owner':
-            return <Crown className="h-4 w-4 text-yellow-500" />
-        case 'admin':
-            return <Shield className="h-4 w-4 text-blue-500" />
-        default:
-            return <User className="h-4 w-4 text-neutral-400" />
-    }
+interface RoleIconProps {
+    role: Role
+    className?: string
+}
+
+export const RoleIcon = ({ role, className }: RoleIconProps) => {
+    const Icon = roleConfig[role].icon
+    return <Icon className={cn('size-4', className)} />
 }
 
 interface RoleBadgeProps {
-    role: GroupMember['role']
+    role: Role
 }
 
 export const RoleBadge = ({ role }: RoleBadgeProps) => {
-    const styles = {
-        owner: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-        admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-        member: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300',
-    }
-
-    const labels = {
-        owner: 'Owner',
-        admin: 'Admin',
-        member: 'Mitglied',
-    }
+    const { label, styles } = roleConfig[role]
 
     return (
         <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${styles[role]}`}
+            className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5',
+                'text-xs font-medium',
+                styles
+            )}
         >
             <RoleIcon role={role} />
-            {labels[role]}
+            {label}
         </span>
     )
 }

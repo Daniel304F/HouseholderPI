@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { cn } from '../utils/cn'
 
 type Theme = 'light' | 'dark'
 
@@ -14,22 +15,23 @@ const getInitialTheme = (): Theme => {
         : 'light'
 }
 
+const buttonStyles = cn(
+    'flex size-9 items-center justify-center rounded-lg',
+    'text-neutral-600 dark:text-neutral-400',
+    'hover:bg-neutral-100 dark:hover:bg-neutral-800',
+    'transition-colors duration-200'
+)
+
 export const ThemeToggle = () => {
     const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
     useEffect(() => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-
+        document.documentElement.classList.toggle('dark', theme === 'dark')
         localStorage.setItem('theme', theme)
     }, [theme])
 
     useEffect(() => {
-        const initialTheme = getInitialTheme()
-        if (initialTheme === 'dark') {
+        if (getInitialTheme() === 'dark') {
             document.documentElement.classList.add('dark')
         }
     }, [])
@@ -38,21 +40,19 @@ export const ThemeToggle = () => {
         setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
     }
 
+    const Icon = theme === 'dark' ? Sun : Moon
+
     return (
         <button
             onClick={toggleTheme}
-            className="text-secondary hover:bg-muted flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
+            className={buttonStyles}
             aria-label={
                 theme === 'dark'
                     ? 'Zum Light Mode wechseln'
                     : 'Zum Dark Mode wechseln'
             }
         >
-            {theme === 'dark' ? (
-                <Sun size={20} strokeWidth={2} />
-            ) : (
-                <Moon size={20} strokeWidth={2} />
-            )}
+            <Icon className="size-5" strokeWidth={2} />
         </button>
     )
 }

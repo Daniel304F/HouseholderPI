@@ -42,9 +42,8 @@ export const CreateGroupMultiStep = ({
         []
     )
 
-    // Create group on step 1 completion (so we have invite code for step 2)
     const handleCreateGroup = async () => {
-        if (createdGroup) return // Already created
+        if (createdGroup) return
 
         setIsLoading(true)
         setError('')
@@ -64,7 +63,6 @@ export const CreateGroupMultiStep = ({
     }
 
     const handleComplete = async () => {
-        // If group not yet created, create it now
         if (!createdGroup) {
             await handleCreateGroup()
         }
@@ -73,7 +71,6 @@ export const CreateGroupMultiStep = ({
         }
     }
 
-    // Steps Definition
     const steps: Step[] = [
         {
             id: 'details',
@@ -113,10 +110,6 @@ export const CreateGroupMultiStep = ({
         />
     )
 }
-
-// ============================================================================
-// Step 1: Group Details
-// ============================================================================
 
 interface StepGroupDetailsProps {
     formData: CreateGroupData

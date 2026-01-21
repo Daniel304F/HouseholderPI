@@ -1,12 +1,36 @@
 import type { LucideIcon } from 'lucide-react'
+import { cn } from '../utils/cn'
+
+type IconButtonVariant = 'default' | 'ghost'
 
 interface IconButtonProps {
     icon: LucideIcon
     onClick: () => void
     size?: number
-    variant?: 'default' | 'ghost'
+    variant?: IconButtonVariant
     className?: string
     ariaLabel?: string
+}
+
+const baseStyles = cn(
+    'cursor-pointer rounded-full p-1.5',
+    'transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-brand-500/20'
+)
+
+const variantStyles: Record<IconButtonVariant, string> = {
+    default: cn(
+        'bg-neutral-200 dark:bg-neutral-700',
+        'text-neutral-500 dark:text-neutral-400',
+        'hover:bg-neutral-300 dark:hover:bg-neutral-600',
+        'hover:text-neutral-700 dark:hover:text-neutral-200'
+    ),
+    ghost: cn(
+        'bg-transparent',
+        'text-neutral-400 dark:text-neutral-500',
+        'hover:bg-neutral-100 dark:hover:bg-neutral-800',
+        'hover:text-neutral-600 dark:hover:text-neutral-300'
+    ),
 }
 
 export const IconButton = ({
@@ -14,19 +38,14 @@ export const IconButton = ({
     onClick,
     size = 14,
     variant = 'default',
-    className = '',
+    className,
     ariaLabel,
 }: IconButtonProps) => {
-    const variantClasses =
-        variant === 'ghost'
-            ? 'bg-transparent hover:bg-transparent text-slate-400 hover:text-slate-600'
-            : 'bg-slate-200 hover:bg-slate-300 text-slate-500 hover:text-slate-700'
-
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`cursor-pointer rounded-full p-1.5 transition-all duration-200 focus:outline-none ${variantClasses} ${className} `}
+            className={cn(baseStyles, variantStyles[variant], className)}
             aria-label={ariaLabel}
         >
             <Icon size={size} />
