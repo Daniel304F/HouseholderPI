@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Plus, UserPlus } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Plus, UserPlus, RefreshCw } from 'lucide-react'
 import { Button } from '../../components/Button'
 import {
     GroupCard,
@@ -9,31 +10,35 @@ import {
     JoinGroupModal,
     GroupDetailModal,
 } from '../../components/groups'
-import { groupsApi, type GroupListItem, type Group } from '../../api/groups'
+import { groupsApi, type Group } from '../../api/groups'
 import { useAuth } from '../../contexts/AuthContext'
+
+// ============================================================================
+// Query Keys
+// ============================================================================
+
+const groupsQueryKey = ['groups'] as const
+
+// ============================================================================
+// Component
+// ============================================================================
 
 export const Groups = () => {
     const { user } = useAuth()
-    const [groups, setGroups] = useState<GroupListItem[]>([])
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showJoinModal, setShowJoinModal] = useState(false)
 
-    const fetchGroups = useCallback(async () => {
-        try {
-            const data = await groupsApi.getMyGroups()
-            setGroups(data)
-        } catch {
-            // Error handling
-        } finally {
-            setIsLoading(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchGroups()
-    }, [fetchGroups])
+    // Data fetching with React Query
+    const {
+        data: groups = [],
+        isLoading,
+        isError,
+        refetch,
+    } = useQuery({
+        queryKey: groupsQueryKey,
+        queryFn: groupsApi.getMyGroups,
+    })
 
     const handleGroupClick = async (groupId: string) => {
         try {
@@ -45,25 +50,41 @@ export const Groups = () => {
     }
 
     const handleUpdated = () => {
-        fetchGroups()
+        refetch()
         setSelectedGroup(null)
     }
 
+    // Loading State
     if (isLoading) {
         return (
             <div className="space-y-6">
-                {/* Header Skeleton */}
                 <div className="flex items-center justify-between">
                     <div className="space-y-2">
                         <div className="h-8 w-40 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
                         <div className="h-5 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
                     </div>
                 </div>
-
-                {/* Cards Skeleton */}
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <GroupCardSkeleton count={6} />
                 </div>
+            </div>
+        )
+    }
+
+    // Error State
+    if (isError) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-4 py-12">
+                <p className="text-neutral-500 dark:text-neutral-400">
+                    Gruppen konnten nicht geladen werden.
+                </p>
+                <Button
+                    variant="secondary"
+                    onClick={() => refetch()}
+                    icon={<RefreshCw className="size-5" />}
+                >
+                    Erneut versuchen
+                </Button>
             </div>
         )
     }
@@ -85,13 +106,13 @@ export const Groups = () => {
                         <Button
                             variant="secondary"
                             onClick={() => setShowJoinModal(true)}
-                            icon={<UserPlus className="h-5 w-5" />}
+                            icon={<UserPlus className="size-5" />}
                         >
                             <span className="hidden sm:inline">Beitreten</span>
                         </Button>
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            icon={<Plus className="h-5 w-5" />}
+                            icon={<Plus className="size-5" />}
                         >
                             <span className="hidden sm:inline">Erstellen</span>
                         </Button>
@@ -121,12 +142,12 @@ export const Groups = () => {
             <CreateGroupModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
-                onCreated={fetchGroups}
+                onCreated={() => refetch()}
             />
             <JoinGroupModal
                 isOpen={showJoinModal}
                 onClose={() => setShowJoinModal(false)}
-                onJoined={fetchGroups}
+                onJoined={() => refetch()}
             />
             <GroupDetailModal
                 group={selectedGroup}
