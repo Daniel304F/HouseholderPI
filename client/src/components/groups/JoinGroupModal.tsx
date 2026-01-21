@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '../Button'
 import { Input } from '../Input'
 import { groupsApi } from '../../api/groups'
+import { cn } from '../../utils/cn'
 
 interface JoinGroupModalProps {
     isOpen: boolean
@@ -48,7 +49,12 @@ export const JoinGroupModal = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 dark:bg-neutral-800">
+            <div
+                className={cn(
+                    'w-full max-w-md rounded-2xl p-6',
+                    'bg-white dark:bg-neutral-800'
+                )}
+            >
                 <h2 className="mb-4 text-xl font-bold text-neutral-900 dark:text-white">
                     Gruppe beitreten
                 </h2>

@@ -1,5 +1,6 @@
 import { Circle, CircleDot } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { cn } from '../utils/cn'
 
 export type SliderImage = {
     url: string
@@ -14,7 +15,7 @@ interface ImageSliderProps {
 
 export const ImageSlider = ({
     images,
-    className = '',
+    className,
     autoPlayInterval = 5000,
 }: ImageSliderProps) => {
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -30,11 +31,20 @@ export const ImageSlider = ({
     return (
         <section
             aria-label="Image Slider"
-            className={`relative w-full overflow-hidden rounded-2xl shadow-md ${className}`}
+            className={cn(
+                'relative w-full overflow-hidden rounded-2xl shadow-md',
+                className
+            )}
         >
             <a
                 href="#after-image-slider-controls"
-                className="sr-only fixed top-0 left-0 z-50 border border-neutral-200 bg-white px-4 py-2 text-neutral-900 focus:not-sr-only dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+                className={cn(
+                    'sr-only fixed top-0 left-0 z-50 px-4 py-2',
+                    'border border-neutral-200 dark:border-neutral-700',
+                    'bg-white dark:bg-neutral-800',
+                    'text-neutral-900 dark:text-neutral-100',
+                    'focus:not-sr-only'
+                )}
             >
                 Skip Image Slider Controls
             </a>
@@ -56,13 +66,22 @@ export const ImageSlider = ({
                     ))}
                 </div>
             </div>
-            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-black/20 p-2 backdrop-blur-sm">
+
+            <div
+                className={cn(
+                    'absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2',
+                    'rounded-full bg-black/20 p-2 backdrop-blur-sm'
+                )}
+            >
                 {images.map((_, index) => (
                     <button
                         key={index}
                         aria-label={`View Image ${index + 1}`}
                         onClick={() => setCurrentIndex(index)}
-                        className="group cursor-pointer transition-transform hover:scale-110 focus-visible:scale-110 focus-visible:outline-none"
+                        className={cn(
+                            'group cursor-pointer transition-transform',
+                            'hover:scale-110 focus-visible:scale-110 focus-visible:outline-none'
+                        )}
                     >
                         {index === currentIndex ? (
                             <CircleDot
