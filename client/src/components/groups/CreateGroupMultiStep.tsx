@@ -154,8 +154,10 @@ const StepGroupDetails = ({
                         'rounded-2xl border-2 border-dashed',
                         'border-neutral-300 dark:border-neutral-600',
                         'bg-neutral-50 dark:bg-neutral-800/50',
-                        'transition-all duration-200',
+                        'transition-all duration-300 ease-out',
                         'hover:border-brand-400 hover:bg-brand-50 dark:hover:border-brand-500 dark:hover:bg-brand-900/20',
+                        'hover:shadow-brand-500/10 hover:scale-105 hover:shadow-lg',
+                        'active:scale-100',
                         'overflow-hidden'
                     )}
                 >
@@ -164,14 +166,14 @@ const StepGroupDetails = ({
                             <img
                                 src={formData.picture}
                                 alt="Gruppenbild"
-                                className="size-full object-cover"
+                                className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                                <Camera className="size-6 text-white" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                                <Camera className="size-6 text-white transition-transform duration-300 group-hover:scale-110" />
                             </div>
                         </>
                     ) : (
-                        <div className="group-hover:text-brand-500 flex flex-col items-center gap-1 text-neutral-400">
+                        <div className="group-hover:text-brand-500 flex flex-col items-center gap-1 text-neutral-400 transition-all duration-300 group-hover:scale-110">
                             <Camera className="size-8" />
                             <span className="text-xs font-medium">Bild</span>
                         </div>
@@ -215,18 +217,15 @@ const StepGroupDetails = ({
                         'bg-white dark:bg-neutral-800',
                         'text-neutral-900 dark:text-white',
                         'placeholder:text-neutral-400',
+                        'hover:border-neutral-300 dark:hover:border-neutral-600',
                         'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
-                        'resize-none transition-all'
+                        'resize-none transition-all duration-200'
                     )}
                 />
             </div>
         </div>
     )
 }
-
-// ============================================================================
-// Step 2: Invite Members
-// ============================================================================
 
 interface StepInviteMembersProps {
     inviteCode: string | undefined
@@ -278,14 +277,14 @@ const StepInviteMembers = ({
     return (
         <div className="space-y-6">
             {/* Invite Code Section */}
-            <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-700 dark:bg-neutral-800/50">
+            <div className="hover:border-brand-200 dark:hover:border-brand-800 rounded-xl border border-neutral-200 bg-neutral-50 p-6 transition-all duration-300 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-800/50">
                 {inviteCode ? (
                     <>
                         <p className="mb-3 text-sm text-neutral-600 dark:text-neutral-400">
                             Teile diesen Code mit deinen Freunden:
                         </p>
                         <div className="flex items-center gap-3">
-                            <code className="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-lg font-bold tracking-wider text-neutral-900 dark:bg-neutral-900 dark:text-white">
+                            <code className="hover:bg-brand-50 dark:hover:bg-brand-950 flex-1 rounded-lg bg-white px-4 py-3 font-mono text-lg font-bold tracking-wider text-neutral-900 transition-all duration-200 dark:bg-neutral-900 dark:text-white">
                                 {inviteCode}
                             </code>
                             <Button
@@ -338,11 +337,11 @@ const StepInviteMembers = ({
             )}
 
             {/* Friends List Placeholder */}
-            <div className="rounded-xl border border-dashed border-neutral-300 p-6 dark:border-neutral-600">
-                <div className="text-center text-neutral-500 dark:text-neutral-400">
-                    <UserPlus className="mx-auto mb-2 size-8 opacity-50" />
+            <div className="group hover:border-brand-300 hover:bg-brand-50/50 dark:hover:border-brand-700 dark:hover:bg-brand-950/20 rounded-xl border border-dashed border-neutral-300 p-6 transition-all duration-300 dark:border-neutral-600">
+                <div className="group-hover:text-brand-600 dark:group-hover:text-brand-400 text-center text-neutral-500 transition-colors duration-300 dark:text-neutral-400">
+                    <UserPlus className="mx-auto mb-2 size-8 opacity-50 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100" />
                     <p className="text-sm">Freundesliste kommt bald...</p>
-                    <p className="text-xs text-neutral-400">
+                    <p className="group-hover:text-brand-500/70 text-xs text-neutral-400">
                         Hier kannst du später direkt Freunde einladen
                     </p>
                 </div>
