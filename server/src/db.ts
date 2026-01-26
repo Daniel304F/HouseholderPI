@@ -3,6 +3,7 @@ import { MongoGenericDAO } from "./models/mongodb/mongo.dao.js";
 import { User } from "./models/user.js";
 import { Group } from "./models/group.js";
 import { Friendship } from "./models/friend.js";
+import { Task } from "./models/task.js";
 import type { Express } from "express";
 import config from "./config/config.js";
 
@@ -25,6 +26,7 @@ async function startMongoDB(app: Express) {
     db,
     "friendships",
   );
+  app.locals["taskDAO"] = new MongoGenericDAO<Task>(db, "tasks");
 }
 
 async function startInMemoryDB(_app: Express) {

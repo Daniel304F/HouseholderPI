@@ -14,7 +14,6 @@ export interface Friend {
     createdAt: string
     updatedAt: string
 }
-
 export interface FriendRequest {
     id: string
     from: {

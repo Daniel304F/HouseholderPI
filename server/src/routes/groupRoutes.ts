@@ -10,6 +10,7 @@ import {
   updateMemberSchema,
   removeMemberSchema,
 } from "../schemas/group.schema.js";
+import taskRoutes from "./taskRoutes.js";
 
 const router = Router();
 
@@ -75,5 +76,8 @@ router.delete(
   validateResource(removeMemberSchema),
   groupController.removeMember as RequestHandler,
 );
+
+// Task-Routen (Sub-Router)
+router.use("/:groupId/tasks", taskRoutes);
 
 export default router;
