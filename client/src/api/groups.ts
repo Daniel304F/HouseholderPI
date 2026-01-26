@@ -6,6 +6,8 @@ export interface GroupMember {
     role: 'owner' | 'admin' | 'member'
     isActiveResident: boolean
     joinedAt: string
+    userName?: string
+    userAvatar?: string
 }
 
 export interface Group {

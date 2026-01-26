@@ -1,11 +1,37 @@
 import { Response, NextFunction, Request } from "express";
-import { Group, GroupListItem, GroupMember } from "../models/group.js";
+import {
+  Group,
+  GroupListItem,
+  GroupMember,
+  GroupMemberWithUser,
+} from "../models/group.js";
+import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import crypto from "crypto";
 
 const getGroupDAO = (req: Request) =>
   req.app.locals["groupDAO"] as GenericDAO<Group>;
+
+const getUserDAO = (req: Request) =>
+  req.app.locals["userDAO"] as GenericDAO<User>;
+
+// Hilfsfunktion: Member mit User-Info anreichern
+const enrichMembersWithUserInfo = async (
+  members: GroupMember[],
+  userDAO: GenericDAO<User>
+): Promise<GroupMemberWithUser[]> => {
+  const userIds = members.map((m) => m.userId);
+  const users = await Promise.all(
+    userIds.map((id) => userDAO.findOne({ id } as Partial<User>))
+  );
+
+  return members.map((member, index) => ({
+    ...member,
+    userName: users[index]?.name,
+    userAvatar: users[index]?.avatar,
+  }));
+};
 
 // Hilfsfunktion: Invite-Code generieren
 const generateInviteCode = (): string => {
@@ -114,6 +140,7 @@ export const getGroup = async (
 ): Promise<void> => {
   try {
     const groupDAO = getGroupDAO(req);
+    const userDAO = getUserDAO(req);
     const userId = req.userId;
     const { groupId } = req.params;
 
@@ -130,9 +157,18 @@ export const getGroup = async (
       return;
     }
 
+    // Member mit User-Info anreichern
+    const membersWithUserInfo = await enrichMembersWithUserInfo(
+      group.members,
+      userDAO
+    );
+
     res.status(200).json({
       success: true,
-      data: group,
+      data: {
+        ...group,
+        members: membersWithUserInfo,
+      },
     });
   } catch (error) {
     next(error);

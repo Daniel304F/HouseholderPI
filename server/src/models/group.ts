@@ -7,6 +7,12 @@ export interface GroupMember {
   joinedAt: Date;
 }
 
+// GroupMember with user info for API responses
+export interface GroupMemberWithUser extends GroupMember {
+  userName?: string;
+  userAvatar?: string;
+}
+
 export interface Group extends Entity {
   name: string;
   inviteCode: string;

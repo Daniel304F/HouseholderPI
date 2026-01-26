@@ -3,6 +3,7 @@ import { Task, TaskResponse } from "../models/task.js";
 import { Group } from "../models/group.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
+import { toISOString } from "../helpers/index.js";
 
 const getTaskDAO = (req: Request) =>
   req.app.locals["taskDAO"] as GenericDAO<Task>;
@@ -24,10 +25,10 @@ const toTaskResponse = (task: Task): TaskResponse => ({
   status: task.status,
   priority: task.priority,
   assignedTo: task.assignedTo,
-  dueDate: task.dueDate.toISOString(),
+  dueDate: toISOString(task.dueDate),
   createdBy: task.createdBy,
-  createdAt: task.createdAt.toISOString(),
-  updatedAt: task.updatedAt.toISOString(),
+  createdAt: toISOString(task.createdAt),
+  updatedAt: toISOString(task.updatedAt),
 });
 
 /**
