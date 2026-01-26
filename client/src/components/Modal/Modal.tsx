@@ -83,11 +83,9 @@ export const Modal = ({ isOpen, options, onClose, onConfirm }: ModalProps) => {
                         {options.title}
                     </h2>
                     <IconButton
-                        icon={X}
+                        icon={<X />}
                         onClick={onClose}
-                        size={20}
                         variant="ghost"
-                        ariaLabel="Modal schließen"
                     />
                 </div>
 

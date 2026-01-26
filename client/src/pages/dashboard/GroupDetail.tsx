@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     ArrowLeft,
     Settings,
@@ -17,71 +17,20 @@ import {
 import { Button } from '../../components/Button'
 import { IconButton } from '../../components/IconButton'
 import { groupsApi } from '../../api/groups'
+import { tasksApi } from '../../api/tasks'
 import { cn } from '../../utils/cn'
 import { GroupDetailModal } from '../../components/groups'
 import { ContentTabs, type Tab } from '../../components/ContentTabs'
 import { KanbanBoard, type ColumnStatus } from '../../components/board'
 import { useAuth } from '../../contexts/AuthContext'
 import { useState } from 'react'
-import type { Task } from '../../components/tasks'
-
-// Temporäre Mock-Daten für Aufgaben
-const mockTasks: Task[] = [
-    {
-        id: '1',
-        title: 'Küche putzen',
-        description: 'Arbeitsflächen abwischen, Boden wischen',
-        status: 'pending',
-        priority: 'high',
-        assignedTo: 'Max',
-        dueDate: new Date(Date.now() + 86400000).toISOString(),
-    },
-    {
-        id: '2',
-        title: 'Müll rausbringen',
-        description: 'Gelber Sack und Restmüll',
-        status: 'in-progress',
-        priority: 'medium',
-        assignedTo: 'Anna',
-        dueDate: new Date(Date.now() + 172800000).toISOString(),
-    },
-    {
-        id: '3',
-        title: 'Bad reinigen',
-        description: 'Toilette, Waschbecken, Dusche',
-        status: 'completed',
-        priority: 'low',
-        assignedTo: 'Tom',
-        dueDate: new Date(Date.now() - 86400000).toISOString(),
-    },
-    {
-        id: '4',
-        title: 'Einkaufen gehen',
-        description: 'Milch, Brot, Eier, Käse',
-        status: 'pending',
-        priority: 'medium',
-        assignedTo: null,
-        dueDate: new Date(Date.now() + 259200000).toISOString(),
-    },
-    {
-        id: '5',
-        title: 'Wäsche waschen',
-        description: 'Buntwäsche, 40 Grad',
-        status: 'in-progress',
-        priority: 'low',
-        assignedTo: 'Lisa',
-        dueDate: new Date(Date.now() + 86400000).toISOString(),
-    },
-    {
-        id: '6',
-        title: 'Fenster putzen',
-        description: 'Alle Fenster im Wohnzimmer',
-        status: 'pending',
-        priority: 'low',
-        assignedTo: null,
-        dueDate: new Date(Date.now() + 604800000).toISOString(),
-    },
-]
+import {
+    CreateTaskModal,
+    EditTaskModal,
+    type CreateTaskData,
+    type EditTaskData,
+    type Task,
+} from '../../components/tasks'
 
 // Tabs für die Navigation
 const tabs: Tab[] = [
@@ -103,8 +52,13 @@ const tabs: Tab[] = [
 export const GroupDetail = () => {
     const { groupId } = useParams<{ groupId: string }>()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const { user } = useAuth()
     const [showSettingsModal, setShowSettingsModal] = useState(false)
+    const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+    const [initialTaskStatus, setInitialTaskStatus] =
+        useState<ColumnStatus>('pending')
     const [activeTab, setActiveTab] = useState('board')
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -119,14 +73,61 @@ export const GroupDetail = () => {
         enabled: !!groupId,
     })
 
+    const { data: tasks = [] } = useQuery({
+        queryKey: ['tasks', groupId],
+        queryFn: () => tasksApi.getGroupTasks(groupId!),
+        enabled: !!groupId,
+    })
+
+    const createTaskMutation = useMutation({
+        mutationFn: (data: CreateTaskData) =>
+            tasksApi.createTask(groupId!, {
+                title: data.title,
+                description: data.description,
+                status: data.status,
+                priority: data.priority,
+                assignedTo: data.assignedTo,
+                dueDate: data.dueDate,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+        },
+    })
+
+    const updateTaskMutation = useMutation({
+        mutationFn: ({ taskId, data }: { taskId: string; data: EditTaskData }) =>
+            tasksApi.updateTask(groupId!, taskId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+        },
+    })
+
+    const deleteTaskMutation = useMutation({
+        mutationFn: (taskId: string) => tasksApi.deleteTask(groupId!, taskId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+        },
+    })
+
     const handleTaskClick = (task: Task) => {
-        // TODO: Open task detail modal
-        console.log('Task clicked:', task)
+        setSelectedTask(task)
     }
 
     const handleAddTask = (status: ColumnStatus) => {
-        // TODO: Open add task modal with pre-selected status
-        console.log('Add task to:', status)
+        setInitialTaskStatus(status)
+        setShowCreateTaskModal(true)
+    }
+
+    const handleCreateTask = async (data: CreateTaskData) => {
+        await createTaskMutation.mutateAsync(data)
+    }
+
+    const handleUpdateTask = async (taskId: string, data: EditTaskData) => {
+        await updateTaskMutation.mutateAsync({ taskId, data })
+    }
+
+    const handleDeleteTask = async (taskId: string) => {
+        await deleteTaskMutation.mutateAsync(taskId)
     }
 
     if (isLoading) {
@@ -369,7 +370,7 @@ export const GroupDetail = () => {
             <div className="min-h-0 flex-1">
                 {activeTab === 'board' && (
                     <KanbanBoard
-                        tasks={mockTasks}
+                        tasks={tasks}
                         onTaskClick={handleTaskClick}
                         onAddTask={handleAddTask}
                     />
@@ -395,6 +396,24 @@ export const GroupDetail = () => {
                     setShowSettingsModal(false)
                 }}
                 currentUserId={user?.id || ''}
+            />
+
+            {/* Create Task Modal */}
+            <CreateTaskModal
+                isOpen={showCreateTaskModal}
+                onClose={() => setShowCreateTaskModal(false)}
+                onSubmit={handleCreateTask}
+                initialStatus={initialTaskStatus}
+                members={group?.members || []}
+            />
+
+            {/* Edit Task Modal */}
+            <EditTaskModal
+                task={selectedTask}
+                onClose={() => setSelectedTask(null)}
+                onSubmit={handleUpdateTask}
+                onDelete={handleDeleteTask}
+                members={group?.members || []}
             />
         </div>
     )

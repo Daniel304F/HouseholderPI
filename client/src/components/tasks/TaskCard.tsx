@@ -9,6 +9,11 @@ export interface Task {
     priority: 'low' | 'medium' | 'high'
     assignedTo: string | null
     dueDate: string
+    // Optional API fields
+    groupId?: string
+    createdBy?: string
+    createdAt?: string
+    updatedAt?: string
 }
 
 interface TaskCardProps {
