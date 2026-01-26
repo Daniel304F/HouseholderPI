@@ -44,8 +44,12 @@ export const KanbanColumn = ({
             className={cn(
                 'flex flex-col rounded-xl',
                 columnBgColors[column.id],
-                // Desktop: fixed width, Mobile: full width, Compact: flexible
-                isMobile ? 'h-full w-full' : isCompact ? 'min-h-64' : 'min-w-72'
+                // Desktop: fixed width with full height, Mobile: full width/height, Compact: flexible
+                isMobile
+                    ? 'h-full w-full'
+                    : isCompact
+                      ? 'min-h-64 max-h-[50vh]'
+                      : 'h-full min-w-72 max-w-72'
             )}
         >
             {/* Column Header - Hidden on mobile (selector shows it) */}

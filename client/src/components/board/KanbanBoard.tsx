@@ -92,11 +92,11 @@ export const KanbanBoard = ({
         )
     }
 
-    // Desktop View: All columns horizontal
+    // Desktop View: All columns horizontal with fixed height
     return (
         <div
             className={cn(
-                'flex gap-4 overflow-x-auto pb-4',
+                'flex h-full gap-4 overflow-x-auto',
                 '-mx-4 px-4 sm:-mx-6 sm:px-6',
                 className
             )}
