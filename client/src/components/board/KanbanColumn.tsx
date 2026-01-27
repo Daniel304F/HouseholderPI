@@ -1,7 +1,9 @@
 import { MoreHorizontal, Plus } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { KanbanCard } from './KanbanCard'
+import { PriorityFilterDropdown } from './PriorityFilterDropdown'
 import type { Task } from '../tasks'
+import type { Priority } from '../../hooks/useTaskFilter'
 
 export type ColumnStatus = 'pending' | 'in-progress' | 'completed'
 
@@ -18,6 +20,11 @@ interface KanbanColumnProps {
     onAddTask: (columnId: ColumnStatus) => void
     isMobile?: boolean
     isCompact?: boolean
+    // Filter props
+    activeFilters?: Priority[]
+    onToggleFilter?: (priority: Priority) => void
+    onClearFilters?: () => void
+    hasActiveFilters?: boolean
 }
 
 const columnColors: Record<ColumnStatus, string> = {
@@ -38,6 +45,10 @@ export const KanbanColumn = ({
     onAddTask,
     isMobile = false,
     isCompact = false,
+    activeFilters = [],
+    onToggleFilter,
+    onClearFilters,
+    hasActiveFilters = false,
 }: KanbanColumnProps) => {
     return (
         <div
@@ -48,8 +59,8 @@ export const KanbanColumn = ({
                 isMobile
                     ? 'max-h-[70vh] w-full'
                     : isCompact
-                      ? 'min-h-64 max-h-[50vh]'
-                      : 'max-h-[65vh] min-w-72 max-w-72'
+                      ? 'max-h-[50vh] min-h-64'
+                      : 'max-h-[65vh] max-w-72 min-w-72'
             )}
         >
             {/* Column Header - Hidden on mobile (selector shows it) */}
@@ -87,16 +98,27 @@ export const KanbanColumn = ({
                         </span>
                     </div>
                     {!isCompact && (
-                        <button
-                            className={cn(
-                                'rounded-lg p-1 transition-colors',
-                                'text-neutral-400 hover:text-neutral-600',
-                                'dark:text-neutral-500 dark:hover:text-neutral-300',
-                                'hover:bg-white/50 dark:hover:bg-neutral-800/50'
+                        <div className="flex items-center gap-1">
+                            {/* Priority Filter */}
+                            {onToggleFilter && onClearFilters && (
+                                <PriorityFilterDropdown
+                                    activeFilters={activeFilters}
+                                    onToggleFilter={onToggleFilter}
+                                    onClearFilters={onClearFilters}
+                                    hasActiveFilters={hasActiveFilters}
+                                />
                             )}
-                        >
-                            <MoreHorizontal className="size-4" />
-                        </button>
+                            <button
+                                className={cn(
+                                    'rounded-lg p-1 transition-colors',
+                                    'text-neutral-400 hover:text-neutral-600',
+                                    'dark:text-neutral-500 dark:hover:text-neutral-300',
+                                    'hover:bg-white/50 dark:hover:bg-neutral-800/50'
+                                )}
+                            >
+                                <MoreHorizontal className="size-4" />
+                            </button>
+                        </div>
                     )}
                 </div>
             )}

@@ -95,8 +95,13 @@ export const GroupDetail = () => {
     })
 
     const updateTaskMutation = useMutation({
-        mutationFn: ({ taskId, data }: { taskId: string; data: EditTaskData }) =>
-            tasksApi.updateTask(groupId!, taskId, data),
+        mutationFn: ({
+            taskId,
+            data,
+        }: {
+            taskId: string
+            data: EditTaskData
+        }) => tasksApi.updateTask(groupId!, taskId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
         },
@@ -373,6 +378,7 @@ export const GroupDetail = () => {
                         tasks={tasks}
                         onTaskClick={handleTaskClick}
                         onAddTask={handleAddTask}
+                        searchQuery={searchQuery}
                     />
                 )}
                 {activeTab === 'stats' && (

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useViewport } from '../../hooks/useViewport'
+import { useTaskFilter } from '../../hooks/useTaskFilter'
 import {
     KanbanColumn,
     type KanbanColumnData,
@@ -13,6 +14,7 @@ interface KanbanBoardProps {
     tasks: Task[]
     onTaskClick: (task: Task) => void
     onAddTask: (status: ColumnStatus) => void
+    searchQuery?: string
     className?: string
 }
 
@@ -26,14 +28,25 @@ export const KanbanBoard = ({
     tasks,
     onTaskClick,
     onAddTask,
+    searchQuery = '',
     className,
 }: KanbanBoardProps) => {
     const { isMobile, isTablet } = useViewport()
     const [activeColumn, setActiveColumn] = useState<ColumnStatus>('pending')
 
-    // Group tasks by status
+    // Task Filter Hook für Prioritätsfilter und Suche
+    const {
+        getFilteredTasksForColumn,
+        toggleColumnFilter,
+        clearColumnFilter,
+        isFilterActive,
+        hasActiveFilters,
+        columnFilters,
+    } = useTaskFilter({ tasks, searchQuery })
+
+    // Group tasks by status with filters applied
     const getColumnData = (columnId: ColumnStatus): KanbanColumnData => {
-        const columnTasks = tasks.filter((task) => task.status === columnId)
+        const columnTasks = getFilteredTasksForColumn(columnId)
 
         return {
             id: columnId,
@@ -67,6 +80,12 @@ export const KanbanBoard = ({
                         onTaskClick={onTaskClick}
                         onAddTask={onAddTask}
                         isMobile
+                        activeFilters={columnFilters[activeColumn] || []}
+                        onToggleFilter={(priority) =>
+                            toggleColumnFilter(activeColumn, priority)
+                        }
+                        onClearFilters={() => clearColumnFilter(activeColumn)}
+                        hasActiveFilters={hasActiveFilters(activeColumn)}
                     />
                 </div>
             </div>
@@ -107,6 +126,12 @@ export const KanbanBoard = ({
                     column={getColumnData(column.id)}
                     onTaskClick={onTaskClick}
                     onAddTask={onAddTask}
+                    activeFilters={columnFilters[column.id] || []}
+                    onToggleFilter={(priority) =>
+                        toggleColumnFilter(column.id, priority)
+                    }
+                    onClearFilters={() => clearColumnFilter(column.id)}
+                    hasActiveFilters={hasActiveFilters(column.id)}
                 />
             ))}
         </div>
