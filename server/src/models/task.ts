@@ -101,7 +101,7 @@ export interface TaskWithSubtasks extends TaskResponse {
 
 export interface TaskWithDetails extends TaskResponse {
   subtasks: TaskResponse[];
-  groupName?: string;
-  assignedToName?: string;
-  createdByName?: string;
+  groupName: string;
+  assignedToName: string | undefined;
+  createdByName: string | undefined;
 }

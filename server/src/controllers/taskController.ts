@@ -900,7 +900,7 @@ export const getMyTasks = async (
               id: task.assignedTo,
             } as Partial<User>);
             assignedToName =
-              assignedUser?.displayName || assignedUser?.email || undefined;
+              assignedUser?.name || assignedUser?.email || undefined;
             if (assignedToName) {
               userNameCache.set(task.assignedTo, assignedToName);
             }
@@ -909,14 +909,14 @@ export const getMyTasks = async (
 
         // createdByName ermitteln
         let createdByName: string | undefined;
+        1;
         if (userNameCache.has(task.createdBy)) {
           createdByName = userNameCache.get(task.createdBy);
         } else {
           const createdUser = await userDAO.findOne({
             id: task.createdBy,
           } as Partial<User>);
-          createdByName =
-            createdUser?.displayName || createdUser?.email || undefined;
+          createdByName = createdUser?.name || createdUser?.email || undefined;
           if (createdByName) {
             userNameCache.set(task.createdBy, createdByName);
           }
