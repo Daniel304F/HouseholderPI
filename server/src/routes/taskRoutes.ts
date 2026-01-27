@@ -1,7 +1,13 @@
 import { Router, RequestHandler } from "express";
 import * as taskController from "../controllers/taskController.js";
+import * as uploadController from "../controllers/uploadController.js";
+import * as statisticsController from "../controllers/statisticsController.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
+import {
+  uploadAttachment,
+  uploadCompletionProof,
+} from "../config/upload.config.js";
 import {
   createTaskSchema,
   updateTaskSchema,
@@ -87,6 +93,31 @@ router.delete(
   "/:taskId/links/:linkedTaskId",
   validateResource(unlinkTaskSchema),
   taskController.unlinkTasks as RequestHandler,
+);
+
+// Attachments
+router.get(
+  "/:taskId/attachments",
+  validateResource(taskIdParamSchema),
+  uploadController.getAttachments as RequestHandler,
+);
+
+router.post(
+  "/:taskId/attachments",
+  uploadAttachment.single("file"),
+  uploadController.uploadAttachment as RequestHandler,
+);
+
+router.delete(
+  "/:taskId/attachments/:attachmentId",
+  uploadController.deleteAttachment as RequestHandler,
+);
+
+// Complete task with optional proof photo
+router.post(
+  "/:taskId/complete",
+  uploadCompletionProof.single("proof"),
+  uploadController.completeTaskWithProof as RequestHandler,
 );
 
 export default router;

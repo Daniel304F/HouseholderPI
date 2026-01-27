@@ -11,9 +11,10 @@ import { Groups } from './pages/dashboard/Groups'
 import { GroupDetail } from './pages/dashboard/GroupDetail'
 import { Friends } from './pages/dashboard/Friends'
 import { MyTasks } from './pages/dashboard/MyTasks'
+import { PersonalStats } from './pages/dashboard/PersonalStats'
+import { GroupStats } from './pages/dashboard/GroupStats'
 
 // Placeholder-Komponenten (ersetze diese durch echte Pages)
-const Stats = () => <div className="p-4">Statistiken - Coming Soon</div>
 const Settings = () => <div className="p-4">Einstellungen - Coming Soon</div>
 
 export const routes: RouteObject[] = [
@@ -65,12 +66,16 @@ export const routes: RouteObject[] = [
                         element: <GroupDetail />,
                     },
                     {
+                        path: 'groups/:groupId/stats',
+                        element: <GroupStats />,
+                    },
+                    {
                         path: 'friends',
                         element: <Friends />,
                     },
                     {
                         path: 'stats',
-                        element: <Stats />,
+                        element: <PersonalStats />,
                     },
                     {
                         path: 'settings',

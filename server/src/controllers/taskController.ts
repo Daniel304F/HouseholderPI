@@ -4,6 +4,7 @@ import {
   TaskResponse,
   TaskWithDetails,
   TaskLink,
+  TaskAttachment,
 } from "../models/task.js";
 import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
@@ -40,6 +41,20 @@ const toTaskResponse = (task: Task): TaskResponse => ({
   updatedAt: toISOString(task.updatedAt),
   parentTaskId: task.parentTaskId || null,
   linkedTasks: task.linkedTasks || [],
+  attachments: (task.attachments || []).map((a: TaskAttachment) => ({
+    ...a,
+    uploadedAt: toISOString(a.uploadedAt),
+    url: `/uploads/${a.filename}`,
+  })),
+  completionProof: task.completionProof
+    ? {
+        ...task.completionProof,
+        uploadedAt: toISOString(task.completionProof.uploadedAt),
+        url: `/uploads/${task.completionProof.filename}`,
+      }
+    : null,
+  completedAt: task.completedAt ? toISOString(task.completedAt) : null,
+  completedBy: task.completedBy || null,
 });
 
 /**
@@ -97,6 +112,10 @@ export const createTask = async (
       createdBy: userId,
       parentTaskId: null,
       linkedTasks: [],
+      attachments: [],
+      completionProof: null,
+      completedAt: null,
+      completedBy: null,
     } as Omit<Task, "id" | "createdAt" | "updatedAt">);
 
     res.status(201).json({
@@ -499,6 +518,10 @@ export const createSubtask = async (
       createdBy: userId,
       parentTaskId: taskId,
       linkedTasks: [],
+      attachments: [],
+      completionProof: null,
+      completedAt: null,
+      completedBy: null,
     } as Omit<Task, "id" | "createdAt" | "updatedAt">);
 
     res.status(201).json({
@@ -694,12 +717,10 @@ export const linkTasks = async (
     }
 
     if (taskId === targetTaskId) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Eine Aufgabe kann nicht mit sich selbst verknüpft werden",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Eine Aufgabe kann nicht mit sich selbst verknüpft werden",
+      });
       return;
     }
 
@@ -843,6 +864,7 @@ export const getMyTasks = async (
   try {
     const taskDAO = getTaskDAO(req);
     const groupDAO = getGroupDAO(req);
+    const userDAO = getUserDAO(req);
     const userId = req.userId;
 
     // Alle Gruppen des Users holen
@@ -851,6 +873,9 @@ export const getMyTasks = async (
 
     // Alle Tasks des Users aus allen seinen Gruppen holen
     const allTasks: TaskWithDetails[] = [];
+
+    // Cache für User-Namen
+    const userNameCache = new Map<string, string>();
 
     for (const group of userGroups) {
       const groupTasks = await taskDAO.findAll({
@@ -865,10 +890,44 @@ export const getMyTasks = async (
           groupId: group.id,
         } as Partial<Task>);
 
+        // assignedToName ermitteln
+        let assignedToName: string | undefined;
+        if (task.assignedTo) {
+          if (userNameCache.has(task.assignedTo)) {
+            assignedToName = userNameCache.get(task.assignedTo);
+          } else {
+            const assignedUser = await userDAO.findOne({
+              id: task.assignedTo,
+            } as Partial<User>);
+            assignedToName =
+              assignedUser?.displayName || assignedUser?.email || undefined;
+            if (assignedToName) {
+              userNameCache.set(task.assignedTo, assignedToName);
+            }
+          }
+        }
+
+        // createdByName ermitteln
+        let createdByName: string | undefined;
+        if (userNameCache.has(task.createdBy)) {
+          createdByName = userNameCache.get(task.createdBy);
+        } else {
+          const createdUser = await userDAO.findOne({
+            id: task.createdBy,
+          } as Partial<User>);
+          createdByName =
+            createdUser?.displayName || createdUser?.email || undefined;
+          if (createdByName) {
+            userNameCache.set(task.createdBy, createdByName);
+          }
+        }
+
         allTasks.push({
           ...toTaskResponse(task),
           subtasks: subtasks.map(toTaskResponse),
           groupName: group.name,
+          assignedToName,
+          createdByName,
         });
       }
     }

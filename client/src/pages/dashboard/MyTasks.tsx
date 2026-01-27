@@ -13,7 +13,7 @@ import {
 import { cn } from '../../utils/cn'
 import { Button } from '../../components/Button'
 import {
-    TaskCard,
+    MyTaskCard,
     TaskDetailView,
     EditTaskModal,
     type EditTaskData,
@@ -87,6 +87,19 @@ export const MyTasks = () => {
         },
     })
 
+    const completeTaskMutation = useMutation({
+        mutationFn: ({
+            groupId,
+            taskId,
+        }: {
+            groupId: string
+            taskId: string
+        }) => tasksApi.completeTaskWithProof(groupId, taskId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+        },
+    })
+
     const deleteTaskMutation = useMutation({
         mutationFn: ({
             groupId,
@@ -119,6 +132,13 @@ export const MyTasks = () => {
         await loadGroupMembers(task.groupId)
         setTaskToEdit(task)
         setSelectedTask(null)
+    }
+
+    const handleCompleteTask = async (task: TaskWithDetails) => {
+        await completeTaskMutation.mutateAsync({
+            groupId: task.groupId,
+            taskId: task.id,
+        })
     }
 
     const handleUpdateTask = async (taskId: string, data: EditTaskData) => {
@@ -406,7 +426,7 @@ export const MyTasks = () => {
                                 </h2>
                                 <div className="space-y-3">
                                     {groupTasks.map((task) => (
-                                        <TaskCard
+                                        <MyTaskCard
                                             key={task.id}
                                             task={task as Task}
                                             onClick={() =>
@@ -414,6 +434,9 @@ export const MyTasks = () => {
                                             }
                                             onEditClick={() =>
                                                 handleEditClick(task)
+                                            }
+                                            onComplete={() =>
+                                                handleCompleteTask(task)
                                             }
                                             subtaskCount={
                                                 task.subtasks?.length || 0
@@ -429,11 +452,12 @@ export const MyTasks = () => {
                 // Flat List with Group Badges
                 <div className="space-y-3">
                     {filteredTasks.map((task) => (
-                        <TaskCard
+                        <MyTaskCard
                             key={task.id}
                             task={task as Task}
                             onClick={() => handleTaskClick(task)}
                             onEditClick={() => handleEditClick(task)}
+                            onComplete={() => handleCompleteTask(task)}
                             showGroupBadge
                             groupName={task.groupName}
                             subtaskCount={task.subtasks?.length || 0}

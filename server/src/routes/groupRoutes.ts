@@ -1,5 +1,6 @@
 import { Router, RequestHandler } from "express";
 import * as groupController from "../controllers/groupController.js";
+import * as statisticsController from "../controllers/statisticsController.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
 import {
@@ -75,6 +76,13 @@ router.delete(
   "/:groupId/members/:memberId",
   validateResource(removeMemberSchema),
   groupController.removeMember as RequestHandler,
+);
+
+// Group statistics
+router.get(
+  "/:groupId/statistics",
+  validateResource(groupIdParamSchema),
+  statisticsController.getGroupStatistics as RequestHandler,
 );
 
 // Task-Routen (Sub-Router)

@@ -15,6 +15,27 @@ export interface TaskLink {
     linkType: TaskLinkType
 }
 
+export interface TaskAttachment {
+    id: string
+    filename: string
+    originalName: string
+    mimeType: string
+    size: number
+    uploadedBy: string
+    uploadedAt: string
+    url: string
+}
+
+export interface CompletionProof {
+    filename: string
+    originalName: string
+    mimeType: string
+    uploadedBy: string
+    uploadedAt: string
+    note?: string
+    url: string
+}
+
 export interface Task {
     id: string
     groupId: string
@@ -29,6 +50,10 @@ export interface Task {
     updatedAt: string
     parentTaskId: string | null
     linkedTasks: TaskLink[]
+    attachments: TaskAttachment[]
+    completionProof: CompletionProof | null
+    completedAt: string | null
+    completedBy: string | null
 }
 
 export interface TaskWithDetails extends Task {
@@ -196,6 +221,74 @@ export const tasksApi = {
     getMyTasks: async (): Promise<TaskWithDetails[]> => {
         const response =
             await apiClient.get<ApiResponse<TaskWithDetails[]>>('/tasks/my')
+        return response.data.data
+    },
+
+    // Attachment hochladen
+    uploadAttachment: async (
+        groupId: string,
+        taskId: string,
+        file: File
+    ): Promise<TaskAttachment> => {
+        const formData = new FormData()
+        formData.append('file', file)
+        const response = await apiClient.post<ApiResponse<TaskAttachment>>(
+            `/groups/${groupId}/tasks/${taskId}/attachments`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        )
+        return response.data.data
+    },
+
+    // Attachments abrufen
+    getAttachments: async (
+        groupId: string,
+        taskId: string
+    ): Promise<TaskAttachment[]> => {
+        const response = await apiClient.get<ApiResponse<TaskAttachment[]>>(
+            `/groups/${groupId}/tasks/${taskId}/attachments`
+        )
+        return response.data.data
+    },
+
+    // Attachment löschen
+    deleteAttachment: async (
+        groupId: string,
+        taskId: string,
+        attachmentId: string
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/groups/${groupId}/tasks/${taskId}/attachments/${attachmentId}`
+        )
+    },
+
+    // Aufgabe mit optionalem Beweis-Foto abschließen
+    completeTaskWithProof: async (
+        groupId: string,
+        taskId: string,
+        proofFile?: File,
+        note?: string
+    ): Promise<Task> => {
+        const formData = new FormData()
+        if (proofFile) {
+            formData.append('proof', proofFile)
+        }
+        if (note) {
+            formData.append('note', note)
+        }
+        const response = await apiClient.post<ApiResponse<Task>>(
+            `/groups/${groupId}/tasks/${taskId}/complete`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        )
         return response.data.data
     },
 }

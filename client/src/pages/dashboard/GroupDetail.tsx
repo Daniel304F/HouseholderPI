@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     ArrowLeft,
@@ -36,12 +36,6 @@ import {
 // Tabs für die Navigation
 const tabs: Tab[] = [
     { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
-    {
-        id: 'stats',
-        label: 'Statistiken',
-        icon: <BarChart3 className="size-4" />,
-        disabled: true,
-    },
     {
         id: 'messages',
         label: 'Messages',
@@ -301,6 +295,16 @@ export const GroupDetail = () => {
                             >
                                 Teilen
                             </Button>
+                            <Link to={`/dashboard/groups/${groupId}/stats`}>
+                                <Button
+                                    variant="outline"
+                                    icon={<BarChart3 className="size-4" />}
+                                >
+                                    <span className="hidden sm:inline">
+                                        Statistiken
+                                    </span>
+                                </Button>
+                            </Link>
                             {isAdmin && (
                                 <Button
                                     variant="outline"
