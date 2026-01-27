@@ -1,16 +1,25 @@
-import { MessageSquare, Paperclip, User } from 'lucide-react'
+import {
+    MessageSquare,
+    Paperclip,
+    User,
+    Pencil,
+    ListTree,
+    Link2,
+} from 'lucide-react'
 import { cn } from '../../utils/cn'
 import type { Task } from '../tasks'
 
 interface KanbanCardProps {
     task: Task
     onClick: () => void
+    onEditClick?: () => void
     dragProps?: {
         draggable: boolean
         onDragStart: (e: React.DragEvent) => void
         onDragEnd: (e: React.DragEvent) => void
     }
     isDragging?: boolean
+    subtaskCount?: number
 }
 
 const priorityStyles = {
@@ -28,17 +37,25 @@ const priorityLabels = {
 export const KanbanCard = ({
     task,
     onClick,
+    onEditClick,
     dragProps,
     isDragging = false,
+    subtaskCount = 0,
 }: KanbanCardProps) => {
     const attachments = 0
     const comments = 0
+    const linkedCount = task.linkedTasks?.length || 0
+
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onEditClick?.()
+    }
 
     return (
         <div
             onClick={onClick}
             className={cn(
-                'group w-full cursor-pointer rounded-lg p-3 text-left',
+                'group relative w-full cursor-pointer rounded-lg p-3 text-left',
                 'bg-white dark:bg-neutral-800',
                 'border border-neutral-200 dark:border-neutral-700',
                 'shadow-sm',
@@ -52,8 +69,28 @@ export const KanbanCard = ({
             )}
             {...dragProps}
         >
+            {/* Edit Button - Jira Style */}
+            {onEditClick && (
+                <button
+                    onClick={handleEditClick}
+                    className={cn(
+                        'absolute top-2 right-2 z-10',
+                        'flex h-6 w-6 items-center justify-center rounded-md',
+                        'bg-neutral-100 dark:bg-neutral-700',
+                        'text-neutral-500 dark:text-neutral-400',
+                        'opacity-0 group-hover:opacity-100',
+                        'hover:bg-brand-100 hover:text-brand-600',
+                        'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
+                        'transition-all duration-200'
+                    )}
+                    title="Aufgabe bearbeiten"
+                >
+                    <Pencil className="size-3" />
+                </button>
+            )}
+
             {/* Header: Priority Badge + Title */}
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 pr-6">
                 <span
                     className={cn(
                         'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium',
@@ -110,6 +147,20 @@ export const KanbanCard = ({
 
                 {/* Meta Icons */}
                 <div className="flex items-center gap-2 text-neutral-400 dark:text-neutral-500">
+                    {/* Subtasks */}
+                    {subtaskCount > 0 && (
+                        <div className="text-info-500 dark:text-info-400 flex items-center gap-0.5 text-[10px]">
+                            <ListTree className="size-3" />
+                            <span>{subtaskCount}</span>
+                        </div>
+                    )}
+                    {/* Links */}
+                    {linkedCount > 0 && (
+                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-0.5 text-[10px]">
+                            <Link2 className="size-3" />
+                            <span>{linkedCount}</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-0.5 text-[10px]">
                         <Paperclip className="size-3" />
                         <span>{attachments}</span>
