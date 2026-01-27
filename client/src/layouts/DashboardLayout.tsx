@@ -1,6 +1,5 @@
 import { type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
 import { useSidebar } from '../hooks/useSidebar'
 import { useViewport } from '../hooks/useViewport'
 import { cn } from '../utils/cn'
@@ -9,37 +8,11 @@ import {
     SidebarSection,
     SidebarNavItem,
 } from '../components/navigation/Sidebar'
+import { dashboardNavItems } from '../config/navigation.config'
 
 interface DashboardLayoutProps {
     children?: ReactNode
 }
-
-const mainNavItems = [
-    {
-        id: 'tasks',
-        label: 'Aufgaben',
-        path: '/dashboard/tasks',
-        icon: ClipboardList,
-    },
-    {
-        id: 'groups',
-        label: 'Gruppen',
-        path: '/dashboard/groups',
-        icon: Users,
-    },
-    {
-        id: 'friends',
-        label: 'Freunde',
-        path: '/dashboard/friends',
-        icon: UserCircle,
-    },
-    {
-        id: 'stats',
-        label: 'Statistiken',
-        path: '/dashboard/stats',
-        icon: BarChart3,
-    },
-]
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const navigate = useNavigate()
@@ -68,7 +41,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     onResizeStart={startResizing}
                 >
                     <SidebarSection title="Menü">
-                        {mainNavItems.map((item) => (
+                        {dashboardNavItems.map((item) => (
                             <SidebarNavItem
                                 key={item.id}
                                 icon={<item.icon size={18} />}

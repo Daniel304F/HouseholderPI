@@ -10,12 +10,28 @@ export interface ColumnFilters {
 
 interface UseTaskFilterOptions {
     tasks: Task[]
-    searchQuery?: string
+    initialSearchQuery?: string
 }
 
 interface UseTaskFilterReturn {
+    /** Aktueller Suchbegriff */
+    searchQuery: string
+    /** Suchbegriff setzen */
+    setSearchQuery: (query: string) => void
+    /** Suche zurücksetzen */
+    clearSearch: () => void
+    /** Ob gerade gesucht wird (Query nicht leer) */
+    isSearching: boolean
     /** Gefilterte Tasks basierend auf Suche und Prioritätsfiltern */
     filteredTasks: Task[]
+    /** Anzahl der Suchergebnisse */
+    resultCount: number
+    /** Suchergebnisse nach Status gruppiert */
+    resultsByStatus: {
+        pending: Task[]
+        'in-progress': Task[]
+        completed: Task[]
+    }
     /** Aktive Filter pro Spalte */
     columnFilters: ColumnFilters
     /** Filter für eine Spalte setzen */
@@ -40,8 +56,9 @@ interface UseTaskFilterReturn {
  */
 export const useTaskFilter = ({
     tasks,
-    searchQuery = '',
+    initialSearchQuery = '',
 }: UseTaskFilterOptions): UseTaskFilterReturn => {
+    const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({})
 
     // Globale Suche über alle Tasks
@@ -67,6 +84,22 @@ export const useTaskFilter = ({
             return columnFilter.includes(task.priority)
         })
     }, [searchFilteredTasks, columnFilters])
+
+    // Suchergebnisse nach Status gruppiert
+    const resultsByStatus = useMemo(() => {
+        return {
+            pending: filteredTasks.filter((t) => t.status === 'pending'),
+            'in-progress': filteredTasks.filter(
+                (t) => t.status === 'in-progress'
+            ),
+            completed: filteredTasks.filter((t) => t.status === 'completed'),
+        }
+    }, [filteredTasks])
+
+    // Suche zurücksetzen
+    const clearSearch = useCallback(() => {
+        setSearchQuery('')
+    }, [])
 
     // Filter für eine Spalte setzen
     const setColumnFilter = useCallback(
@@ -108,6 +141,7 @@ export const useTaskFilter = ({
     // Alle Filter zurücksetzen
     const clearAllFilters = useCallback(() => {
         setColumnFilters({})
+        setSearchQuery('')
     }, [])
 
     // Prüfen ob Filter aktiv
@@ -135,7 +169,13 @@ export const useTaskFilter = ({
     )
 
     return {
+        searchQuery,
+        setSearchQuery,
+        clearSearch,
+        isSearching: searchQuery.trim().length > 0,
         filteredTasks,
+        resultCount: filteredTasks.length,
+        resultsByStatus,
         columnFilters,
         setColumnFilter,
         toggleColumnFilter,

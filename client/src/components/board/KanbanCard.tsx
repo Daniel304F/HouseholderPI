@@ -1,12 +1,6 @@
-import {
-    MessageSquare,
-    Paperclip,
-    User,
-    Pencil,
-    ListTree,
-    Link2,
-} from 'lucide-react'
+import { MessageSquare, Paperclip, User, Pencil, ListTree, Link2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { PriorityBadge } from '../ui/PriorityBadge'
 import type { Task } from '../tasks'
 
 interface KanbanCardProps {
@@ -20,18 +14,6 @@ interface KanbanCardProps {
     }
     isDragging?: boolean
     subtaskCount?: number
-}
-
-const priorityStyles = {
-    low: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400',
-    medium: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400',
-    high: 'bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400',
-}
-
-const priorityLabels = {
-    low: 'Niedrig',
-    medium: 'Mittel',
-    high: 'Hoch',
 }
 
 export const KanbanCard = ({
@@ -62,14 +44,13 @@ export const KanbanCard = ({
                 'transition-all duration-200',
                 'hover:-translate-y-0.5 hover:shadow-md',
                 'hover:border-brand-300 dark:hover:border-brand-600',
-                // Dragging styles
                 isDragging &&
                     'ring-brand-500 scale-95 opacity-50 shadow-lg ring-2',
                 dragProps?.draggable && 'cursor-grab active:cursor-grabbing'
             )}
             {...dragProps}
         >
-            {/* Edit Button - Jira Style */}
+            {/* Edit Button */}
             {onEditClick && (
                 <button
                     onClick={handleEditClick}
@@ -91,14 +72,7 @@ export const KanbanCard = ({
 
             {/* Header: Priority Badge + Title */}
             <div className="flex items-start gap-2 pr-6">
-                <span
-                    className={cn(
-                        'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium',
-                        priorityStyles[task.priority]
-                    )}
-                >
-                    {priorityLabels[task.priority]}
-                </span>
+                <PriorityBadge priority={task.priority} size="sm" />
                 <h4
                     className={cn(
                         'flex-1 text-sm font-medium text-neutral-900 dark:text-white',
@@ -110,7 +84,7 @@ export const KanbanCard = ({
                 </h4>
             </div>
 
-            {/* Description - only show first line */}
+            {/* Description */}
             {task.description && (
                 <p className="mt-1.5 line-clamp-1 text-xs text-neutral-500 dark:text-neutral-400">
                     {task.description}

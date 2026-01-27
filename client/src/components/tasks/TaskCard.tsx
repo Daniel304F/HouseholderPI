@@ -1,14 +1,8 @@
-import {
-    Clock,
-    User,
-    AlertCircle,
-    CheckCircle2,
-    Circle,
-    Pencil,
-    Link2,
-    ListTree,
-} from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
+import { PriorityBadge } from '../ui/PriorityBadge'
+import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
 
 export interface Task {
@@ -19,7 +13,6 @@ export interface Task {
     priority: 'low' | 'medium' | 'high'
     assignedTo: string | null
     dueDate: string
-    // Optional API fields
     groupId?: string
     createdBy?: string
     createdAt?: string
@@ -37,30 +30,6 @@ interface TaskCardProps {
     subtaskCount?: number
 }
 
-const priorityStyles = {
-    low: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',
-    medium: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400',
-    high: 'bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400',
-}
-
-const priorityLabels = {
-    low: 'Niedrig',
-    medium: 'Mittel',
-    high: 'Hoch',
-}
-
-const statusIcons = {
-    pending: Circle,
-    'in-progress': Clock,
-    completed: CheckCircle2,
-}
-
-const statusStyles = {
-    pending: 'text-neutral-400 dark:text-neutral-500',
-    'in-progress': 'text-info-500 dark:text-info-400',
-    completed: 'text-success-500 dark:text-success-400',
-}
-
 export const TaskCard = ({
     task,
     onClick,
@@ -69,27 +38,7 @@ export const TaskCard = ({
     groupName,
     subtaskCount = 0,
 }: TaskCardProps) => {
-    const StatusIcon = statusIcons[task.status]
-    const isOverdue =
-        task.status !== 'completed' && new Date(task.dueDate) < new Date()
-    const hasLinks = task.linkedTasks && task.linkedTasks.length > 0
-
-    const formatDueDate = (dateStr: string) => {
-        const date = new Date(dateStr)
-        const now = new Date()
-        const diffDays = Math.ceil(
-            (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        )
-
-        if (diffDays < 0) return `${Math.abs(diffDays)} Tag(e) überfällig`
-        if (diffDays === 0) return 'Heute'
-        if (diffDays === 1) return 'Morgen'
-        if (diffDays < 7) return `In ${diffDays} Tagen`
-        return date.toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-        })
-    }
+    const StatusIcon = STATUS_ICONS[task.status]
 
     const handleEditClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -136,7 +85,7 @@ export const TaskCard = ({
             <div
                 className={cn(
                     'mt-0.5 transition-transform duration-300 group-hover:scale-110',
-                    statusStyles[task.status]
+                    STATUS_STYLES[task.status]
                 )}
             >
                 <StatusIcon className="size-5" />
@@ -165,14 +114,7 @@ export const TaskCard = ({
                     </div>
 
                     {/* Priority Badge */}
-                    <span
-                        className={cn(
-                            'shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
-                            priorityStyles[task.priority]
-                        )}
-                    >
-                        {priorityLabels[task.priority]}
-                    </span>
+                    <PriorityBadge priority={task.priority} />
                 </div>
 
                 {task.description && (
@@ -182,49 +124,14 @@ export const TaskCard = ({
                 )}
 
                 {/* Meta Info */}
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
-                    {/* Assigned To */}
-                    <div className="flex items-center gap-1">
-                        <User className="size-3.5" />
-                        <span>{task.assignedTo || 'Nicht zugewiesen'}</span>
-                    </div>
-
-                    {/* Due Date */}
-                    <div
-                        className={cn(
-                            'flex items-center gap-1',
-                            isOverdue && 'text-error-500 dark:text-error-400'
-                        )}
-                    >
-                        {isOverdue ? (
-                            <AlertCircle className="size-3.5" />
-                        ) : (
-                            <Clock className="size-3.5" />
-                        )}
-                        <span>{formatDueDate(task.dueDate)}</span>
-                    </div>
-
-                    {/* Subtask Counter */}
-                    {subtaskCount > 0 && (
-                        <div className="text-info-500 dark:text-info-400 flex items-center gap-1">
-                            <ListTree className="size-3.5" />
-                            <span>
-                                {subtaskCount} Unteraufgabe
-                                {subtaskCount > 1 ? 'n' : ''}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Links Indicator */}
-                    {hasLinks && (
-                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1">
-                            <Link2 className="size-3.5" />
-                            <span>
-                                {task.linkedTasks?.length} Verknüpfung
-                                {task.linkedTasks!.length > 1 ? 'en' : ''}
-                            </span>
-                        </div>
-                    )}
+                <div className="mt-2">
+                    <TaskMetadata
+                        assignedTo={task.assignedTo}
+                        dueDate={task.dueDate}
+                        status={task.status}
+                        subtaskCount={subtaskCount}
+                        linkedTasks={task.linkedTasks}
+                    />
                 </div>
             </div>
         </div>

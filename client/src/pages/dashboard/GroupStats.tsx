@@ -4,7 +4,6 @@ import {
     TrendingUp,
     CheckCircle2,
     Target,
-    BarChart3,
     Users,
     Trophy,
     ArrowLeft,
@@ -20,32 +19,17 @@ import {
     LineChart,
     ProgressRing,
 } from '../../components/charts'
+import { StatsPageSkeleton, StatsErrorState } from '../../components/ui'
 import { statisticsApi } from '../../api/statistics'
 import { groupsApi } from '../../api/groups'
-
-const COLORS = {
-    completed: '#10B981', // emerald
-    pending: '#F59E0B', // amber
-    inProgress: '#3B82F6', // blue
-    primary: '#6366F1', // indigo
-}
-
-const MEMBER_COLORS = [
-    '#6366F1', // indigo
-    '#10B981', // emerald
-    '#F59E0B', // amber
-    '#EF4444', // red
-    '#8B5CF6', // violet
-    '#EC4899', // pink
-    '#14B8A6', // teal
-    '#F97316', // orange
-]
+import { queryKeys } from '../../lib/queryKeys'
+import { CHART_COLORS, getMemberColor } from '../../constants'
 
 export const GroupStats = () => {
     const { groupId } = useParams<{ groupId: string }>()
 
     const { data: group } = useQuery({
-        queryKey: ['group', groupId],
+        queryKey: queryKeys.groups.detail(groupId!),
         queryFn: () => groupsApi.getGroup(groupId!),
         enabled: !!groupId,
     })
@@ -55,58 +39,32 @@ export const GroupStats = () => {
         isLoading,
         isError,
     } = useQuery({
-        queryKey: ['groupStatistics', groupId],
+        queryKey: queryKeys.statistics.group(groupId!),
         queryFn: () => statisticsApi.getGroupStatistics(groupId!),
         enabled: !!groupId,
     })
 
     if (isLoading) {
-        return (
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="h-8 w-48 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700" />
-                        <div className="mt-2 h-5 w-64 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                    </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {[...Array(4)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="h-32 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700"
-                        />
-                    ))}
-                </div>
-            </div>
-        )
+        return <StatsPageSkeleton showBadge />
     }
 
     if (isError || !stats) {
         return (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-neutral-300 py-12 dark:border-neutral-600">
-                <BarChart3 className="size-12 text-neutral-400" />
-                <div className="text-center">
-                    <p className="font-medium text-neutral-700 dark:text-neutral-300">
-                        Statistiken konnten nicht geladen werden
-                    </p>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Bitte versuche es später erneut
-                    </p>
-                </div>
+            <StatsErrorState>
                 <Link to={`/dashboard/groups/${groupId}`}>
                     <Button variant="secondary">
                         <ArrowLeft className="mr-2 size-4" />
                         Zurück zur Gruppe
                     </Button>
                 </Link>
-            </div>
+            </StatsErrorState>
         )
     }
 
     const monthlyChartData = stats.monthlyStats.map((m) => ({
         label: m.monthName.substring(0, 3),
         value: m.completed,
-        color: COLORS.completed,
+        color: CHART_COLORS.completed,
     }))
 
     const lineChartSeries = [
@@ -116,7 +74,7 @@ export const GroupStats = () => {
                 label: m.monthName.substring(0, 3),
                 value: m.completed,
             })),
-            color: COLORS.completed,
+            color: CHART_COLORS.completed,
         },
         {
             name: 'Erstellt',
@@ -124,7 +82,7 @@ export const GroupStats = () => {
                 label: m.monthName.substring(0, 3),
                 value: m.created,
             })),
-            color: COLORS.primary,
+            color: CHART_COLORS.primary,
         },
     ]
 
@@ -132,20 +90,24 @@ export const GroupStats = () => {
         {
             label: 'Erledigt',
             value: stats.completedTasks,
-            color: COLORS.completed,
+            color: CHART_COLORS.completed,
         },
-        { label: 'Offen', value: stats.pendingTasks, color: COLORS.pending },
+        {
+            label: 'Offen',
+            value: stats.pendingTasks,
+            color: CHART_COLORS.pending,
+        },
         {
             label: 'In Bearbeitung',
             value: stats.inProgressTasks,
-            color: COLORS.inProgress,
+            color: CHART_COLORS.inProgress,
         },
     ]
 
     const memberChartData = stats.memberStats.map((m, i) => ({
         label: m.userName,
         value: m.completedTasks,
-        color: MEMBER_COLORS[i % MEMBER_COLORS.length],
+        color: getMemberColor(i),
     }))
 
     // Find top performer
@@ -285,11 +247,7 @@ export const GroupStats = () => {
                                         size={48}
                                         strokeWidth={6}
                                         showValue={false}
-                                        color={
-                                            MEMBER_COLORS[
-                                                index % MEMBER_COLORS.length
-                                            ]
-                                        }
+                                        color={getMemberColor(index)}
                                     />
                                     <p className="mt-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
                                         {member.completionRate}%

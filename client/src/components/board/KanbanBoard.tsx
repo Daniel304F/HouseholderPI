@@ -43,7 +43,7 @@ export const KanbanBoard = ({
         clearColumnFilter,
         hasActiveFilters,
         columnFilters,
-    } = useTaskFilter({ tasks, searchQuery })
+    } = useTaskFilter({ tasks, initialSearchQuery: searchQuery })
 
     // Drag and Drop Hook
     const {
