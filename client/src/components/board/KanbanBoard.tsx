@@ -39,7 +39,6 @@ export const KanbanBoard = ({
         getFilteredTasksForColumn,
         toggleColumnFilter,
         clearColumnFilter,
-        isFilterActive,
         hasActiveFilters,
         columnFilters,
     } = useTaskFilter({ tasks, searchQuery })
