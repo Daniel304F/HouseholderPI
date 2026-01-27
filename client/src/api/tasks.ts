@@ -1,40 +1,70 @@
 import { apiClient } from '../lib/axios'
 
 // Types
+export type TaskStatus = 'pending' | 'in-progress' | 'completed'
+export type TaskPriority = 'low' | 'medium' | 'high'
+export type TaskLinkType =
+    | 'blocks'
+    | 'blocked-by'
+    | 'relates-to'
+    | 'duplicates'
+    | 'duplicated-by'
+
+export interface TaskLink {
+    taskId: string
+    linkType: TaskLinkType
+}
+
 export interface Task {
     id: string
     groupId: string
     title: string
     description?: string
-    status: 'pending' | 'in-progress' | 'completed'
-    priority: 'low' | 'medium' | 'high'
+    status: TaskStatus
+    priority: TaskPriority
     assignedTo: string | null
     dueDate: string
     createdBy: string
     createdAt: string
     updatedAt: string
+    parentTaskId: string | null
+    linkedTasks: TaskLink[]
+}
+
+export interface TaskWithDetails extends Task {
+    subtasks: Task[]
+    groupName?: string
+    assignedToName?: string
+    createdByName?: string
 }
 
 export interface CreateTaskRequest {
     title: string
     description?: string
-    status?: 'pending' | 'in-progress' | 'completed'
-    priority?: 'low' | 'medium' | 'high'
+    status?: TaskStatus
+    priority?: TaskPriority
     assignedTo?: string | null
     dueDate: string
+    parentTaskId?: string | null
 }
 
 export interface UpdateTaskRequest {
     title?: string
     description?: string
-    status?: 'pending' | 'in-progress' | 'completed'
-    priority?: 'low' | 'medium' | 'high'
+    status?: TaskStatus
+    priority?: TaskPriority
     assignedTo?: string | null
     dueDate?: string
+    parentTaskId?: string | null
 }
 
 export interface AssignTaskRequest {
     assignedTo: string | null
+}
+
+export interface LinkTaskRequest {
+    targetTaskId: string
+    linkType: TaskLinkType
 }
 
 // API Response Types
@@ -58,6 +88,17 @@ export const tasksApi = {
     getTask: async (groupId: string, taskId: string): Promise<Task> => {
         const response = await apiClient.get<ApiResponse<Task>>(
             `/groups/${groupId}/tasks/${taskId}`
+        )
+        return response.data.data
+    },
+
+    // Aufgabe mit Details (inkl. Subtasks) abrufen
+    getTaskWithDetails: async (
+        groupId: string,
+        taskId: string
+    ): Promise<TaskWithDetails> => {
+        const response = await apiClient.get<ApiResponse<TaskWithDetails>>(
+            `/groups/${groupId}/tasks/${taskId}/details`
         )
         return response.data.data
     },
@@ -102,6 +143,59 @@ export const tasksApi = {
             `/groups/${groupId}/tasks/${taskId}/assign`,
             data
         )
+        return response.data.data
+    },
+
+    // Subtask erstellen
+    createSubtask: async (
+        groupId: string,
+        parentTaskId: string,
+        data: CreateTaskRequest
+    ): Promise<Task> => {
+        const response = await apiClient.post<ApiResponse<Task>>(
+            `/groups/${groupId}/tasks/${parentTaskId}/subtasks`,
+            data
+        )
+        return response.data.data
+    },
+
+    // Subtasks einer Aufgabe abrufen
+    getSubtasks: async (groupId: string, taskId: string): Promise<Task[]> => {
+        const response = await apiClient.get<ApiResponse<Task[]>>(
+            `/groups/${groupId}/tasks/${taskId}/subtasks`
+        )
+        return response.data.data
+    },
+
+    // Aufgaben verknüpfen
+    linkTasks: async (
+        groupId: string,
+        taskId: string,
+        data: LinkTaskRequest
+    ): Promise<Task> => {
+        const response = await apiClient.post<ApiResponse<Task>>(
+            `/groups/${groupId}/tasks/${taskId}/links`,
+            data
+        )
+        return response.data.data
+    },
+
+    // Aufgaben-Verknüpfung entfernen
+    unlinkTasks: async (
+        groupId: string,
+        taskId: string,
+        linkedTaskId: string
+    ): Promise<Task> => {
+        const response = await apiClient.delete<ApiResponse<Task>>(
+            `/groups/${groupId}/tasks/${taskId}/links/${linkedTaskId}`
+        )
+        return response.data.data
+    },
+
+    // Meine Aufgaben abrufen (gruppenübergreifend)
+    getMyTasks: async (): Promise<TaskWithDetails[]> => {
+        const response =
+            await apiClient.get<ApiResponse<TaskWithDetails[]>>('/tasks/my')
         return response.data.data
     },
 }
