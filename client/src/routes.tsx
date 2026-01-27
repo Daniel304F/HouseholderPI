@@ -10,9 +10,9 @@ import { GuestRoute } from './pages/GuestRoute'
 import { Groups } from './pages/dashboard/Groups'
 import { GroupDetail } from './pages/dashboard/GroupDetail'
 import { Friends } from './pages/dashboard/Friends'
+import { MyTasks } from './pages/dashboard/MyTasks'
 
 // Placeholder-Komponenten (ersetze diese durch echte Pages)
-const Tasks = () => <div className="p-4">Meine Aufgaben - Coming Soon</div>
 const Stats = () => <div className="p-4">Statistiken - Coming Soon</div>
 const Settings = () => <div className="p-4">Einstellungen - Coming Soon</div>
 
@@ -54,7 +54,7 @@ export const routes: RouteObject[] = [
                     },
                     {
                         path: 'tasks',
-                        element: <Tasks />,
+                        element: <MyTasks />,
                     },
                     {
                         path: 'groups',
