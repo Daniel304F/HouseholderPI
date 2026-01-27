@@ -1,6 +1,12 @@
 import { Response, NextFunction, Request } from "express";
-import { Task, TaskResponse } from "../models/task.js";
+import {
+  Task,
+  TaskResponse,
+  TaskWithDetails,
+  TaskLink,
+} from "../models/task.js";
 import { Group } from "../models/group.js";
+import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { toISOString } from "../helpers/index.js";
@@ -10,6 +16,9 @@ const getTaskDAO = (req: Request) =>
 
 const getGroupDAO = (req: Request) =>
   req.app.locals["groupDAO"] as GenericDAO<Group>;
+
+const getUserDAO = (req: Request) =>
+  req.app.locals["userDAO"] as GenericDAO<User>;
 
 // Hilfsfunktion: Prüfen ob User Mitglied einer Gruppe ist
 const isMemberOfGroup = (group: Group, userId: string): boolean => {
@@ -29,6 +38,8 @@ const toTaskResponse = (task: Task): TaskResponse => ({
   createdBy: task.createdBy,
   createdAt: toISOString(task.createdAt),
   updatedAt: toISOString(task.updatedAt),
+  parentTaskId: task.parentTaskId || null,
+  linkedTasks: task.linkedTasks || [],
 });
 
 /**
@@ -84,6 +95,8 @@ export const createTask = async (
       assignedTo: assignedTo || null,
       dueDate: new Date(dueDate),
       createdBy: userId,
+      parentTaskId: null,
+      linkedTasks: [],
     } as Omit<Task, "id" | "createdAt" | "updatedAt">);
 
     res.status(201).json({
@@ -416,4 +429,472 @@ export const assignTask = async (
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * Erstellt eine Unteraufgabe für eine bestehende Aufgabe
+ * POST /api/groups/:groupId/tasks/:taskId/subtasks
+ */
+export const createSubtask = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userId = req.userId;
+    const { groupId, taskId } = req.params;
+    const { title, description, status, priority, assignedTo, dueDate } =
+      req.body;
+
+    // Gruppe prüfen
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+
+    if (!group) {
+      res
+        .status(404)
+        .json({ success: false, message: "Gruppe nicht gefunden" });
+      return;
+    }
+
+    // Prüfen ob User Mitglied ist
+    if (!isMemberOfGroup(group, userId)) {
+      res
+        .status(403)
+        .json({ success: false, message: "Kein Zugriff auf diese Gruppe" });
+      return;
+    }
+
+    // Parent Task prüfen
+    const parentTask = await taskDAO.findOne({
+      id: taskId,
+      groupId,
+    } as Partial<Task>);
+
+    if (!parentTask) {
+      res
+        .status(404)
+        .json({ success: false, message: "Parent-Aufgabe nicht gefunden" });
+      return;
+    }
+
+    // Falls assignedTo gesetzt ist, prüfen ob die Person Mitglied der Gruppe ist
+    if (assignedTo && !isMemberOfGroup(group, assignedTo)) {
+      res.status(400).json({
+        success: false,
+        message: "Die zugewiesene Person ist kein Mitglied der Gruppe",
+      });
+      return;
+    }
+
+    const newSubtask = await taskDAO.create({
+      groupId,
+      title,
+      description,
+      status: status || "pending",
+      priority: priority || "medium",
+      assignedTo: assignedTo || null,
+      dueDate: new Date(dueDate),
+      createdBy: userId,
+      parentTaskId: taskId,
+      linkedTasks: [],
+    } as Omit<Task, "id" | "createdAt" | "updatedAt">);
+
+    res.status(201).json({
+      success: true,
+      data: toTaskResponse(newSubtask),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Holt alle Unteraufgaben einer Aufgabe
+ * GET /api/groups/:groupId/tasks/:taskId/subtasks
+ */
+export const getSubtasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userId = req.userId;
+    const { groupId, taskId } = req.params;
+
+    // Gruppe prüfen
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+
+    if (!group) {
+      res
+        .status(404)
+        .json({ success: false, message: "Gruppe nicht gefunden" });
+      return;
+    }
+
+    // Prüfen ob User Mitglied ist
+    if (!isMemberOfGroup(group, userId)) {
+      res
+        .status(403)
+        .json({ success: false, message: "Kein Zugriff auf diese Gruppe" });
+      return;
+    }
+
+    const subtasks = await taskDAO.findAll({
+      parentTaskId: taskId,
+      groupId,
+    } as Partial<Task>);
+
+    res.status(200).json({
+      success: true,
+      data: subtasks.map(toTaskResponse),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Holt eine Aufgabe mit allen Details (inkl. Subtasks und Gruppenname)
+ * GET /api/groups/:groupId/tasks/:taskId/details
+ */
+export const getTaskWithDetails = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userDAO = getUserDAO(req);
+    const userId = req.userId;
+    const { groupId, taskId } = req.params;
+
+    // Gruppe prüfen
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+
+    if (!group) {
+      res
+        .status(404)
+        .json({ success: false, message: "Gruppe nicht gefunden" });
+      return;
+    }
+
+    // Prüfen ob User Mitglied ist
+    if (!isMemberOfGroup(group, userId)) {
+      res
+        .status(403)
+        .json({ success: false, message: "Kein Zugriff auf diese Gruppe" });
+      return;
+    }
+
+    const task = await taskDAO.findOne({
+      id: taskId,
+      groupId,
+    } as Partial<Task>);
+
+    if (!task) {
+      res
+        .status(404)
+        .json({ success: false, message: "Aufgabe nicht gefunden" });
+      return;
+    }
+
+    // Subtasks holen
+    const subtasks = await taskDAO.findAll({
+      parentTaskId: taskId,
+      groupId,
+    } as Partial<Task>);
+
+    // User-Namen holen
+    let assignedToName: string | undefined;
+    let createdByName: string | undefined;
+
+    if (task.assignedTo) {
+      const assignedUser = await userDAO.findOne({
+        id: task.assignedTo,
+      } as Partial<User>);
+      assignedToName = assignedUser?.name;
+    }
+
+    const createdByUser = await userDAO.findOne({
+      id: task.createdBy,
+    } as Partial<User>);
+    createdByName = createdByUser?.name;
+
+    const taskWithDetails: TaskWithDetails = {
+      ...toTaskResponse(task),
+      subtasks: subtasks.map(toTaskResponse),
+      groupName: group.name,
+      assignedToName,
+      createdByName,
+    };
+
+    res.status(200).json({
+      success: true,
+      data: taskWithDetails,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Verknüpft zwei Aufgaben miteinander
+ * POST /api/groups/:groupId/tasks/:taskId/links
+ */
+export const linkTasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userId = req.userId;
+    const { groupId, taskId } = req.params;
+    const { targetTaskId, linkType } = req.body;
+
+    // Gruppe prüfen
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+
+    if (!group) {
+      res
+        .status(404)
+        .json({ success: false, message: "Gruppe nicht gefunden" });
+      return;
+    }
+
+    // Prüfen ob User Mitglied ist
+    if (!isMemberOfGroup(group, userId)) {
+      res
+        .status(403)
+        .json({ success: false, message: "Kein Zugriff auf diese Gruppe" });
+      return;
+    }
+
+    // Beide Tasks prüfen
+    const task = await taskDAO.findOne({
+      id: taskId,
+      groupId,
+    } as Partial<Task>);
+    const targetTask = await taskDAO.findOne({
+      id: targetTaskId,
+      groupId,
+    } as Partial<Task>);
+
+    if (!task || !targetTask) {
+      res
+        .status(404)
+        .json({ success: false, message: "Aufgabe nicht gefunden" });
+      return;
+    }
+
+    if (taskId === targetTaskId) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Eine Aufgabe kann nicht mit sich selbst verknüpft werden",
+        });
+      return;
+    }
+
+    // Prüfen ob Verknüpfung bereits existiert
+    const existingLink = (task.linkedTasks || []).find(
+      (link: TaskLink) => link.taskId === targetTaskId,
+    );
+    if (existingLink) {
+      res
+        .status(400)
+        .json({ success: false, message: "Verknüpfung existiert bereits" });
+      return;
+    }
+
+    // Verknüpfung hinzufügen
+    const newLinkedTasks = [
+      ...(task.linkedTasks || []),
+      { taskId: targetTaskId, linkType },
+    ];
+
+    await taskDAO.update({
+      id: taskId,
+      linkedTasks: newLinkedTasks,
+    } as Partial<Task>);
+
+    // Inverse Verknüpfung beim Ziel-Task hinzufügen
+    const inverseLinkType = getInverseLinkType(linkType);
+    const targetLinkedTasks = [
+      ...(targetTask.linkedTasks || []),
+      { taskId, linkType: inverseLinkType },
+    ];
+
+    await taskDAO.update({
+      id: targetTaskId,
+      linkedTasks: targetLinkedTasks,
+    } as Partial<Task>);
+
+    const updatedTask = await taskDAO.findOne({ id: taskId } as Partial<Task>);
+
+    res.status(201).json({
+      success: true,
+      data: updatedTask ? toTaskResponse(updatedTask) : null,
+      message: "Aufgaben verknüpft",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Entfernt eine Verknüpfung zwischen zwei Aufgaben
+ * DELETE /api/groups/:groupId/tasks/:taskId/links/:linkedTaskId
+ */
+export const unlinkTasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userId = req.userId;
+    const { groupId, taskId, linkedTaskId } = req.params;
+
+    // Gruppe prüfen
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+
+    if (!group) {
+      res
+        .status(404)
+        .json({ success: false, message: "Gruppe nicht gefunden" });
+      return;
+    }
+
+    // Prüfen ob User Mitglied ist
+    if (!isMemberOfGroup(group, userId)) {
+      res
+        .status(403)
+        .json({ success: false, message: "Kein Zugriff auf diese Gruppe" });
+      return;
+    }
+
+    // Beide Tasks prüfen
+    const task = await taskDAO.findOne({
+      id: taskId,
+      groupId,
+    } as Partial<Task>);
+    const linkedTask = await taskDAO.findOne({
+      id: linkedTaskId,
+      groupId,
+    } as Partial<Task>);
+
+    if (!task || !linkedTask) {
+      res
+        .status(404)
+        .json({ success: false, message: "Aufgabe nicht gefunden" });
+      return;
+    }
+
+    // Verknüpfung entfernen
+    const newLinkedTasks = (task.linkedTasks || []).filter(
+      (link: TaskLink) => link.taskId !== linkedTaskId,
+    );
+
+    await taskDAO.update({
+      id: taskId,
+      linkedTasks: newLinkedTasks,
+    } as Partial<Task>);
+
+    // Inverse Verknüpfung beim Ziel-Task entfernen
+    const targetLinkedTasks = (linkedTask.linkedTasks || []).filter(
+      (link: TaskLink) => link.taskId !== taskId,
+    );
+
+    await taskDAO.update({
+      id: linkedTaskId,
+      linkedTasks: targetLinkedTasks,
+    } as Partial<Task>);
+
+    const updatedTask = await taskDAO.findOne({ id: taskId } as Partial<Task>);
+
+    res.status(200).json({
+      success: true,
+      data: updatedTask ? toTaskResponse(updatedTask) : null,
+      message: "Verknüpfung entfernt",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Holt alle Aufgaben die dem aktuellen User zugewiesen sind
+ * GET /api/tasks/my
+ */
+export const getMyTasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskDAO = getTaskDAO(req);
+    const groupDAO = getGroupDAO(req);
+    const userId = req.userId;
+
+    // Alle Gruppen des Users holen
+    const allGroups = await groupDAO.findAll({} as Partial<Group>);
+    const userGroups = allGroups.filter((g) => isMemberOfGroup(g, userId));
+
+    // Alle Tasks des Users aus allen seinen Gruppen holen
+    const allTasks: TaskWithDetails[] = [];
+
+    for (const group of userGroups) {
+      const groupTasks = await taskDAO.findAll({
+        groupId: group.id,
+        assignedTo: userId,
+      } as Partial<Task>);
+
+      for (const task of groupTasks) {
+        // Subtasks holen
+        const subtasks = await taskDAO.findAll({
+          parentTaskId: task.id,
+          groupId: group.id,
+        } as Partial<Task>);
+
+        allTasks.push({
+          ...toTaskResponse(task),
+          subtasks: subtasks.map(toTaskResponse),
+          groupName: group.name,
+        });
+      }
+    }
+
+    // Nach Fälligkeitsdatum sortieren
+    allTasks.sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+    );
+
+    res.status(200).json({
+      success: true,
+      data: allTasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Hilfsfunktion: Inverse Link-Typen ermitteln
+const getInverseLinkType = (linkType: string): string => {
+  const inverseTypes: Record<string, string> = {
+    blocks: "blocked-by",
+    "blocked-by": "blocks",
+    "relates-to": "relates-to",
+    duplicates: "duplicated-by",
+    "duplicated-by": "duplicates",
+  };
+  return inverseTypes[linkType] || "relates-to";
 };
