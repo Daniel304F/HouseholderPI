@@ -5,6 +5,12 @@ import type { Task } from '../tasks'
 interface KanbanCardProps {
     task: Task
     onClick: () => void
+    dragProps?: {
+        draggable: boolean
+        onDragStart: (e: React.DragEvent) => void
+        onDragEnd: (e: React.DragEvent) => void
+    }
+    isDragging?: boolean
 }
 
 const priorityStyles = {
@@ -19,22 +25,32 @@ const priorityLabels = {
     high: 'Hoch',
 }
 
-export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
+export const KanbanCard = ({
+    task,
+    onClick,
+    dragProps,
+    isDragging = false,
+}: KanbanCardProps) => {
     const attachments = 0
     const comments = 0
 
     return (
-        <button
+        <div
             onClick={onClick}
             className={cn(
-                'group w-full rounded-lg p-3 text-left',
+                'group w-full cursor-pointer rounded-lg p-3 text-left',
                 'bg-white dark:bg-neutral-800',
                 'border border-neutral-200 dark:border-neutral-700',
                 'shadow-sm',
                 'transition-all duration-200',
                 'hover:-translate-y-0.5 hover:shadow-md',
-                'hover:border-brand-300 dark:hover:border-brand-600'
+                'hover:border-brand-300 dark:hover:border-brand-600',
+                // Dragging styles
+                isDragging &&
+                    'ring-brand-500 scale-95 opacity-50 shadow-lg ring-2',
+                dragProps?.draggable && 'cursor-grab active:cursor-grabbing'
             )}
+            {...dragProps}
         >
             {/* Header: Priority Badge + Title */}
             <div className="flex items-start gap-2">
@@ -104,6 +120,6 @@ export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
                     </div>
                 </div>
             </div>
-        </button>
+        </div>
     )
 }

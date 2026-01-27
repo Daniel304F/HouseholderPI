@@ -3,10 +3,10 @@ import { cn } from '../../utils/cn'
 import { useViewport } from '../../hooks/useViewport'
 import { useTaskFilter } from '../../hooks/useTaskFilter'
 import {
-    KanbanColumn,
-    type KanbanColumnData,
+    useKanbanDragDrop,
     type ColumnStatus,
-} from './KanbanColumn'
+} from '../../hooks/useKanbanDragDrop'
+import { KanbanColumn, type KanbanColumnData } from './KanbanColumn'
 import { ColumnSelector } from './ColumnSelector'
 import type { Task } from '../tasks'
 
@@ -14,6 +14,7 @@ interface KanbanBoardProps {
     tasks: Task[]
     onTaskClick: (task: Task) => void
     onAddTask: (status: ColumnStatus) => void
+    onTaskMove?: (taskId: string, newStatus: ColumnStatus) => Promise<void>
     searchQuery?: string
     className?: string
 }
@@ -28,6 +29,7 @@ export const KanbanBoard = ({
     tasks,
     onTaskClick,
     onAddTask,
+    onTaskMove,
     searchQuery = '',
     className,
 }: KanbanBoardProps) => {
@@ -42,6 +44,17 @@ export const KanbanBoard = ({
         hasActiveFilters,
         columnFilters,
     } = useTaskFilter({ tasks, searchQuery })
+
+    // Drag and Drop Hook
+    const {
+        dragState,
+        getDragProps,
+        getDropZoneProps,
+        isDropTarget,
+        isUpdating,
+    } = useKanbanDragDrop({
+        onTaskMove: onTaskMove || (async () => {}),
+    })
 
     // Group tasks by status with filters applied
     const getColumnData = (columnId: ColumnStatus): KanbanColumnData => {
@@ -85,6 +98,10 @@ export const KanbanBoard = ({
                         }
                         onClearFilters={() => clearColumnFilter(activeColumn)}
                         hasActiveFilters={hasActiveFilters(activeColumn)}
+                        getDragProps={getDragProps}
+                        getDropZoneProps={getDropZoneProps}
+                        isDropTarget={isDropTarget(activeColumn)}
+                        draggedTaskId={dragState.draggedTask?.id}
                     />
                 </div>
             </div>
@@ -103,6 +120,10 @@ export const KanbanBoard = ({
                             onTaskClick={onTaskClick}
                             onAddTask={onAddTask}
                             isCompact
+                            getDragProps={getDragProps}
+                            getDropZoneProps={getDropZoneProps}
+                            isDropTarget={isDropTarget(column.id)}
+                            draggedTaskId={dragState.draggedTask?.id}
                         />
                     ))}
                 </div>
@@ -116,7 +137,8 @@ export const KanbanBoard = ({
             className={cn(
                 'flex h-full gap-4 overflow-x-auto',
                 '-mx-4 px-4 sm:-mx-6 sm:px-6',
-                className
+                className,
+                isUpdating && 'pointer-events-none opacity-70'
             )}
         >
             {columns.map((column) => (
@@ -131,6 +153,10 @@ export const KanbanBoard = ({
                     }
                     onClearFilters={() => clearColumnFilter(column.id)}
                     hasActiveFilters={hasActiveFilters(column.id)}
+                    getDragProps={getDragProps}
+                    getDropZoneProps={getDropZoneProps}
+                    isDropTarget={isDropTarget(column.id)}
+                    draggedTaskId={dragState.draggedTask?.id}
                 />
             ))}
         </div>

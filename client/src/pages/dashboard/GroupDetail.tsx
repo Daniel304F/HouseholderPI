@@ -135,6 +135,14 @@ export const GroupDetail = () => {
         await deleteTaskMutation.mutateAsync(taskId)
     }
 
+    // Drag and Drop: Task in neue Spalte verschieben
+    const handleTaskMove = async (taskId: string, newStatus: ColumnStatus) => {
+        await updateTaskMutation.mutateAsync({
+            taskId,
+            data: { status: newStatus },
+        })
+    }
+
     if (isLoading) {
         return (
             <div className="space-y-6">
@@ -378,6 +386,7 @@ export const GroupDetail = () => {
                         tasks={tasks}
                         onTaskClick={handleTaskClick}
                         onAddTask={handleAddTask}
+                        onTaskMove={handleTaskMove}
                         searchQuery={searchQuery}
                     />
                 )}

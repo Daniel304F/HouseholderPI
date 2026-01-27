@@ -25,6 +25,19 @@ interface KanbanColumnProps {
     onToggleFilter?: (priority: Priority) => void
     onClearFilters?: () => void
     hasActiveFilters?: boolean
+    // Drag and Drop props
+    getDragProps?: (task: Task) => {
+        draggable: boolean
+        onDragStart: (e: React.DragEvent) => void
+        onDragEnd: (e: React.DragEvent) => void
+    }
+    getDropZoneProps?: (columnId: ColumnStatus) => {
+        onDragOver: (e: React.DragEvent) => void
+        onDragLeave: (e: React.DragEvent) => void
+        onDrop: (e: React.DragEvent) => void
+    }
+    isDropTarget?: boolean
+    draggedTaskId?: string
 }
 
 const columnColors: Record<ColumnStatus, string> = {
@@ -49,19 +62,29 @@ export const KanbanColumn = ({
     onToggleFilter,
     onClearFilters,
     hasActiveFilters = false,
+    getDragProps,
+    getDropZoneProps,
+    isDropTarget = false,
+    draggedTaskId,
 }: KanbanColumnProps) => {
+    const dropZoneProps = getDropZoneProps?.(column.id)
+
     return (
         <div
             className={cn(
-                'flex flex-col rounded-xl',
+                'flex flex-col rounded-xl transition-all duration-200',
                 columnBgColors[column.id],
                 // Desktop: fixed width with max height, Mobile: full width, Compact: flexible
                 isMobile
                     ? 'max-h-[70vh] w-full'
                     : isCompact
                       ? 'max-h-[50vh] min-h-64'
-                      : 'max-h-[65vh] max-w-72 min-w-72'
+                      : 'max-h-[65vh] max-w-72 min-w-72',
+                // Drop target styling
+                isDropTarget &&
+                    'ring-brand-500 bg-brand-50 dark:bg-brand-950/30 ring-2 ring-inset'
             )}
+            {...dropZoneProps}
         >
             {/* Column Header - Hidden on mobile (selector shows it) */}
             {!isMobile && (
@@ -134,10 +157,14 @@ export const KanbanColumn = ({
                     <div
                         className={cn(
                             'flex flex-col items-center justify-center py-8',
-                            'text-sm text-neutral-400 dark:text-neutral-500'
+                            'text-sm text-neutral-400 dark:text-neutral-500',
+                            isDropTarget &&
+                                'border-brand-400 rounded-lg border-2 border-dashed'
                         )}
                     >
-                        <p>Keine Aufgaben</p>
+                        <p>
+                            {isDropTarget ? 'Hier ablegen' : 'Keine Aufgaben'}
+                        </p>
                     </div>
                 ) : (
                     column.tasks.map((task) => (
@@ -145,6 +172,8 @@ export const KanbanColumn = ({
                             key={task.id}
                             task={task}
                             onClick={() => onTaskClick(task)}
+                            dragProps={getDragProps?.(task)}
+                            isDragging={draggedTaskId === task.id}
                         />
                     ))
                 )}
