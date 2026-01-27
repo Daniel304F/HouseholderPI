@@ -27,6 +27,7 @@ import { useState } from 'react'
 import {
     CreateTaskModal,
     EditTaskModal,
+    TaskDetailView,
     type CreateTaskData,
     type EditTaskData,
     type Task,
@@ -57,6 +58,8 @@ export const GroupDetail = () => {
     const [showSettingsModal, setShowSettingsModal] = useState(false)
     const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
     const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+    const [taskToEdit, setTaskToEdit] = useState<Task | null>(null)
+    const [showTaskDetail, setShowTaskDetail] = useState(false)
     const [initialTaskStatus, setInitialTaskStatus] =
         useState<ColumnStatus>('pending')
     const [activeTab, setActiveTab] = useState('board')
@@ -116,6 +119,12 @@ export const GroupDetail = () => {
 
     const handleTaskClick = (task: Task) => {
         setSelectedTask(task)
+        setShowTaskDetail(true)
+    }
+
+    const handleEditFromDetail = () => {
+        setShowTaskDetail(false)
+        setTaskToEdit(selectedTask)
     }
 
     const handleAddTask = (status: ColumnStatus) => {
@@ -422,10 +431,23 @@ export const GroupDetail = () => {
                 members={group?.members || []}
             />
 
+            {/* Task Detail View */}
+            {showTaskDetail && selectedTask && groupId && (
+                <TaskDetailView
+                    groupId={groupId}
+                    taskId={selectedTask.id}
+                    onClose={() => {
+                        setShowTaskDetail(false)
+                        setSelectedTask(null)
+                    }}
+                    onEditClick={handleEditFromDetail}
+                />
+            )}
+
             {/* Edit Task Modal */}
             <EditTaskModal
-                task={selectedTask}
-                onClose={() => setSelectedTask(null)}
+                task={taskToEdit}
+                onClose={() => setTaskToEdit(null)}
                 onSubmit={handleUpdateTask}
                 onDelete={handleDeleteTask}
                 members={group?.members || []}
