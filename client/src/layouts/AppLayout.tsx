@@ -52,8 +52,8 @@ export const AppLayout = () => {
 
                 <main
                     className={cn(
-                        'hide-scrollbar flex flex-1 flex-col',
-                        isDashboard ? 'overflow-hidden' : 'overflow-y-auto'
+                        'hide-scrollbar flex flex-1 flex-col overflow-y-auto',
+                        isDashboard ? 'min-h-0' : ''
                     )}
                 >
                     <div

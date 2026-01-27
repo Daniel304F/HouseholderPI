@@ -57,7 +57,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const isActive = (path: string) => location.pathname === path
 
     return (
-        <div className="flex h-full flex-1 overflow-hidden">
+        <div className="flex h-full flex-1">
             {/* Sidebar - Desktop only */}
             {!isMobile && (
                 <Sidebar

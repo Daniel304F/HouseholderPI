@@ -160,3 +160,38 @@ a:hover {
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
+
+/* Thin scrollbar for Kanban columns */
+.kanban-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neutral-300) transparent;
+}
+
+.dark .kanban-scrollbar {
+    scrollbar-color: var(--color-neutral-600) transparent;
+}
+
+.kanban-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-300);
+    border-radius: 3px;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-400);
+}
+
+.dark .kanban-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-600);
+}
+
+.dark .kanban-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-500);
+}

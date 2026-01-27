@@ -20,13 +20,6 @@ const priorityLabels = {
 }
 
 export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
-    // Mock data for demo - later these would come from the task
-    const progress =
-        task.status === 'completed'
-            ? 100
-            : task.status === 'in-progress'
-              ? 50
-              : 0
     const attachments = 0
     const comments = 0
 
@@ -34,7 +27,7 @@ export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
         <button
             onClick={onClick}
             className={cn(
-                'group w-full rounded-xl p-4 text-left',
+                'group w-full rounded-lg p-3 text-left',
                 'bg-white dark:bg-neutral-800',
                 'border border-neutral-200 dark:border-neutral-700',
                 'shadow-sm',
@@ -43,62 +36,45 @@ export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
                 'hover:border-brand-300 dark:hover:border-brand-600'
             )}
         >
-            {/* Priority Badge */}
-            <span
-                className={cn(
-                    'inline-block rounded-md px-2 py-1 text-xs font-medium',
-                    priorityStyles[task.priority]
-                )}
-            >
-                {priorityLabels[task.priority]}
-            </span>
+            {/* Header: Priority Badge + Title */}
+            <div className="flex items-start gap-2">
+                <span
+                    className={cn(
+                        'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium',
+                        priorityStyles[task.priority]
+                    )}
+                >
+                    {priorityLabels[task.priority]}
+                </span>
+                <h4
+                    className={cn(
+                        'flex-1 text-sm font-medium text-neutral-900 dark:text-white',
+                        'line-clamp-2 transition-colors duration-200',
+                        'group-hover:text-brand-600 dark:group-hover:text-brand-400'
+                    )}
+                >
+                    {task.title}
+                </h4>
+            </div>
 
-            {/* Title */}
-            <h4
-                className={cn(
-                    'mt-2 font-semibold text-neutral-900 dark:text-white',
-                    'transition-colors duration-200',
-                    'group-hover:text-brand-600 dark:group-hover:text-brand-400'
-                )}
-            >
-                {task.title}
-            </h4>
-
-            {/* Description */}
+            {/* Description - only show first line */}
             {task.description && (
-                <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-1.5 line-clamp-1 text-xs text-neutral-500 dark:text-neutral-400">
                     {task.description}
                 </p>
             )}
 
-            {/* Progress Bar */}
-            <div className="mt-3">
-                <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                    <span>Fortschritt</span>
-                    <span>{progress}%</span>
-                </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-                    <div
-                        className={cn(
-                            'h-full rounded-full transition-all duration-300',
-                            progress === 100 ? 'bg-success-500' : 'bg-brand-500'
-                        )}
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-            </div>
-
             {/* Footer */}
-            <div className="mt-3 flex items-center justify-between">
+            <div className="mt-2 flex items-center justify-between">
                 {/* Assignee Avatar */}
-                <div className="flex -space-x-2">
+                <div className="flex -space-x-1.5">
                     {task.assignedTo ? (
                         <div
                             className={cn(
-                                'flex size-7 items-center justify-center rounded-full',
+                                'flex size-5 items-center justify-center rounded-full',
                                 'bg-brand-100 dark:bg-brand-900/30',
-                                'border-2 border-white dark:border-neutral-800',
-                                'text-brand-600 dark:text-brand-400 text-xs font-medium'
+                                'border border-white dark:border-neutral-800',
+                                'text-brand-600 dark:text-brand-400 text-[10px] font-medium'
                             )}
                         >
                             {task.assignedTo.charAt(0).toUpperCase()}
@@ -106,24 +82,24 @@ export const KanbanCard = ({ task, onClick }: KanbanCardProps) => {
                     ) : (
                         <div
                             className={cn(
-                                'flex size-7 items-center justify-center rounded-full',
+                                'flex size-5 items-center justify-center rounded-full',
                                 'bg-neutral-100 dark:bg-neutral-700',
-                                'border-2 border-white dark:border-neutral-800'
+                                'border border-white dark:border-neutral-800'
                             )}
                         >
-                            <User className="size-3.5 text-neutral-400" />
+                            <User className="size-3 text-neutral-400" />
                         </div>
                     )}
                 </div>
 
                 {/* Meta Icons */}
-                <div className="flex items-center gap-3 text-neutral-400 dark:text-neutral-500">
-                    <div className="flex items-center gap-1 text-xs">
-                        <Paperclip className="size-3.5" />
+                <div className="flex items-center gap-2 text-neutral-400 dark:text-neutral-500">
+                    <div className="flex items-center gap-0.5 text-[10px]">
+                        <Paperclip className="size-3" />
                         <span>{attachments}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs">
-                        <MessageSquare className="size-3.5" />
+                    <div className="flex items-center gap-0.5 text-[10px]">
+                        <MessageSquare className="size-3" />
                         <span>{comments}</span>
                     </div>
                 </div>

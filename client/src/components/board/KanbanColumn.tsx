@@ -44,12 +44,12 @@ export const KanbanColumn = ({
             className={cn(
                 'flex flex-col rounded-xl',
                 columnBgColors[column.id],
-                // Desktop: fixed width with full height, Mobile: full width/height, Compact: flexible
+                // Desktop: fixed width with max height, Mobile: full width, Compact: flexible
                 isMobile
-                    ? 'h-full w-full'
+                    ? 'max-h-[70vh] w-full'
                     : isCompact
                       ? 'min-h-64 max-h-[50vh]'
-                      : 'h-full min-w-72 max-w-72'
+                      : 'max-h-[65vh] min-w-72 max-w-72'
             )}
         >
             {/* Column Header - Hidden on mobile (selector shows it) */}
@@ -104,7 +104,7 @@ export const KanbanColumn = ({
             {/* Tasks Container */}
             <div
                 className={cn(
-                    'flex flex-1 flex-col gap-2 overflow-y-auto p-2',
+                    'kanban-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2',
                     !isMobile && 'pt-0'
                 )}
             >
