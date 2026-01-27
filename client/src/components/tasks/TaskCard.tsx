@@ -1,5 +1,15 @@
-import { Clock, User, AlertCircle, CheckCircle2, Circle } from 'lucide-react'
+import {
+    Clock,
+    User,
+    AlertCircle,
+    CheckCircle2,
+    Circle,
+    Pencil,
+    Link2,
+    ListTree,
+} from 'lucide-react'
 import { cn } from '../../utils/cn'
+import type { TaskLink } from '../../api/tasks'
 
 export interface Task {
     id: string
@@ -14,11 +24,17 @@ export interface Task {
     createdBy?: string
     createdAt?: string
     updatedAt?: string
+    parentTaskId?: string | null
+    linkedTasks?: TaskLink[]
 }
 
 interface TaskCardProps {
     task: Task
     onClick: () => void
+    onEditClick?: () => void
+    showGroupBadge?: boolean
+    groupName?: string
+    subtaskCount?: number
 }
 
 const priorityStyles = {
@@ -45,10 +61,18 @@ const statusStyles = {
     completed: 'text-success-500 dark:text-success-400',
 }
 
-export const TaskCard = ({ task, onClick }: TaskCardProps) => {
+export const TaskCard = ({
+    task,
+    onClick,
+    onEditClick,
+    showGroupBadge = false,
+    groupName,
+    subtaskCount = 0,
+}: TaskCardProps) => {
     const StatusIcon = statusIcons[task.status]
     const isOverdue =
         task.status !== 'completed' && new Date(task.dueDate) < new Date()
+    const hasLinks = task.linkedTasks && task.linkedTasks.length > 0
 
     const formatDueDate = (dateStr: string) => {
         const date = new Date(dateStr)
@@ -67,11 +91,16 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
         })
     }
 
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onEditClick?.()
+    }
+
     return (
-        <button
+        <div
             onClick={onClick}
             className={cn(
-                'group flex w-full items-start gap-4 p-4 text-left',
+                'group relative flex w-full cursor-pointer items-start gap-4 p-4 text-left',
                 'rounded-xl border',
                 'bg-white dark:bg-neutral-800',
                 'border-neutral-200 dark:border-neutral-700',
@@ -83,6 +112,26 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
                 task.status === 'completed' && 'opacity-60'
             )}
         >
+            {/* Edit Button*/}
+            {onEditClick && (
+                <button
+                    onClick={handleEditClick}
+                    className={cn(
+                        'absolute top-2 right-2 z-10',
+                        'flex h-7 w-7 items-center justify-center rounded-md',
+                        'bg-neutral-100 dark:bg-neutral-700',
+                        'text-neutral-500 dark:text-neutral-400',
+                        'opacity-0 group-hover:opacity-100',
+                        'hover:bg-brand-100 hover:text-brand-600',
+                        'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
+                        'transition-all duration-200'
+                    )}
+                    title="Aufgabe bearbeiten"
+                >
+                    <Pencil className="size-3.5" />
+                </button>
+            )}
+
             {/* Status Icon */}
             <div
                 className={cn(
@@ -94,18 +143,26 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
             </div>
 
             {/* Content */}
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pr-6">
                 <div className="flex items-start justify-between gap-2">
-                    <h3
-                        className={cn(
-                            'font-medium text-neutral-900 dark:text-white',
-                            'transition-colors duration-300',
-                            'group-hover:text-brand-600 dark:group-hover:text-brand-400',
-                            task.status === 'completed' && 'line-through'
+                    <div className="min-w-0 flex-1">
+                        {/* Group Badge */}
+                        {showGroupBadge && groupName && (
+                            <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 mb-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium">
+                                {groupName}
+                            </span>
                         )}
-                    >
-                        {task.title}
-                    </h3>
+                        <h3
+                            className={cn(
+                                'font-medium text-neutral-900 dark:text-white',
+                                'transition-colors duration-300',
+                                'group-hover:text-brand-600 dark:group-hover:text-brand-400',
+                                task.status === 'completed' && 'line-through'
+                            )}
+                        >
+                            {task.title}
+                        </h3>
+                    </div>
 
                     {/* Priority Badge */}
                     <span
@@ -146,8 +203,30 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
                         )}
                         <span>{formatDueDate(task.dueDate)}</span>
                     </div>
+
+                    {/* Subtask Counter */}
+                    {subtaskCount > 0 && (
+                        <div className="text-info-500 dark:text-info-400 flex items-center gap-1">
+                            <ListTree className="size-3.5" />
+                            <span>
+                                {subtaskCount} Unteraufgabe
+                                {subtaskCount > 1 ? 'n' : ''}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Links Indicator */}
+                    {hasLinks && (
+                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1">
+                            <Link2 className="size-3.5" />
+                            <span>
+                                {task.linkedTasks?.length} Verknüpfung
+                                {task.linkedTasks!.length > 1 ? 'en' : ''}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
-        </button>
+        </div>
     )
 }
