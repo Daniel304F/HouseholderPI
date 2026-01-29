@@ -14,9 +14,8 @@ interface ProgressRingProps {
 export const ProgressRing = ({
     value,
     size = 120,
-    strokeWidth = 12,
-    color = 'hsl(var(--primary))',
-    backgroundColor = 'hsl(var(--muted))',
+    strokeWidth = 10,
+    color,
     showValue = true,
     label,
     className,
@@ -27,22 +26,47 @@ export const ProgressRing = ({
     const offset = circumference - (normalizedValue / 100) * circumference
     const center = size / 2
 
+    // Dynamic color based on value if not provided
+    const getColor = () => {
+        if (color) return color
+        if (normalizedValue >= 75) return 'var(--color-success-500)'
+        if (normalizedValue >= 50) return 'var(--color-brand-500)'
+        if (normalizedValue >= 25) return 'var(--color-warning-500)'
+        return 'var(--color-error-500)'
+    }
+
+    const ringColor = getColor()
+
     return (
         <div
             className={cn(
                 'relative inline-flex items-center justify-center',
+                'rounded-2xl p-4',
+                'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
+                'border border-neutral-200/60 dark:border-neutral-800/60',
+                'shadow-md shadow-brand-500/5',
                 className
             )}
-            style={{ width: size, height: size }}
+            style={{ width: size + 32, height: size + 32 }}
         >
-            <svg width={size} height={size} className="-rotate-90">
+            {/* Glow effect */}
+            <div
+                className="absolute rounded-full opacity-20 blur-xl transition-opacity duration-500"
+                style={{
+                    width: size * 0.8,
+                    height: size * 0.8,
+                    backgroundColor: ringColor,
+                }}
+            />
+
+            <svg width={size} height={size} className="relative -rotate-90">
                 {/* Background circle */}
                 <circle
                     cx={center}
                     cy={center}
                     r={radius}
                     fill="none"
-                    stroke={backgroundColor}
+                    className="stroke-neutral-200/80 dark:stroke-neutral-700/60"
                     strokeWidth={strokeWidth}
                 />
                 {/* Progress circle */}
@@ -51,21 +75,28 @@ export const ProgressRing = ({
                     cy={center}
                     r={radius}
                     fill="none"
-                    stroke={color}
+                    stroke={ringColor}
                     strokeWidth={strokeWidth}
                     strokeDasharray={circumference}
                     strokeDashoffset={offset}
                     strokeLinecap="round"
                     className="transition-all duration-700 ease-out"
+                    style={{
+                        filter: `drop-shadow(0 0 8px ${ringColor}60)`,
+                    }}
                 />
             </svg>
+
             {showValue && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-foreground text-xl font-bold">
+                    <span
+                        className="text-2xl font-bold transition-colors duration-500"
+                        style={{ color: ringColor }}
+                    >
                         {Math.round(normalizedValue)}%
                     </span>
                     {label && (
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                             {label}
                         </span>
                     )}
