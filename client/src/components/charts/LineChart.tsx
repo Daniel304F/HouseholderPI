@@ -30,7 +30,7 @@ export const LineChart = ({
     showLabels = true,
     showLegend = true,
     showGrid = true,
-    showArea = true,
+    showArea = false,
     className,
     title,
 }: LineChartProps) => {
@@ -44,26 +44,26 @@ export const LineChart = ({
     const labels = series[0]?.data.map((d) => d.label) || []
     const pointCount = labels.length
 
-    const padding = { top: 20, right: 20, bottom: 40, left: 20 }
-    const chartWidth = 100 // percentage
-    const chartHeight = height - padding.top - padding.bottom
+    // SVG dimensions
+    const svgWidth = 400
+    const svgHeight = height
+    const padding = { top: 16, right: 16, bottom: 32, left: 16 }
+    const chartWidth = svgWidth - padding.left - padding.right
+    const chartHeight = svgHeight - padding.top - padding.bottom
 
     const getX = (index: number) =>
-        padding.left +
-        (index / Math.max(pointCount - 1, 1)) *
-            (chartWidth - padding.left - padding.right)
+        padding.left + (index / Math.max(pointCount - 1, 1)) * chartWidth
+
     const getY = (value: number) =>
-        padding.top +
-        chartHeight -
-        ((value - minValue) / valueRange) * chartHeight
+        padding.top + chartHeight - ((value - minValue) / valueRange) * chartHeight
 
     return (
         <div
             className={cn(
                 'rounded-2xl p-5',
-                'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
-                'border border-neutral-200/60 dark:border-neutral-800/60',
-                'shadow-md shadow-brand-500/5',
+                'bg-white dark:bg-neutral-800',
+                'border border-neutral-200 dark:border-neutral-700',
+                'shadow-sm',
                 className
             )}
         >
@@ -74,18 +74,15 @@ export const LineChart = ({
             )}
 
             {showLegend && series.length > 1 && (
-                <div className="mb-4 flex flex-wrap gap-4">
+                <div className="mb-4 flex flex-wrap gap-3">
                     {series.map((s, index) => (
                         <div
                             key={index}
-                            className="flex items-center gap-2 rounded-full bg-neutral-100/60 dark:bg-neutral-800/40 px-3 py-1"
+                            className="flex items-center gap-2"
                         >
                             <div
                                 className="h-0.5 w-4 rounded-full"
-                                style={{
-                                    backgroundColor: s.color,
-                                    boxShadow: `0 0 6px ${s.color}`,
-                                }}
+                                style={{ backgroundColor: s.color }}
                             />
                             <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
                                 {s.name}
@@ -98,8 +95,8 @@ export const LineChart = ({
             <svg
                 width="100%"
                 height={height}
-                viewBox={`0 0 100 ${height}`}
-                preserveAspectRatio="none"
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                preserveAspectRatio="xMidYMid meet"
                 className="overflow-visible"
             >
                 <defs>
@@ -112,7 +109,7 @@ export const LineChart = ({
                             x2="0%"
                             y2="100%"
                         >
-                            <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
+                            <stop offset="0%" stopColor={s.color} stopOpacity="0.2" />
                             <stop offset="100%" stopColor={s.color} stopOpacity="0" />
                         </linearGradient>
                     ))}
@@ -126,11 +123,11 @@ export const LineChart = ({
                                 key={index}
                                 x1={padding.left}
                                 y1={padding.top + chartHeight * (1 - ratio)}
-                                x2={chartWidth - padding.right}
+                                x2={svgWidth - padding.right}
                                 y2={padding.top + chartHeight * (1 - ratio)}
-                                className="stroke-neutral-200/60 dark:stroke-neutral-700/40"
-                                strokeWidth="0.3"
-                                strokeDasharray="2,2"
+                                className="stroke-neutral-200 dark:stroke-neutral-700"
+                                strokeWidth="1"
+                                strokeDasharray="4,4"
                             />
                         ))}
                     </g>
@@ -151,7 +148,6 @@ export const LineChart = ({
                                 <polygon
                                     points={areaPoints}
                                     fill={`url(#area-gradient-${seriesIndex})`}
-                                    className="transition-all duration-500 ease-out"
                                 />
                             )}
                             {/* Line */}
@@ -162,45 +158,22 @@ export const LineChart = ({
                                 strokeWidth="2.5"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                className="transition-all duration-500 ease-out"
-                                vectorEffect="non-scaling-stroke"
-                                style={{
-                                    filter: `drop-shadow(0 2px 4px ${s.color}50)`,
-                                }}
                             />
                             {/* Dots */}
                             {showDots &&
                                 s.data.map((d, i) => (
-                                    <g key={i} className="group">
-                                        {/* Outer glow */}
+                                    <g key={i}>
                                         <circle
                                             cx={getX(i)}
                                             cy={getY(d.value)}
-                                            r="6"
+                                            r="4"
                                             fill={s.color}
-                                            opacity="0.2"
-                                            className="transition-all duration-300"
                                         />
-                                        {/* Inner dot */}
                                         <circle
                                             cx={getX(i)}
                                             cy={getY(d.value)}
-                                            r="3.5"
-                                            fill={s.color}
-                                            className="transition-all duration-300"
-                                            vectorEffect="non-scaling-stroke"
-                                            style={{
-                                                filter: `drop-shadow(0 0 4px ${s.color})`,
-                                            }}
-                                        />
-                                        {/* White center */}
-                                        <circle
-                                            cx={getX(i)}
-                                            cy={getY(d.value)}
-                                            r="1.5"
+                                            r="2"
                                             fill="white"
-                                            className="transition-all duration-300"
-                                            vectorEffect="non-scaling-stroke"
                                         />
                                     </g>
                                 ))}
@@ -210,15 +183,12 @@ export const LineChart = ({
             </svg>
 
             {/* X-axis labels */}
-            {showLabels && (
-                <div
-                    className="flex justify-between px-5"
-                    style={{ marginTop: -30 }}
-                >
+            {showLabels && labels.length > 0 && (
+                <div className="mt-2 flex justify-between px-4">
                     {labels.map((label, index) => (
                         <span
                             key={index}
-                            className="text-[10px] font-medium text-neutral-500 dark:text-neutral-500"
+                            className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400"
                         >
                             {label}
                         </span>

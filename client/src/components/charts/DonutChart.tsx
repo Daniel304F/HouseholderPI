@@ -52,9 +52,9 @@ export const DonutChart = ({
         <div
             className={cn(
                 'rounded-2xl p-5',
-                'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
-                'border border-neutral-200/60 dark:border-neutral-800/60',
-                'shadow-md shadow-brand-500/5',
+                'bg-white dark:bg-neutral-800',
+                'border border-neutral-200 dark:border-neutral-700',
+                'shadow-sm',
                 className
             )}
         >
@@ -68,17 +68,10 @@ export const DonutChart = ({
                     className="relative flex-shrink-0"
                     style={{ width: size, height: size }}
                 >
-                    {/* Glow effect */}
-                    <div
-                        className="absolute inset-0 rounded-full opacity-30 blur-xl"
-                        style={{
-                            background: `conic-gradient(${data.map((d, i) => `${d.color} ${(i / data.length) * 100}%`).join(', ')})`,
-                        }}
-                    />
                     <svg
                         width={size}
                         height={size}
-                        className="relative -rotate-90 drop-shadow-lg"
+                        className="relative -rotate-90"
                     >
                         {/* Background circle */}
                         <circle
@@ -102,10 +95,7 @@ export const DonutChart = ({
                                 strokeDasharray={segment.strokeDasharray}
                                 strokeDashoffset={segment.strokeDashoffset}
                                 strokeLinecap="round"
-                                className="transition-all duration-700 ease-out hover:brightness-110"
-                                style={{
-                                    filter: `drop-shadow(0 0 6px ${segment.color}50)`,
-                                }}
+                                className="transition-all duration-500 ease-out"
                             />
                         ))}
                     </svg>
@@ -129,11 +119,8 @@ export const DonutChart = ({
                                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1 transition-colors hover:bg-neutral-100/60 dark:hover:bg-neutral-800/40"
                             >
                                 <div
-                                    className="size-3 rounded-full ring-2 ring-white/50 dark:ring-neutral-900/50 transition-transform group-hover:scale-125"
-                                    style={{
-                                        backgroundColor: item.color,
-                                        boxShadow: `0 0 8px ${item.color}60`,
-                                    }}
+                                    className="size-3 rounded-full transition-transform group-hover:scale-110"
+                                    style={{ backgroundColor: item.color }}
                                 />
                                 <span className="text-sm text-neutral-600 dark:text-neutral-400">
                                     {item.label}

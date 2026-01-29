@@ -44,9 +44,9 @@ export const BarChart = ({
             <div
                 className={cn(
                     'rounded-2xl p-5',
-                    'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
-                    'border border-neutral-200/60 dark:border-neutral-800/60',
-                    'shadow-md shadow-brand-500/5',
+                    'bg-white dark:bg-neutral-800',
+                    'border border-neutral-200 dark:border-neutral-700',
+                    'shadow-sm',
                     className
                 )}
             >
@@ -94,9 +94,9 @@ export const BarChart = ({
         <div
             className={cn(
                 'rounded-2xl p-5',
-                'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
-                'border border-neutral-200/60 dark:border-neutral-800/60',
-                'shadow-md shadow-brand-500/5',
+                'bg-white dark:bg-neutral-800',
+                'border border-neutral-200 dark:border-neutral-700',
+                'shadow-sm',
                 className
             )}
         >

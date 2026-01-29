@@ -41,23 +41,10 @@ export const ProgressRing = ({
         <div
             className={cn(
                 'relative inline-flex items-center justify-center',
-                'rounded-2xl p-4',
-                'bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm',
-                'border border-neutral-200/60 dark:border-neutral-800/60',
-                'shadow-md shadow-brand-500/5',
                 className
             )}
-            style={{ width: size + 32, height: size + 32 }}
+            style={{ width: size, height: size }}
         >
-            {/* Glow effect */}
-            <div
-                className="absolute rounded-full opacity-20 blur-xl transition-opacity duration-500"
-                style={{
-                    width: size * 0.8,
-                    height: size * 0.8,
-                    backgroundColor: ringColor,
-                }}
-            />
 
             <svg width={size} height={size} className="relative -rotate-90">
                 {/* Background circle */}
@@ -81,9 +68,6 @@ export const ProgressRing = ({
                     strokeDashoffset={offset}
                     strokeLinecap="round"
                     className="transition-all duration-700 ease-out"
-                    style={{
-                        filter: `drop-shadow(0 0 8px ${ringColor}60)`,
-                    }}
                 />
             </svg>
 
