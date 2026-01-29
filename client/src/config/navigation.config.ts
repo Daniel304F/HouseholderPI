@@ -10,7 +10,6 @@ export interface NavItem {
 
 /**
  * Hauptnavigation für Dashboard
- * Wird in AppLayout (BottomNavigation) und DashboardLayout (Sidebar) verwendet
  */
 export const dashboardNavItems: NavItem[] = [
     {
