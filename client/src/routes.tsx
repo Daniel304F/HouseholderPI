@@ -14,7 +14,6 @@ import { MyTasks } from './pages/dashboard/MyTasks'
 import { PersonalStats } from './pages/dashboard/PersonalStats'
 import { GroupStats } from './pages/dashboard/GroupStats'
 
-// Placeholder-Komponenten (ersetze diese durch echte Pages)
 const Settings = () => <div className="p-4">Einstellungen - Coming Soon</div>
 
 export const routes: RouteObject[] = [
