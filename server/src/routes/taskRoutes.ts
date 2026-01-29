@@ -1,7 +1,6 @@
 import { Router, RequestHandler } from "express";
 import * as taskController from "../controllers/taskController.js";
 import * as uploadController from "../controllers/uploadController.js";
-import * as statisticsController from "../controllers/statisticsController.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
 import {

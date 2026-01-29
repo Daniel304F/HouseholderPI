@@ -1,56 +1,15 @@
 import { Response, NextFunction, Request } from "express";
-import {
-  Group,
-  GroupListItem,
-  GroupMember,
-  GroupMemberWithUser,
-} from "../models/group.js";
+import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
-import crypto from "crypto";
+import { GroupService } from "../services/group.service.js";
+import { AppError } from "../services/errors.js";
 
-const getGroupDAO = (req: Request) =>
-  req.app.locals["groupDAO"] as GenericDAO<Group>;
-
-const getUserDAO = (req: Request) =>
-  req.app.locals["userDAO"] as GenericDAO<User>;
-
-// Hilfsfunktion: Member mit User-Info anreichern
-const enrichMembersWithUserInfo = async (
-  members: GroupMember[],
-  userDAO: GenericDAO<User>
-): Promise<GroupMemberWithUser[]> => {
-  const userIds = members.map((m) => m.userId);
-  const users = await Promise.all(
-    userIds.map((id) => userDAO.findOne({ id } as Partial<User>))
-  );
-
-  return members.map((member, index) => ({
-    ...member,
-    userName: users[index]?.name,
-    userAvatar: users[index]?.avatar,
-  }));
-};
-
-// Hilfsfunktion: Invite-Code generieren
-const generateInviteCode = (): string => {
-  return crypto.randomBytes(4).toString("hex").toUpperCase();
-};
-
-// Hilfsfunktion: Prüfen ob User Mitglied einer Gruppe ist
-const getMemberRole = (
-  group: Group,
-  userId: string
-): GroupMember["role"] | null => {
-  const member = group.members.find((m) => m.userId === userId);
-  return member?.role ?? null;
-};
-
-// Hilfsfunktion: Prüfen ob User Admin/Owner ist
-const isAdminOrOwner = (group: Group, userId: string): boolean => {
-  const role = getMemberRole(group, userId);
-  return role === "owner" || role === "admin";
+const getGroupService = (req: Request): GroupService => {
+  const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
+  const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
+  return new GroupService(groupDAO, userDAO);
 };
 
 /**
@@ -60,33 +19,23 @@ const isAdminOrOwner = (group: Group, userId: string): boolean => {
 export const createGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { name, picture } = req.body;
 
-    const newGroup = await groupDAO.create({
-      name,
-      inviteCode: generateInviteCode(),
-      members: [
-        {
-          userId,
-          role: "owner",
-          isActiveResident: true,
-          joinedAt: new Date(),
-        },
-      ],
-      activeResidentsCount: 1,
-      picture,
-    } as Omit<Group, "id" | "createdAt" | "updatedAt">);
+    const group = await groupService.createGroup(req.userId, name, picture);
 
     res.status(201).json({
       success: true,
-      data: newGroup,
+      data: group,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -98,33 +47,22 @@ export const createGroup = async (
 export const getMyGroups = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
 
-    const allGroups = await groupDAO.findAll();
-
-    const userGroups: GroupListItem[] = allGroups
-      .filter((group) => group.members.some((m) => m.userId === userId))
-      .map((group) => {
-        const member = group.members.find((m) => m.userId === userId)!;
-        return {
-          id: group.id,
-          name: group.name,
-          memberCount: group.members.length,
-          activeResidentsCount: group.activeResidentsCount,
-          picture: group.picture,
-          role: member.role,
-        };
-      });
+    const groups = await groupService.getMyGroups(req.userId);
 
     res.status(200).json({
       success: true,
-      data: userGroups,
+      data: groups,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -136,41 +74,23 @@ export const getMyGroups = async (
 export const getGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userDAO = getUserDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId } = req.params;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    // Prüfen ob User Mitglied ist
-    if (!getMemberRole(group, userId)) {
-      res.status(403).json({ message: "Kein Zugriff auf diese Gruppe" });
-      return;
-    }
-
-    // Member mit User-Info anreichern
-    const membersWithUserInfo = await enrichMembersWithUserInfo(
-      group.members,
-      userDAO
-    );
+    const group = await groupService.getGroup(groupId!, req.userId);
 
     res.status(200).json({
       success: true,
-      data: {
-        ...group,
-        members: membersWithUserInfo,
-      },
+      data: group,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -182,46 +102,27 @@ export const getGroup = async (
 export const updateGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId } = req.params;
     const { name, picture } = req.body;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    if (!isAdminOrOwner(group, userId)) {
-      res.status(403).json({ message: "Keine Berechtigung" });
-      return;
-    }
-
-    const updated = await groupDAO.update({
-      id: groupId,
-      ...(name && { name }),
-      ...(picture !== undefined && { picture }),
-    } as Partial<Group>);
-
-    if (!updated) {
-      res.status(500).json({ message: "Aktualisierung fehlgeschlagen" });
-      return;
-    }
-
-    const updatedGroup = await groupDAO.findOne({
-      id: groupId,
-    } as Partial<Group>);
+    const group = await groupService.updateGroup(groupId!, req.userId, {
+      name,
+      picture,
+    });
 
     res.status(200).json({
       success: true,
-      data: updatedGroup,
+      data: group,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -233,34 +134,23 @@ export const updateGroup = async (
 export const deleteGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId } = req.params;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    if (getMemberRole(group, userId) !== "owner") {
-      res.status(403).json({ message: "Nur der Owner kann die Gruppe löschen" });
-      return;
-    }
-
-    if (groupId) {
-      await groupDAO.delete(groupId);
-    }
+    await groupService.deleteGroup(groupId!, req.userId);
 
     res.status(200).json({
       success: true,
       message: "Gruppe gelöscht",
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -272,53 +162,24 @@ export const deleteGroup = async (
 export const joinGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { inviteCode } = req.body;
 
-    const group = await groupDAO.findOne({
-      inviteCode,
-    } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Ungültiger Invite-Code" });
-      return;
-    }
-
-    // Prüfen ob User bereits Mitglied ist
-    if (getMemberRole(group, userId)) {
-      res.status(409).json({ message: "Du bist bereits Mitglied dieser Gruppe" });
-      return;
-    }
-
-    const newMember: GroupMember = {
-      userId,
-      role: "member",
-      isActiveResident: false,
-      joinedAt: new Date(),
-    };
-
-    const updated = await groupDAO.update({
-      id: group.id,
-      members: [...group.members, newMember],
-    } as Partial<Group>);
-
-    if (!updated) {
-      res.status(500).json({ message: "Beitritt fehlgeschlagen" });
-      return;
-    }
-
-    const updatedGroup = await groupDAO.findOne({ id: group.id } as Partial<Group>);
+    const result = await groupService.joinGroup(inviteCode, req.userId);
 
     res.status(200).json({
       success: true,
-      message: "Erfolgreich beigetreten",
-      data: updatedGroup,
+      message: result.message,
+      data: result.group,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -330,53 +191,23 @@ export const joinGroup = async (
 export const leaveGroup = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId } = req.params;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    const memberRole = getMemberRole(group, userId);
-
-    if (!memberRole) {
-      res.status(403).json({ message: "Du bist kein Mitglied dieser Gruppe" });
-      return;
-    }
-
-    // Owner kann nicht einfach verlassen
-    if (memberRole === "owner") {
-      res.status(400).json({
-        message:
-          "Als Owner musst du die Gruppe löschen oder einen anderen Owner bestimmen",
-      });
-      return;
-    }
-
-    const member = group.members.find((m) => m.userId === userId)!;
-    const updatedMembers = group.members.filter((m) => m.userId !== userId);
-    const newActiveCount = member.isActiveResident
-      ? group.activeResidentsCount - 1
-      : group.activeResidentsCount;
-
-    await groupDAO.update({
-      id: groupId,
-      members: updatedMembers,
-      activeResidentsCount: newActiveCount,
-    } as Partial<Group>);
+    await groupService.leaveGroup(groupId!, req.userId);
 
     res.status(200).json({
       success: true,
       message: "Gruppe verlassen",
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -388,37 +219,26 @@ export const leaveGroup = async (
 export const regenerateInviteCode = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId } = req.params;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    if (!isAdminOrOwner(group, userId)) {
-      res.status(403).json({ message: "Keine Berechtigung" });
-      return;
-    }
-
-    const newInviteCode = generateInviteCode();
-
-    await groupDAO.update({
-      id: groupId,
-      inviteCode: newInviteCode,
-    } as Partial<Group>);
+    const inviteCode = await groupService.regenerateInviteCode(
+      groupId!,
+      req.userId,
+    );
 
     res.status(200).json({
       success: true,
-      data: { inviteCode: newInviteCode },
+      data: { inviteCode },
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -430,64 +250,32 @@ export const regenerateInviteCode = async (
 export const updateMember = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId, memberId } = req.params;
     const { role, isActiveResident } = req.body;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    if (!isAdminOrOwner(group, userId)) {
-      res.status(403).json({ message: "Keine Berechtigung" });
-      return;
-    }
-
-    const memberIndex = group.members.findIndex((m) => m.userId === memberId);
-
-    if (memberIndex === -1) {
-      res.status(404).json({ message: "Mitglied nicht gefunden" });
-      return;
-    }
-
-    const targetMember = group.members[memberIndex]!;
-
-    // Owner-Rolle kann nicht geändert werden
-    if (targetMember.role === "owner" && role) {
-      res.status(400).json({ message: "Owner-Rolle kann nicht geändert werden" });
-      return;
-    }
-
-    const updatedMembers = [...group.members];
-    updatedMembers[memberIndex] = {
-      ...targetMember,
-      ...(role && { role }),
-      ...(isActiveResident !== undefined && { isActiveResident }),
-    };
-
-    // ActiveResidentsCount neu berechnen
-    const newActiveCount = updatedMembers.filter(
-      (m) => m.isActiveResident
-    ).length;
-
-    await groupDAO.update({
-      id: groupId,
-      members: updatedMembers,
-      activeResidentsCount: newActiveCount,
-    } as Partial<Group>);
+    const member = await groupService.updateMember(
+      groupId!,
+      memberId!,
+      req.userId,
+      {
+        role,
+        isActiveResident,
+      },
+    );
 
     res.status(200).json({
       success: true,
-      data: updatedMembers[memberIndex],
+      data: member,
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };
@@ -499,63 +287,23 @@ export const updateMember = async (
 export const removeMember = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const groupDAO = getGroupDAO(req);
-    const userId = req.userId;
+    const groupService = getGroupService(req);
     const { groupId, memberId } = req.params;
 
-    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
-
-    if (!group) {
-      res.status(404).json({ message: "Gruppe nicht gefunden" });
-      return;
-    }
-
-    if (!isAdminOrOwner(group, userId)) {
-      res.status(403).json({ message: "Keine Berechtigung" });
-      return;
-    }
-
-    const targetMember = group.members.find((m) => m.userId === memberId);
-
-    if (!targetMember) {
-      res.status(404).json({ message: "Mitglied nicht gefunden" });
-      return;
-    }
-
-    // Owner kann nicht entfernt werden
-    if (targetMember.role === "owner") {
-      res.status(400).json({ message: "Owner kann nicht entfernt werden" });
-      return;
-    }
-
-    // Admin kann keine anderen Admins entfernen (nur Owner)
-    if (
-      targetMember.role === "admin" &&
-      getMemberRole(group, userId) !== "owner"
-    ) {
-      res.status(403).json({ message: "Nur der Owner kann Admins entfernen" });
-      return;
-    }
-
-    const updatedMembers = group.members.filter((m) => m.userId !== memberId);
-    const newActiveCount = targetMember.isActiveResident
-      ? group.activeResidentsCount - 1
-      : group.activeResidentsCount;
-
-    await groupDAO.update({
-      id: groupId,
-      members: updatedMembers,
-      activeResidentsCount: newActiveCount,
-    } as Partial<Group>);
+    await groupService.removeMember(groupId!, memberId!, req.userId);
 
     res.status(200).json({
       success: true,
       message: "Mitglied entfernt",
     });
   } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
     next(error);
   }
 };

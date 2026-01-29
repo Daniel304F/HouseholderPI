@@ -9,12 +9,6 @@ const taskLinkTypeEnum = z.enum([
   "duplicated-by",
 ]);
 
-// Task Link Schema
-const taskLinkSchema = z.object({
-  taskId: z.string().uuid("Ungültige Task-ID"),
-  linkType: taskLinkTypeEnum,
-});
-
 export const createTaskSchema = z.object({
   params: z.object({
     groupId: z.string().uuid("Ungültige Gruppen-ID"),

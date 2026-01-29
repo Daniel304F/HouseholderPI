@@ -1,7 +1,6 @@
 import { errorHandler } from "./middlewares/errorHandler.js";
 import express, { RequestHandler } from "express";
 import cors from "cors";
-import path from "path";
 import authRoutes from "./routes/authRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
 import friendRoutes from "./routes/friendRoutes.js";
