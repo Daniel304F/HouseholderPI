@@ -36,15 +36,16 @@ export const CreateGroupModal = ({
         <div className="animate-in fade-in fixed inset-0 z-50 flex items-start justify-center pt-16 duration-200 sm:pt-24">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50"
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={handleClose}
             />
+            <div className="from-brand-50/40 to-brand-100/50 dark:from-brand-950/30 dark:to-brand-900/30 pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br via-transparent dark:via-neutral-950/40" />
 
             {/* Modal */}
-            <div className="animate-in slide-in-from-top-4 relative mx-4 w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl duration-300 dark:bg-neutral-800">
+            <div className="animate-in slide-in-from-top-4 shadow-brand-500/15 relative mx-4 w-full max-w-lg rounded-3xl border border-neutral-200/70 bg-white/90 p-6 shadow-2xl backdrop-blur duration-300 dark:border-neutral-800/70 dark:bg-neutral-900/80">
                 {/* Header */}
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
+                    <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white">
                         Neue Gruppe erstellen
                     </h2>
                     <IconButton

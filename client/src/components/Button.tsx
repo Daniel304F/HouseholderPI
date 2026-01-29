@@ -17,42 +17,53 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseStyles = cn(
-    'inline-flex cursor-pointer items-center justify-center',
-    'rounded-xl font-semibold',
+    'inline-flex cursor-pointer items-center justify-center gap-2',
+    'rounded-2xl font-semibold tracking-tight',
     'transition-all duration-200 ease-out',
-    'focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2',
-    'disabled:cursor-not-allowed disabled:opacity-70'
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900',
+    'disabled:cursor-not-allowed disabled:opacity-60',
+    'active:scale-[0.985]'
 )
 
 const variantStyles: Record<ButtonVariant, string> = {
     primary: cn(
-        'bg-brand-500 text-white',
-        'hover:bg-brand-600 active:bg-brand-700',
-        'dark:bg-brand-600 dark:hover:bg-brand-500',
-        'disabled:bg-brand-300 dark:disabled:bg-brand-800'
+        'bg-gradient-to-br from-brand-400 via-brand-500 to-brand-600 text-white',
+        'shadow-lg shadow-brand-500/25 hover:shadow-xl hover:shadow-brand-500/35',
+        'hover:-translate-y-0.5',
+        'active:translate-y-0 active:shadow-md',
+        'border border-brand-400/60 dark:border-brand-500/60',
+        'dark:from-brand-500 dark:via-brand-600 dark:to-brand-700',
+        'disabled:bg-brand-300 dark:disabled:bg-brand-800 disabled:shadow-none disabled:hover:translate-y-0'
     ),
     secondary: cn(
-        'bg-neutral-100 text-neutral-900',
-        'hover:bg-neutral-200 active:bg-neutral-300',
-        'dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700'
+        'bg-white/80 text-neutral-900 backdrop-blur-sm',
+        'shadow-sm hover:shadow-md border border-neutral-200/80',
+        'hover:bg-neutral-50 hover:-translate-y-0.5',
+        'active:translate-y-0',
+        'dark:bg-neutral-900/70 dark:text-neutral-50 dark:hover:bg-neutral-800',
+        'dark:border-neutral-700/80 dark:shadow-black/30'
     ),
     ghost: cn(
         'bg-transparent text-neutral-600',
-        'hover:bg-neutral-100 hover:text-neutral-900',
-        'dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
+        'hover:bg-white/70 hover:text-neutral-900',
+        'active:bg-neutral-100',
+        'dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100'
     ),
     outline: cn(
-        'bg-transparent text-brand-600',
-        'border-2 border-brand-500',
-        'hover:bg-brand-50',
-        'dark:text-brand-400 dark:border-brand-400 dark:hover:bg-brand-950'
+        'bg-white/60 text-brand-700',
+        'border-2 border-brand-200/80',
+        'hover:bg-brand-50/70 hover:border-brand-400 hover:-translate-y-0.5',
+        'hover:shadow-sm hover:shadow-brand-400/20',
+        'active:translate-y-0',
+        'dark:bg-transparent dark:text-brand-300 dark:border-brand-700/70',
+        'dark:hover:bg-brand-900/30'
     ),
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-5 py-2.5 text-base',
-    lg: 'px-8 py-4 text-lg',
+    sm: 'px-4 py-2 text-sm gap-1.5',
+    md: 'px-6 py-3 text-base gap-2',
+    lg: 'px-8 py-4 text-lg gap-2.5',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

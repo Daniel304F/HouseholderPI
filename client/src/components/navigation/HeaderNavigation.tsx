@@ -21,11 +21,11 @@ export const HeaderNavigation = () => {
     }
 
     return (
-        <header className="border-default bg-surface sticky top-0 z-50 border-b shadow-lg">
+        <header className="shadow-brand-500/5 sticky top-0 z-50 border-b border-neutral-200/70 bg-white/80 shadow-lg backdrop-blur-md dark:border-neutral-800/80 dark:bg-neutral-950/60">
             <div className="mx-auto max-w-7xl px-4 pr-8">
-                <div className="flex h-16 items-center justify-between">
+                <div className="flex h-16 items-center justify-between gap-6">
                     <div
-                        className="flex cursor-pointer items-center gap-2"
+                        className="group flex cursor-pointer items-center gap-2"
                         onClick={() => navigate('/')}
                     >
                         <img
@@ -33,7 +33,7 @@ export const HeaderNavigation = () => {
                             alt="HouseHolder Logo"
                             className="h-8 w-8"
                         />
-                        <span className="text-primary text-xl font-semibold">
+                        <span className="group-hover:text-brand-600 dark:group-hover:text-brand-300 text-xl font-semibold tracking-tight text-neutral-900 transition-colors duration-200 dark:text-neutral-100">
                             HouseHolder
                         </span>
                     </div>
@@ -64,8 +64,8 @@ export const HeaderNavigation = () => {
                         </nav>
 
                         {isAuthenticated && user && (
-                            <div className="border-l border-neutral-200 pl-4 dark:border-neutral-700">
-                                <div className="bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-300 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold">
+                            <div className="flex items-center gap-3 border-l border-neutral-200 pl-4 dark:border-neutral-800">
+                                <div className="from-brand-400/80 via-brand-500/80 to-brand-600/80 shadow-brand-500/25 ring-brand-100/60 dark:from-brand-700 dark:via-brand-600 dark:to-brand-500 dark:ring-brand-900/40 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-md ring-4">
                                     {user.name.charAt(0).toUpperCase()}
                                 </div>
                             </div>

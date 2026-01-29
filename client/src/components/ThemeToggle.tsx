@@ -16,10 +16,12 @@ const getInitialTheme = (): Theme => {
 }
 
 const buttonStyles = cn(
-    'flex size-9 items-center justify-center rounded-lg',
-    'text-neutral-600 dark:text-neutral-400',
-    'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-    'transition-colors duration-200'
+    'relative flex size-11 items-center justify-center rounded-2xl',
+    'text-neutral-600 dark:text-amber-200',
+    'bg-gradient-to-br from-white/70 via-neutral-50/60 to-brand-50/60 dark:from-neutral-900/70 dark:via-neutral-900/60 dark:to-brand-900/30',
+    'border border-neutral-200/80 dark:border-neutral-800/80 backdrop-blur',
+    'hover:-translate-y-[1px] hover:shadow-lg hover:shadow-brand-500/15',
+    'active:scale-95 transition-all duration-300'
 )
 
 export const ThemeToggle = () => {
@@ -52,7 +54,11 @@ export const ThemeToggle = () => {
                     : 'Zum Dark Mode wechseln'
             }
         >
-            <Icon className="size-5" strokeWidth={2} />
+            <span className="from-brand-400/20 via-brand-200/10 dark:from-brand-500/20 dark:via-brand-900/10 absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br to-transparent opacity-0 blur-md transition-opacity duration-500" />
+            <Icon
+                className="size-5 transition-transform duration-500"
+                strokeWidth={2}
+            />
         </button>
     )
 }

@@ -2,10 +2,10 @@ import { cn } from '../../utils/cn'
 import { Skeleton } from '../skeleton'
 
 const cardStyles = cn(
-    'flex w-full items-center gap-4',
-    'p-4 rounded-xl',
-    'bg-white dark:bg-neutral-800',
-    'border border-neutral-200 dark:border-neutral-700'
+    'flex w-full items-center gap-4 rounded-2xl p-4',
+    'bg-white/85 dark:bg-neutral-900/70 backdrop-blur-sm',
+    'border border-neutral-200/70 dark:border-neutral-800/70',
+    'shadow-md shadow-brand-500/10'
 )
 
 interface GroupCardSkeletonProps {

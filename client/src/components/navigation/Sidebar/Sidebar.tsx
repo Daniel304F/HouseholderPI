@@ -28,11 +28,11 @@ export const Sidebar = ({
                     onClick={onToggle}
                     className={cn(
                         'fixed top-20 left-0 z-40',
-                        'flex h-10 w-10 items-center justify-center',
-                        'bg-surface border-default rounded-r-lg border border-l-0',
-                        'text-text-muted hover:text-text hover:bg-surface-hover',
-                        'transition-all duration-200',
-                        'shadow-md'
+                        'flex h-10 w-10 items-center justify-center rounded-r-2xl',
+                        'shadow-brand-500/10 bg-white/85 shadow-lg backdrop-blur dark:bg-neutral-950/70',
+                        'border border-l-0 border-neutral-200/80 dark:border-neutral-800/70',
+                        'text-text-muted hover:text-text hover:shadow-brand-500/20 hover:-translate-y-[1px] hover:shadow-xl',
+                        'transition-all duration-250'
                     )}
                     aria-label="Sidebar öffnen"
                 >
@@ -43,23 +43,27 @@ export const Sidebar = ({
             {/* Sidebar Container */}
             <aside
                 className={cn(
-                    'bg-surface border-default relative flex flex-col border-r',
-                    'h-full shrink-0',
-                    'transition-[width,opacity,transform] duration-200 ease-in-out',
+                    'relative flex h-full shrink-0 flex-col border-r',
+                    'bg-white/80 backdrop-blur dark:bg-neutral-950/70',
+                    'border-neutral-200/80 dark:border-neutral-800/70',
+                    'shadow-[6px_0_24px_-14px_rgba(0,0,0,0.18)]',
+                    'transition-[width,opacity,transform] duration-250 ease-in-out',
                     isCollapsed && 'w-0 overflow-hidden opacity-0',
                     isResizing && 'transition-none',
                     className
                 )}
                 style={{ width: isCollapsed ? 0 : width }}
             >
-                <div className="border-default flex h-14 shrink-0 items-center justify-between border-b px-4">
-                    <span className="text-text font-semibold">Navigation</span>
+                <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200/80 px-4 dark:border-neutral-800/70">
+                    <span className="text-text font-semibold tracking-tight">
+                        Navigation
+                    </span>
                     <button
                         onClick={onToggle}
                         className={cn(
-                            'flex h-8 w-8 items-center justify-center rounded-md',
-                            'text-text-muted hover:text-text hover:bg-surface-hover',
-                            'transition-colors duration-150'
+                            'flex h-8 w-8 items-center justify-center rounded-xl',
+                            'text-text-muted hover:text-text hover:bg-brand-50 dark:hover:bg-brand-950 hover:-translate-y-[1px]',
+                            'transition-all duration-200'
                         )}
                         aria-label="Sidebar schließen"
                     >

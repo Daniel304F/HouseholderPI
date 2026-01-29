@@ -41,15 +41,18 @@ interface KanbanColumnProps {
 }
 
 const columnColors: Record<ColumnStatus, string> = {
-    pending: 'bg-amber-400',
-    'in-progress': 'bg-blue-400',
-    completed: 'bg-green-400',
+    pending: 'bg-gradient-to-r from-amber-400 to-orange-400',
+    'in-progress': 'bg-gradient-to-r from-blue-400 to-indigo-400',
+    completed: 'bg-gradient-to-r from-green-400 to-emerald-400',
 }
 
 const columnBgColors: Record<ColumnStatus, string> = {
-    pending: 'bg-amber-50 dark:bg-amber-950/20',
-    'in-progress': 'bg-blue-50 dark:bg-blue-950/20',
-    completed: 'bg-green-50 dark:bg-green-950/20',
+    pending:
+        'bg-gradient-to-b from-amber-50/80 to-amber-50/30 dark:from-amber-950/30 dark:to-amber-950/10',
+    'in-progress':
+        'bg-gradient-to-b from-blue-50/80 to-blue-50/30 dark:from-blue-950/30 dark:to-blue-950/10',
+    completed:
+        'bg-gradient-to-b from-green-50/80 to-green-50/30 dark:from-green-950/30 dark:to-green-950/10',
 }
 
 export const KanbanColumn = ({
@@ -72,7 +75,9 @@ export const KanbanColumn = ({
     return (
         <div
             className={cn(
-                'flex flex-col rounded-xl transition-all duration-200',
+                'flex flex-col rounded-2xl transition-all duration-300',
+                'border border-neutral-200/50 dark:border-neutral-700/50',
+                'shadow-sm',
                 columnBgColors[column.id],
                 // Desktop: fixed width with max height, Mobile: full width, Compact: flexible
                 isMobile
@@ -82,7 +87,7 @@ export const KanbanColumn = ({
                       : 'max-h-[65vh] max-w-72 min-w-72',
                 // Drop target styling
                 isDropTarget &&
-                    'ring-brand-500 bg-brand-50 dark:bg-brand-950/30 ring-2 ring-inset'
+                    'ring-brand-500 bg-brand-50 dark:bg-brand-950/30 scale-[1.02] shadow-lg ring-2 ring-inset'
             )}
             {...dropZoneProps}
         >
@@ -91,19 +96,19 @@ export const KanbanColumn = ({
                 <div
                     className={cn(
                         'flex items-center justify-between',
-                        isCompact ? 'p-2' : 'p-3'
+                        isCompact ? 'p-3' : 'p-4'
                     )}
                 >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                         <div
                             className={cn(
-                                'size-2 rounded-full',
+                                'size-2.5 rounded-full shadow-sm',
                                 columnColors[column.id]
                             )}
                         />
                         <h3
                             className={cn(
-                                'font-semibold text-neutral-900 dark:text-white',
+                                'font-bold text-neutral-800 dark:text-neutral-100',
                                 isCompact && 'text-sm'
                             )}
                         >
@@ -111,17 +116,18 @@ export const KanbanColumn = ({
                         </h3>
                         <span
                             className={cn(
-                                'flex items-center justify-center rounded-full text-xs font-medium',
-                                'bg-neutral-200 dark:bg-neutral-700',
-                                'text-neutral-600 dark:text-neutral-400',
-                                isCompact ? 'size-4' : 'size-5'
+                                'flex items-center justify-center rounded-full text-xs font-bold',
+                                'bg-white/80 dark:bg-neutral-800/80',
+                                'text-neutral-600 dark:text-neutral-300',
+                                'border border-neutral-200/50 shadow-sm dark:border-neutral-700/50',
+                                isCompact ? 'size-5' : 'size-6'
                             )}
                         >
                             {column.tasks.length}
                         </span>
                     </div>
                     {!isCompact && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                             {/* Priority Filter */}
                             {onToggleFilter && onClearFilters && (
                                 <PriorityFilterDropdown
@@ -133,10 +139,11 @@ export const KanbanColumn = ({
                             )}
                             <button
                                 className={cn(
-                                    'rounded-lg p-1 transition-colors',
+                                    'rounded-lg p-1.5 transition-all duration-200',
                                     'text-neutral-400 hover:text-neutral-600',
                                     'dark:text-neutral-500 dark:hover:text-neutral-300',
-                                    'hover:bg-white/50 dark:hover:bg-neutral-800/50'
+                                    'hover:bg-white/70 dark:hover:bg-neutral-800/70',
+                                    'active:scale-90'
                                 )}
                             >
                                 <MoreHorizontal className="size-4" />
@@ -156,14 +163,18 @@ export const KanbanColumn = ({
                 {column.tasks.length === 0 ? (
                     <div
                         className={cn(
-                            'flex flex-col items-center justify-center py-8',
+                            'flex flex-col items-center justify-center px-4 py-10',
                             'text-sm text-neutral-400 dark:text-neutral-500',
-                            isDropTarget &&
-                                'border-brand-400 rounded-lg border-2 border-dashed'
+                            'rounded-xl',
+                            isDropTarget
+                                ? 'border-brand-400 bg-brand-50/50 dark:bg-brand-950/20 border-2 border-dashed'
+                                : 'border border-dashed border-neutral-300 dark:border-neutral-600'
                         )}
                     >
-                        <p>
-                            {isDropTarget ? 'Hier ablegen' : 'Keine Aufgaben'}
+                        <p className="font-medium">
+                            {isDropTarget
+                                ? '✨ Hier ablegen'
+                                : 'Keine Aufgaben'}
                         </p>
                     </div>
                 ) : (
@@ -182,15 +193,17 @@ export const KanbanColumn = ({
                 <button
                     onClick={() => onAddTask(column.id)}
                     className={cn(
-                        'flex items-center justify-center gap-2 rounded-lg',
-                        'border border-dashed',
-                        'border-neutral-300 dark:border-neutral-600',
-                        'text-sm text-neutral-500 dark:text-neutral-400',
+                        'flex items-center justify-center gap-2 rounded-xl',
+                        'border-2 border-dashed',
+                        'border-neutral-300/80 dark:border-neutral-600/80',
+                        'text-sm font-medium text-neutral-500 dark:text-neutral-400',
                         'transition-all duration-200',
                         'hover:border-brand-400 hover:text-brand-600',
                         'dark:hover:border-brand-500 dark:hover:text-brand-400',
-                        'hover:bg-white/50 dark:hover:bg-neutral-800/50',
-                        isCompact ? 'p-2' : 'p-3'
+                        'hover:bg-brand-50/50 dark:hover:bg-brand-950/30',
+                        'hover:scale-[1.02]',
+                        'active:scale-[0.98]',
+                        isCompact ? 'p-2.5' : 'p-3.5'
                     )}
                 >
                     <Plus className="size-4" />

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 @variant dark (&:where(.dark, .dark *));
 @theme {
     --color-brand-50: hsl(147, 78%, 97%);
@@ -99,6 +100,16 @@
     /* Border colors */
     --semantic-border: hsl(147, 6%, 90%);
     --semantic-border-strong: hsl(147, 5%, 82%);
+
+    /* Shadows for light mode */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03), 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    --shadow-md:
+        0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg:
+        0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --shadow-xl:
+        0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    --shadow-glow: 0 0 20px -5px hsl(149, 58%, 50%, 0.3);
 }
 
 .dark {
@@ -115,12 +126,40 @@
     /* Border colors */
     --semantic-border: hsl(147, 6%, 22%);
     --semantic-border-strong: hsl(147, 5%, 30%);
+
+    /* Shadows for dark mode - subtle glows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+    --shadow-glow: 0 0 25px -5px hsl(149, 58%, 40%, 0.4);
 }
 
 body {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family:
+        'Manrope',
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        sans-serif;
     color: var(--semantic-text);
-    background-color: var(--semantic-surface);
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            hsl(147 78% 96% / 0.8),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 80% 0%,
+            hsl(149 58% 50% / 0.08),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 100%,
+            hsl(210 80% 97% / 0.7),
+            transparent 45%
+        ),
+        var(--semantic-surface);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -128,6 +167,26 @@ body {
     transition:
         background-color 0.2s ease,
         color 0.2s ease;
+}
+
+.dark body {
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            hsl(153 74% 18% / 0.4),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 80% 0%,
+            hsl(149 58% 30% / 0.2),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 100%,
+            hsl(154 78% 10% / 0.6),
+            transparent 45%
+        ),
+        var(--semantic-surface);
 }
 
 a {
@@ -194,4 +253,156 @@ a:hover {
 
 .dark .kanban-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--color-neutral-500);
+}
+/* Global smooth transitions */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus visible styles */
+*:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+}
+
+/* Interactive element base styles */
+button,
+[role='button'],
+input,
+select,
+textarea {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+/* Soft hover lift effect class */
+.hover-lift {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Active press effect */
+.press-effect:active {
+    transform: scale(0.98);
+}
+
+/* Glass morphism effect */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.dark .glass {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Gradient border effect */
+.gradient-border {
+    position: relative;
+    background: var(--semantic-surface);
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        var(--color-brand-400),
+        var(--color-brand-600)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gradient-border:hover::before {
+    opacity: 1;
+}
+
+/* Glow effect on focus/hover */
+.glow-brand:hover,
+.glow-brand:focus-visible {
+    box-shadow: var(--shadow-glow);
+}
+
+/* Smooth card appearance animation */
+@keyframes card-appear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-card {
+    animation: card-appear 0.3s ease forwards;
+}
+
+/* Pulse animation for notifications */
+@keyframes gentle-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.animate-pulse-gentle {
+    animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--color-neutral-200) 25%,
+        var(--color-neutral-100) 50%,
+        var(--color-neutral-200) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--color-neutral-800) 25%,
+        var(--color-neutral-700) 50%,
+        var(--color-neutral-800) 75%
+    );
+    background-size: 200% 100%;
 }
