@@ -4,22 +4,24 @@ import {
     TrendingUp,
     CheckCircle2,
     Target,
-    Users,
     Trophy,
     ArrowLeft,
     Timer,
-    Star,
 } from 'lucide-react'
-import { cn } from '../../utils/cn'
 import { Button } from '../../components/Button'
 import {
     StatCard,
     BarChart,
     DonutChart,
     LineChart,
-    ProgressRing,
 } from '../../components/charts'
-import { StatsPageSkeleton, StatsErrorState } from '../../components/ui'
+import {
+    StatsPageSkeleton,
+    StatsErrorState,
+    ChartCard,
+    StatsHeader,
+} from '../../components/ui'
+import { MemberLeaderboard, FrequentTasksList } from '../../components/stats'
 import { statisticsApi } from '../../api/statistics'
 import { groupsApi } from '../../api/groups'
 import { queryKeys } from '../../lib/queryKeys'
@@ -117,34 +119,22 @@ export const GroupStats = () => {
         stats.memberStats[0]
     )
 
+    const topPerformerBadge =
+        topPerformer && topPerformer.completedTasks > 0 ? (
+            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-2 text-white">
+                <Trophy className="size-5" />
+                <span className="font-bold">Top: {topPerformer.userName}</span>
+            </div>
+        ) : null
+
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <Link to={`/dashboard/groups/${groupId}`}>
-                            <Button variant="ghost" size="sm">
-                                <ArrowLeft className="size-4" />
-                            </Button>
-                        </Link>
-                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-                            {group?.name} - Statistiken
-                        </h1>
-                    </div>
-                    <p className="mt-1 ml-11 text-neutral-500 dark:text-neutral-400">
-                        Gruppenaktivität und Leistungsübersicht
-                    </p>
-                </div>
-                {topPerformer && topPerformer.completedTasks > 0 && (
-                    <div className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-2 text-white md:flex">
-                        <Trophy className="size-5" />
-                        <span className="font-bold">
-                            Top: {topPerformer.userName}
-                        </span>
-                    </div>
-                )}
-            </div>
+            <StatsHeader
+                title={`${group?.name} - Statistiken`}
+                subtitle="Gruppenaktivität und Leistungsübersicht"
+                backLink={`/dashboard/groups/${groupId}`}
+                badge={topPerformerBadge}
+            />
 
             {/* Stat Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -176,135 +166,33 @@ export const GroupStats = () => {
 
             {/* Charts Row */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Monthly Progress */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                        Monatlicher Fortschritt
-                    </h2>
+                <ChartCard title="Monatlicher Fortschritt">
                     <LineChart series={lineChartSeries} height={220} />
-                </div>
+                </ChartCard>
 
-                {/* Status Distribution */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                        Aufgaben nach Status
-                    </h2>
-                    <div className="flex items-center justify-center">
-                        <DonutChart
-                            data={statusDonutData}
-                            totalLabel="Aufgaben"
-                        />
-                    </div>
-                </div>
+                <ChartCard title="Aufgaben nach Status" centerContent>
+                    <DonutChart data={statusDonutData} totalLabel="Aufgaben" />
+                </ChartCard>
             </div>
 
             {/* Member Stats & Most Frequent Tasks */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Member Leaderboard */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-white">
-                        <Users className="size-5" />
-                        Mitglieder Rangliste
-                    </h2>
-                    <div className="space-y-3">
-                        {stats.memberStats.map((member, index) => (
-                            <div
-                                key={member.userId}
-                                className={cn(
-                                    'flex items-center gap-3 rounded-lg p-3',
-                                    index === 0
-                                        ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20'
-                                        : 'bg-neutral-50 dark:bg-neutral-800/50'
-                                )}
-                            >
-                                <div
-                                    className={cn(
-                                        'flex size-8 shrink-0 items-center justify-center rounded-full font-bold',
-                                        index === 0
-                                            ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white'
-                                            : index === 1
-                                              ? 'bg-neutral-300 text-neutral-700 dark:bg-neutral-600 dark:text-neutral-200'
-                                              : index === 2
-                                                ? 'bg-orange-200 text-orange-700 dark:bg-orange-900 dark:text-orange-200'
-                                                : 'bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
-                                    )}
-                                >
-                                    {index + 1}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate font-medium text-neutral-900 dark:text-white">
-                                        {member.userName}
-                                    </p>
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {member.completedTasks} erledigt
-                                        {member.assignedTasks > 0 &&
-                                            ` von ${member.assignedTasks}`}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <ProgressRing
-                                        value={member.completionRate}
-                                        size={48}
-                                        strokeWidth={6}
-                                        showValue={false}
-                                        color={getMemberColor(index)}
-                                    />
-                                    <p className="mt-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                                        {member.completionRate}%
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Most Frequent Tasks */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-white">
-                        <Star className="size-5" />
-                        Häufigste Aufgaben
-                    </h2>
-                    {stats.mostFrequentTasks.length > 0 ? (
-                        <div className="space-y-3">
-                            {stats.mostFrequentTasks
-                                .slice(0, 8)
-                                .map((task, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-3"
-                                    >
-                                        <div className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-medium">
-                                            {task.count}x
-                                        </div>
-                                        <p className="truncate text-neutral-700 capitalize dark:text-neutral-300">
-                                            {task.title}
-                                        </p>
-                                    </div>
-                                ))}
-                        </div>
-                    ) : (
-                        <p className="py-8 text-center text-neutral-500 dark:text-neutral-400">
-                            Noch keine erledigten Aufgaben
-                        </p>
-                    )}
-                </div>
+                <MemberLeaderboard
+                    members={stats.memberStats}
+                    getMemberColor={getMemberColor}
+                />
+                <FrequentTasksList tasks={stats.mostFrequentTasks} />
             </div>
 
             {/* Member Performance Bar Chart */}
-            <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                    Erledigte Aufgaben pro Mitglied
-                </h2>
+            <ChartCard title="Erledigte Aufgaben pro Mitglied">
                 <BarChart data={memberChartData} horizontal showValues />
-            </div>
+            </ChartCard>
 
             {/* Monthly Bar Chart */}
-            <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                    Erledigte Aufgaben pro Monat
-                </h2>
+            <ChartCard title="Erledigte Aufgaben pro Monat">
                 <BarChart data={monthlyChartData} height={200} />
-            </div>
+            </ChartCard>
         </div>
     )
 }

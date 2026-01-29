@@ -14,7 +14,12 @@ import {
     LineChart,
     ProgressRing,
 } from '../../components/charts'
-import { StatsPageSkeleton, StatsErrorState } from '../../components/ui'
+import {
+    StatsPageSkeleton,
+    StatsErrorState,
+    ChartCard,
+    StatsHeader,
+} from '../../components/ui'
 import { statisticsApi } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
 import { CHART_COLORS } from '../../constants'
@@ -80,27 +85,21 @@ export const PersonalStats = () => {
         },
     ]
 
+    const streakBadge =
+        stats.streak > 0 ? (
+            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-white">
+                <Flame className="size-5" />
+                <span className="font-bold">{stats.streak} Tage Streak!</span>
+            </div>
+        ) : null
+
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        Meine Statistiken
-                    </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400">
-                        Dein persönlicher Fortschritt auf einen Blick
-                    </p>
-                </div>
-                {stats.streak > 0 && (
-                    <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-white">
-                        <Flame className="size-5" />
-                        <span className="font-bold">
-                            {stats.streak} Tage Streak!
-                        </span>
-                    </div>
-                )}
-            </div>
+            <StatsHeader
+                title="Meine Statistiken"
+                subtitle="Dein persönlicher Fortschritt auf einen Blick"
+                badge={streakBadge}
+            />
 
             {/* Stat Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -132,36 +131,19 @@ export const PersonalStats = () => {
 
             {/* Charts Row */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Monthly Progress */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                        Monatlicher Fortschritt
-                    </h2>
+                <ChartCard title="Monatlicher Fortschritt">
                     <LineChart series={lineChartSeries} height={220} />
-                </div>
+                </ChartCard>
 
-                {/* Status Distribution */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                        Aufgaben nach Status
-                    </h2>
-                    <div className="flex items-center justify-center">
-                        <DonutChart
-                            data={statusDonutData}
-                            totalLabel="Aufgaben"
-                        />
-                    </div>
-                </div>
+                <ChartCard title="Aufgaben nach Status" centerContent>
+                    <DonutChart data={statusDonutData} totalLabel="Aufgaben" />
+                </ChartCard>
             </div>
 
             {/* Completion Rate Ring & Tasks by Group */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Completion Progress */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                        Abschlussfortschritt
-                    </h2>
-                    <div className="flex items-center justify-center gap-8">
+                <ChartCard title="Abschlussfortschritt" centerContent>
+                    <div className="flex items-center gap-8">
                         <ProgressRing
                             value={stats.completionRate}
                             size={140}
@@ -189,14 +171,12 @@ export const PersonalStats = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </ChartCard>
 
-                {/* Tasks by Group */}
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-white">
-                        <Users className="size-5" />
-                        Aufgaben nach Gruppe
-                    </h2>
+                <ChartCard
+                    title="Aufgaben nach Gruppe"
+                    icon={<Users className="size-5" />}
+                >
                     {stats.tasksByGroup.length > 0 ? (
                         <BarChart
                             data={stats.tasksByGroup.map((g, i) => ({
@@ -217,16 +197,13 @@ export const PersonalStats = () => {
                             Noch keine Aufgaben in Gruppen
                         </p>
                     )}
-                </div>
+                </ChartCard>
             </div>
 
             {/* Monthly Bar Chart */}
-            <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-                <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
-                    Erledigte Aufgaben pro Monat
-                </h2>
+            <ChartCard title="Erledigte Aufgaben pro Monat">
                 <BarChart data={monthlyChartData} height={200} />
-            </div>
+            </ChartCard>
         </div>
     )
 }
