@@ -1,5 +1,5 @@
 import { UserPlus, Plus } from 'lucide-react'
-import { Button } from '../Button'
+import { Button } from '../common'
 import { useViewport } from '../../hooks/useViewport'
 import { cn } from '../../utils/cn'
 

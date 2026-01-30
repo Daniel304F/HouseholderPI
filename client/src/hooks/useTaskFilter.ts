@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
-import type { Task } from '../components/tasks'
+import type { Task } from '../api/tasks'
 
 export type Priority = 'low' | 'medium' | 'high'
 export type ColumnStatus = 'pending' | 'in-progress' | 'completed'

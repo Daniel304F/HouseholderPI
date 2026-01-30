@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react'
-import { ChartCard } from '../ui/ChartCard'
+import { ChartCard } from '../charts'
 
 interface FrequentTask {
     title: string

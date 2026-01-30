@@ -1,15 +1,13 @@
-import type { ReactNode } from 'react'
-import { cn } from '../utils/cn'
+import type { ReactNode, ButtonHTMLAttributes } from 'react'
+import { cn } from '../../utils/cn'
 
-type IconButtonVariant = 'default' | 'ghost'
+type IconButtonVariant = 'default' | 'ghost' | 'danger'
 type IconButtonSize = 'sm' | 'md' | 'lg'
 
-interface IconButtonProps {
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     icon: ReactNode
-    onClick: () => void
     variant?: IconButtonVariant
     size?: IconButtonSize
-    className?: string
     'aria-label'?: string
 }
 
@@ -17,7 +15,8 @@ const baseStyles = cn(
     'cursor-pointer rounded-full',
     'transition-all duration-200 ease-out',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30',
-    'active:scale-90'
+    'active:scale-90',
+    'disabled:cursor-not-allowed disabled:opacity-50'
 )
 
 const variantStyles: Record<IconButtonVariant, string> = {
@@ -35,6 +34,12 @@ const variantStyles: Record<IconButtonVariant, string> = {
         'hover:bg-neutral-100/80 dark:hover:bg-neutral-800/80',
         'hover:text-neutral-600 dark:hover:text-neutral-300'
     ),
+    danger: cn(
+        'bg-transparent',
+        'text-neutral-400',
+        'hover:bg-error-100 hover:text-error-600',
+        'dark:hover:bg-error-900/30 dark:hover:text-error-400'
+    ),
 }
 
 const sizeStyles: Record<IconButtonSize, string> = {
@@ -45,16 +50,15 @@ const sizeStyles: Record<IconButtonSize, string> = {
 
 export const IconButton = ({
     icon,
-    onClick,
     variant = 'default',
     size = 'md',
     className,
     'aria-label': ariaLabel,
+    ...props
 }: IconButtonProps) => {
     return (
         <button
             type="button"
-            onClick={onClick}
             className={cn(
                 baseStyles,
                 variantStyles[variant],
@@ -62,6 +66,7 @@ export const IconButton = ({
                 className
             )}
             aria-label={ariaLabel}
+            {...props}
         >
             {icon}
         </button>

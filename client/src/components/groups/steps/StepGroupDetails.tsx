@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Camera } from 'lucide-react'
-import { Input } from '../../Input'
+import { Input } from '../../common'
 import { cn } from '../../../utils/cn'
 
 export interface CreateGroupData {

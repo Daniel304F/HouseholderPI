@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { UserPlus, X, Mail, Loader2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../Button'
-import { Input } from '../Input'
+import { Button, Input } from '../common'
 
 interface AddFriendModalProps {
     isOpen: boolean

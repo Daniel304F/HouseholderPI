@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
-import { Button } from '../Button'
+import { Button } from '../common'
 import { BaseModal } from '../modal'
 import { TaskForm, type TaskFormData, type TaskFormErrors } from './TaskForm'
 import { toDateInputValue } from '../../utils/date.utils'

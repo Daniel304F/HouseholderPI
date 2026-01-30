@@ -8,19 +8,15 @@ import {
     ArrowLeft,
     Timer,
 } from 'lucide-react'
-import { Button } from '../../components/Button'
+import { Button, PageHeader } from '../../components/common'
 import {
     StatCard,
     BarChart,
     DonutChart,
     LineChart,
-} from '../../components/charts'
-import {
-    StatsPageSkeleton,
-    StatsErrorState,
     ChartCard,
-    StatsHeader,
-} from '../../components/ui'
+} from '../../components/charts'
+import { PageHeaderSkeleton, StatCardsSkeleton, StatsErrorState } from '../../components/feedback'
 import { MemberLeaderboard, FrequentTasksList } from '../../components/stats'
 import { statisticsApi } from '../../api/statistics'
 import { groupsApi } from '../../api/groups'
@@ -47,19 +43,25 @@ export const GroupStats = () => {
     })
 
     if (isLoading) {
-        return <StatsPageSkeleton showBadge />
+        return (
+            <div className="space-y-6">
+                <PageHeaderSkeleton showBadge />
+                <StatCardsSkeleton count={4} />
+            </div>
+        )
     }
 
     if (isError || !stats) {
         return (
-            <StatsErrorState>
+            <div className="space-y-6">
+                <StatsErrorState />
                 <Link to={`/dashboard/groups/${groupId}`}>
                     <Button variant="secondary">
                         <ArrowLeft className="mr-2 size-4" />
                         Zurück zur Gruppe
                     </Button>
                 </Link>
-            </StatsErrorState>
+            </div>
         )
     }
 
@@ -129,10 +131,17 @@ export const GroupStats = () => {
 
     return (
         <div className="space-y-6">
-            <StatsHeader
+            <PageHeader
                 title={`${group?.name} - Statistiken`}
                 subtitle="Gruppenaktivität und Leistungsübersicht"
-                backLink={`/dashboard/groups/${groupId}`}
+                backButton={
+                    <Link
+                        to={`/dashboard/groups/${groupId}`}
+                        className="flex size-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                    >
+                        <ArrowLeft className="size-5" />
+                    </Link>
+                }
                 badge={topPerformerBadge}
             />
 

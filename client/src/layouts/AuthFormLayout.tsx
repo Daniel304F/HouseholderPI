@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { Card } from '../components/Card'
-import { Headline } from '../components/Headline'
+import { Card, Headline } from '../components/common'
 
 interface AuthFormLayoutProps {
     title: string

@@ -1,7 +1,8 @@
-import { cn } from '../utils/cn'
+import { cn } from '../../utils/cn'
 
 interface PasswordStrengthMeterProps {
-    strength: number
+    strength: number // 0-5
+    className?: string
 }
 
 const strengthConfig = {
@@ -26,6 +27,7 @@ const strengthConfig = {
 
 export const PasswordStrengthMeter = ({
     strength,
+    className,
 }: PasswordStrengthMeterProps) => {
     if (strength === 0) return null
 
@@ -35,7 +37,7 @@ export const PasswordStrengthMeter = ({
     const labelColor = strengthConfig.labelColors[colorIndex]
 
     return (
-        <div className="space-y-2 pt-1">
+        <div className={cn('space-y-2 pt-1', className)}>
             <div className="flex items-center gap-2">
                 <div className="flex flex-1 gap-1">
                     {Array.from({ length: 5 }).map((_, index) => (

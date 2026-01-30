@@ -1,5 +1,5 @@
 import { Shield, Trash2 } from 'lucide-react'
-import { Button } from '../../Button'
+import { Button } from '../../common'
 import { RoleIcon, RoleBadge } from '../RoleBadge'
 import { cn } from '../../../utils/cn'
 import type { GroupMember } from '../../../api/groups'

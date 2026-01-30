@@ -8,7 +8,7 @@ import {
 } from '../../hooks/useKanbanDragDrop'
 import { KanbanColumn, type KanbanColumnData } from './KanbanColumn'
 import { ColumnSelector } from './ColumnSelector'
-import type { Task } from '../tasks'
+import type { Task } from '../../api/tasks'
 
 interface KanbanBoardProps {
     tasks: Task[]

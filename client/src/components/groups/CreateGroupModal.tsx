@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 import { CreateGroupMultiStep } from './CreateGroupMultiStep'
-import { IconButton } from '../IconButton'
+import { IconButton } from '../common'
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut'
 import type { Group } from '../../api/groups'
 

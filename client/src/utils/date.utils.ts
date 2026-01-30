@@ -46,3 +46,42 @@ export const toDateInputValue = (date: Date | string): string => {
 export const getTomorrowDateValue = (): string => {
     return toDateInputValue(new Date(Date.now() + 24 * 60 * 60 * 1000))
 }
+
+/**
+ * Formatiert ein Datum im deutschen Format (DD.MM.YYYY)
+ * @param dateStr - ISO Datum-String
+ * @returns Formatierter String (z.B. "15.03.2024")
+ */
+export const formatDate = (dateStr: string): string => {
+    return new Date(dateStr).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    })
+}
+
+/**
+ * Formatiert ein Datum mit Uhrzeit im deutschen Format
+ * @param dateStr - ISO Datum-String
+ * @returns Formatierter String (z.B. "15.03.2024, 14:30")
+ */
+export const formatDateTime = (dateStr: string): string => {
+    return new Date(dateStr).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+}
+
+/**
+ * Berechnet die verbleibenden Tage bis zu einem Datum
+ * @param dateStr - ISO Datum-String
+ * @returns Anzahl der Tage (negativ wenn überfällig)
+ */
+export const getDaysUntil = (dateStr: string): number => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}

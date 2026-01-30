@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut'
-import { IconButton } from '../IconButton'
+import { IconButton } from '../common'
 import {
     ModalHeight,
     ModalPosition,

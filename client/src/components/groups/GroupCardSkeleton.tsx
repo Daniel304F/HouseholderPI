@@ -1,5 +1,5 @@
 import { cn } from '../../utils/cn'
-import { Skeleton } from '../skeleton'
+import { Skeleton } from '../feedback'
 
 const cardStyles = cn(
     'flex w-full items-center gap-4 rounded-2xl p-4',

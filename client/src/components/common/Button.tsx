@@ -1,8 +1,8 @@
 import { type ButtonHTMLAttributes, type ReactNode, forwardRef } from 'react'
 import { Loader2 } from 'lucide-react'
-import { cn } from '../utils/cn'
+import { cn } from '../../utils/cn'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 type IconPosition = 'left' | 'right'
 
@@ -20,7 +20,9 @@ const baseStyles = cn(
     'inline-flex cursor-pointer items-center justify-center gap-2',
     'rounded-2xl font-semibold tracking-tight',
     'transition-all duration-200 ease-out',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/80',
+    'focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+    'dark:focus-visible:ring-offset-neutral-900',
     'disabled:cursor-not-allowed disabled:opacity-60',
     'active:scale-[0.985]'
 )
@@ -33,7 +35,8 @@ const variantStyles: Record<ButtonVariant, string> = {
         'active:translate-y-0 active:shadow-md',
         'border border-brand-400/60 dark:border-brand-500/60',
         'dark:from-brand-500 dark:via-brand-600 dark:to-brand-700',
-        'disabled:bg-brand-300 dark:disabled:bg-brand-800 disabled:shadow-none disabled:hover:translate-y-0'
+        'disabled:bg-brand-300 dark:disabled:bg-brand-800',
+        'disabled:shadow-none disabled:hover:translate-y-0'
     ),
     secondary: cn(
         'bg-white/80 text-neutral-900 backdrop-blur-sm',
@@ -57,6 +60,13 @@ const variantStyles: Record<ButtonVariant, string> = {
         'active:translate-y-0',
         'dark:bg-transparent dark:text-brand-300 dark:border-brand-700/70',
         'dark:hover:bg-brand-900/30'
+    ),
+    danger: cn(
+        'bg-gradient-to-br from-error-400 via-error-500 to-error-600 text-white',
+        'shadow-lg shadow-error-500/25 hover:shadow-xl hover:shadow-error-500/35',
+        'hover:-translate-y-0.5',
+        'active:translate-y-0 active:shadow-md',
+        'border border-error-400/60'
     ),
 }
 

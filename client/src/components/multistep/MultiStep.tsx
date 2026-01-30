@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../Button'
+import { Button } from '../common'
 import {
     MultiStepContext,
     type MultiStepContextValue,

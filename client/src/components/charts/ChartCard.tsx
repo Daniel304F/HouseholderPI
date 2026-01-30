@@ -7,14 +7,19 @@ interface ChartCardProps {
     children: ReactNode
     className?: string
     centerContent?: boolean
+    subtitle?: string
 }
 
+/**
+ * Card wrapper for chart components with consistent styling
+ */
 export const ChartCard = ({
     title,
     icon,
     children,
     className,
     centerContent = false,
+    subtitle,
 }: ChartCardProps) => {
     return (
         <div
@@ -24,15 +29,22 @@ export const ChartCard = ({
                 className
             )}
         >
-            <h2
-                className={cn(
-                    'mb-4 text-lg font-semibold text-neutral-900 dark:text-white',
-                    icon && 'flex items-center gap-2'
+            <div className="mb-4">
+                <h2
+                    className={cn(
+                        'text-lg font-semibold text-neutral-900 dark:text-white',
+                        icon && 'flex items-center gap-2'
+                    )}
+                >
+                    {icon}
+                    {title}
+                </h2>
+                {subtitle && (
+                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        {subtitle}
+                    </p>
                 )}
-            >
-                {icon}
-                {title}
-            </h2>
+            </div>
             <div className={cn(centerContent && 'flex items-center justify-center')}>
                 {children}
             </div>

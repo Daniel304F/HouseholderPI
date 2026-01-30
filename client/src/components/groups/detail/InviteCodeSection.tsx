@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Copy, Check, RefreshCw } from 'lucide-react'
-import { Button } from '../../Button'
+import { Button } from '../../common'
 import { cn } from '../../../utils/cn'
 
 interface InviteCodeSectionProps {

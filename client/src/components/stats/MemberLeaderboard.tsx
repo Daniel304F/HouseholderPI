@@ -1,7 +1,7 @@
 import { Users } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { ProgressRing } from '../charts'
-import { ChartCard } from '../ui/ChartCard'
+import { ChartCard } from '../charts'
 
 interface MemberStat {
     userId: string

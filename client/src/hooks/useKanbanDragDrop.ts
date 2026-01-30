@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import type { Task } from '../components/tasks'
+import type { Task } from '../api/tasks'
 
 export type ColumnStatus = 'pending' | 'in-progress' | 'completed'
 
@@ -100,8 +100,6 @@ export const useKanbanDragDrop = ({
     const handleDrop = useCallback(
         async (columnId: ColumnStatus) => {
             const task = draggedTaskRef.current
-
-            // Nur wenn eine Task gezogen wird und sich die Spalte ändert
             if (!task || task.status === columnId) {
                 handleDragEnd()
                 return
@@ -125,11 +123,9 @@ export const useKanbanDragDrop = ({
         (task: Task) => ({
             draggable: true,
             onDragStart: (e: React.DragEvent) => {
-                // Setze Drag-Daten für bessere Browser-Kompatibilität
                 e.dataTransfer.effectAllowed = 'move'
                 e.dataTransfer.setData('text/plain', task.id)
 
-                // Kleine Verzögerung für visuelles Feedback
                 requestAnimationFrame(() => {
                     handleDragStart(task)
                 })
@@ -149,7 +145,6 @@ export const useKanbanDragDrop = ({
                 handleDragOver(columnId)
             },
             onDragLeave: (e: React.DragEvent) => {
-                // Nur wenn wir wirklich die Drop-Zone verlassen
                 const relatedTarget = e.relatedTarget as HTMLElement
                 const currentTarget = e.currentTarget as HTMLElement
 

@@ -1,6 +1,6 @@
 import { UserPlus, Users } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../Button'
+import { Button } from '../common'
 
 interface FriendsEmptyStateProps {
     onAddFriend: () => void

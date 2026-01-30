@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, UserPlus, RefreshCw } from 'lucide-react'
-import { Button } from '../../components/Button'
+import { Button } from '../../components/common'
 import {
     GroupCard,
     GroupCardSkeleton,

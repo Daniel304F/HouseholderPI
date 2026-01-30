@@ -1,7 +1,7 @@
 import { Check, X, Clock } from 'lucide-react'
 import type { FriendRequest, SentRequest } from '../../api/friends'
 import { cn } from '../../utils/cn'
-import { Button } from '../Button'
+import { Button } from '../common'
 
 interface FriendRequestCardProps {
     request: FriendRequest

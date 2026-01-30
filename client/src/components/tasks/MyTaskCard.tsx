@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Clock, CheckCircle2, Circle, Pencil, Sparkles } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { PriorityBadge } from '../ui/PriorityBadge'
+import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
 

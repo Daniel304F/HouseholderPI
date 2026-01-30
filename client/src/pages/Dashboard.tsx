@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useHeaderContext } from '../contexts/HeaderContext'
-import { Headline } from '../components/Headline'
+import { Headline } from '../components/common'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 
 export const Dashboard = () => {

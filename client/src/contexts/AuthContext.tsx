@@ -72,9 +72,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const login = useCallback(
         async (data: LoginRequest) => {
             const response = await authApi.login(data)
-            // console.log('Login response:', response)
-            console.log('data:', response.data)
-
             const { user, accessToken } = response.data
 
             localStorage.setItem('accessToken', accessToken)

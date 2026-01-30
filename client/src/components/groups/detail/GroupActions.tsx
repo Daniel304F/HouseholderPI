@@ -1,5 +1,5 @@
 import { Trash2, LogOut } from 'lucide-react'
-import { Button } from '../../Button'
+import { Button } from '../../common'
 
 interface GroupActionsProps {
     isOwner: boolean

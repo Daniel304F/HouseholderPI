@@ -1,7 +1,7 @@
 import { Pencil } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
-import { PriorityBadge } from '../ui/PriorityBadge'
+import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
 

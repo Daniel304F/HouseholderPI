@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserPlus, RefreshCw, Inbox, Send, Users } from 'lucide-react'
-import { Button } from '../../components/Button'
+import { Button } from '../../components/common'
 import {
     FriendCard,
     FriendCardSkeleton,
@@ -11,7 +11,7 @@ import {
     AddFriendModal,
     FriendsEmptyState,
 } from '../../components/friends'
-import { ContentTabs, type Tab } from '../../components/ContentTabs'
+import { Tabs as ContentTabs, type Tab } from '../../components/display'
 import { friendsApi } from '../../api/friends'
 import { cn } from '../../utils/cn'
 

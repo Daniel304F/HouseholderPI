@@ -1,16 +1,13 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
-
-import { PasswordInput } from '../components/auth/PasswordInput'
+import { Button, Input } from '../components/common'
+import { PasswordInput, PasswordStrengthMeter } from '../components/forms'
 import { PasswordRequirementsList } from '../components/auth/PasswordRequirementsList'
 import {
     calculatePasswordStrength,
     PASSWORD_REQUIREMENTS,
 } from '../utils/passwordUtils'
-import { Input } from '../components/Input'
-import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter'
-import { Button } from '../components/Button'
 import { useAuth } from '../contexts/AuthContext'
 import { getErrorMessage, isApiError } from '../lib/axios'
 import { AuthFormLayout } from '../layouts/AuthFormLayout'

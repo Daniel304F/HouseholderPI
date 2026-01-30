@@ -7,8 +7,8 @@ import {
     Link2,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { PriorityBadge } from '../ui/PriorityBadge'
-import type { Task } from '../tasks'
+import { PriorityBadge } from '../tasks'
+import type { Task } from '../../api/tasks'
 
 interface KanbanCardProps {
     task: Task

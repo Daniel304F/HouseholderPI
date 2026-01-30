@@ -11,6 +11,9 @@ interface PriorityBadgeProps {
     className?: string
 }
 
+/**
+ * Badge component for displaying task priority
+ */
 export const PriorityBadge = ({
     priority,
     size = 'md',

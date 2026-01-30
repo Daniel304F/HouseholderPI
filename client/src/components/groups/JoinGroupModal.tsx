@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Button } from '../Button'
-import { Input } from '../Input'
+import { Button, Input } from '../common'
 import { groupsApi } from '../../api/groups'
 import { cn } from '../../utils/cn'
 

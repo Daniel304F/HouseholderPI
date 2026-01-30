@@ -1,7 +1,7 @@
 import { Calendar, Flag, User } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Input } from '../Input'
-import { ImageUpload } from '../ui/ImageUpload'
+import { Input } from '../common'
+import { ImageUpload } from '../forms'
 import {
     STATUS_OPTIONS,
     PRIORITY_OPTIONS,

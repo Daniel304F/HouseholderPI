@@ -13,13 +13,10 @@ import {
     DonutChart,
     LineChart,
     ProgressRing,
-} from '../../components/charts'
-import {
-    StatsPageSkeleton,
-    StatsErrorState,
     ChartCard,
-    StatsHeader,
-} from '../../components/ui'
+} from '../../components/charts'
+import { PageHeaderSkeleton, StatCardsSkeleton, StatsErrorState } from '../../components/feedback'
+import { PageHeader } from '../../components/common'
 import { statisticsApi } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
 import { CHART_COLORS } from '../../constants'
@@ -35,7 +32,12 @@ export const PersonalStats = () => {
     })
 
     if (isLoading) {
-        return <StatsPageSkeleton showBadge />
+        return (
+            <div className="space-y-6">
+                <PageHeaderSkeleton showBadge />
+                <StatCardsSkeleton count={4} />
+            </div>
+        )
     }
 
     if (isError || !stats) {
@@ -95,7 +97,7 @@ export const PersonalStats = () => {
 
     return (
         <div className="space-y-6">
-            <StatsHeader
+            <PageHeader
                 title="Meine Statistiken"
                 subtitle="Dein persönlicher Fortschritt auf einen Blick"
                 badge={streakBadge}

@@ -2,7 +2,7 @@ import { MoreHorizontal, Plus } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { KanbanCard } from './KanbanCard'
 import { PriorityFilterDropdown } from './PriorityFilterDropdown'
-import type { Task } from '../tasks'
+import type { Task } from '../../api/tasks'
 import type { Priority } from '../../hooks/useTaskFilter'
 
 export type ColumnStatus = 'pending' | 'in-progress' | 'completed'
