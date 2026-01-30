@@ -65,8 +65,16 @@ export const HeaderNavigation = () => {
 
                         {isAuthenticated && user && (
                             <div className="flex items-center gap-3 border-l border-neutral-200 pl-4 dark:border-neutral-800">
-                                <div className="from-brand-400/80 via-brand-500/80 to-brand-600/80 shadow-brand-500/25 ring-brand-100/60 dark:from-brand-700 dark:via-brand-600 dark:to-brand-500 dark:ring-brand-900/40 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-md ring-4">
-                                    {user.name.charAt(0).toUpperCase()}
+                                <div className="from-brand-400/80 via-brand-500/80 to-brand-600/80 shadow-brand-500/25 ring-brand-100/60 dark:from-brand-700 dark:via-brand-600 dark:to-brand-500 dark:ring-brand-900/40 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-white shadow-md ring-4">
+                                    {user.avatar ? (
+                                        <img
+                                            src={user.avatar}
+                                            alt={user.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        user.name.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                             </div>
                         )}

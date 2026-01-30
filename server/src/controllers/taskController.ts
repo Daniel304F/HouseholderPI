@@ -2,9 +2,14 @@ import { Response, NextFunction, Request } from "express";
 import { Task } from "../models/task.js";
 import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
+import { ActivityLog } from "../models/activityLog.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { TaskService } from "../services/task.service.js";
+import {
+  ActivityLogService,
+  LogActivityInput,
+} from "../services/activityLog.service.js";
 import { AppError } from "../services/errors.js";
 
 const getTaskService = (req: Request): TaskService => {
@@ -12,6 +17,31 @@ const getTaskService = (req: Request): TaskService => {
   const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
   const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
   return new TaskService(taskDAO, groupDAO, userDAO);
+};
+
+const getActivityLogService = (req: Request): ActivityLogService => {
+  const activityLogDAO = req.app.locals[
+    "activityLogDAO"
+  ] as GenericDAO<ActivityLog>;
+  return new ActivityLogService(activityLogDAO);
+};
+
+const getGroupDAO = (req: Request): GenericDAO<Group> => {
+  return req.app.locals["groupDAO"] as GenericDAO<Group>;
+};
+
+const getUserDAO = (req: Request): GenericDAO<User> => {
+  return req.app.locals["userDAO"] as GenericDAO<User>;
+};
+
+// Helper to log activity without blocking the response
+const logActivityAsync = (
+  activityLogService: ActivityLogService,
+  input: LogActivityInput,
+): void => {
+  activityLogService.logActivity(input).catch((err) => {
+    console.error("Failed to log activity:", err);
+  });
 };
 
 /**
@@ -25,6 +55,8 @@ export const createTask = async (
 ): Promise<void> => {
   try {
     const taskService = getTaskService(req);
+    const activityLogService = getActivityLogService(req);
+    const groupDAO = getGroupDAO(req);
     const { groupId } = req.params;
     const { title, description, status, priority, assignedTo, dueDate } =
       req.body;
@@ -37,6 +69,19 @@ export const createTask = async (
       assignedTo,
       dueDate,
     });
+
+    // Log activity
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+    if (group) {
+      logActivityAsync(activityLogService, {
+        userId: req.userId,
+        type: "created",
+        taskId: task.id,
+        taskTitle: task.title,
+        groupId: groupId!,
+        groupName: group.name,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -124,9 +169,15 @@ export const updateTask = async (
 ): Promise<void> => {
   try {
     const taskService = getTaskService(req);
+    const activityLogService = getActivityLogService(req);
+    const groupDAO = getGroupDAO(req);
     const { groupId, taskId } = req.params;
     const { title, description, status, priority, assignedTo, dueDate } =
       req.body;
+
+    // Get task before update to check status change
+    const taskBefore = await taskService.getTask(groupId!, taskId!, req.userId);
+    const wasCompleted = taskBefore.status === "completed";
 
     const task = await taskService.updateTask(groupId!, taskId!, req.userId, {
       title,
@@ -136,6 +187,31 @@ export const updateTask = async (
       assignedTo,
       dueDate,
     });
+
+    // Log activity
+    const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+    if (group) {
+      // Check if task was just completed
+      if (status === "completed" && !wasCompleted) {
+        logActivityAsync(activityLogService, {
+          userId: req.userId,
+          type: "completed",
+          taskId: task.id,
+          taskTitle: task.title,
+          groupId: groupId!,
+          groupName: group.name,
+        });
+      } else {
+        logActivityAsync(activityLogService, {
+          userId: req.userId,
+          type: "updated",
+          taskId: task.id,
+          taskTitle: task.title,
+          groupId: groupId!,
+          groupName: group.name,
+        });
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -193,6 +269,9 @@ export const assignTask = async (
 ): Promise<void> => {
   try {
     const taskService = getTaskService(req);
+    const activityLogService = getActivityLogService(req);
+    const groupDAO = getGroupDAO(req);
+    const userDAO = getUserDAO(req);
     const { groupId, taskId } = req.params;
     const { assignedTo } = req.body;
 
@@ -202,6 +281,29 @@ export const assignTask = async (
       req.userId,
       assignedTo,
     );
+
+    // Log activity if task was assigned (not unassigned)
+    if (assignedTo) {
+      const group = await groupDAO.findOne({ id: groupId } as Partial<Group>);
+      const assignedUser = await userDAO.findOne({
+        id: assignedTo,
+      } as Partial<User>);
+
+      if (group) {
+        const activityInput: LogActivityInput = {
+          userId: req.userId,
+          type: "assigned",
+          taskId: result.task.id,
+          taskTitle: result.task.title,
+          groupId: groupId!,
+          groupName: group.name,
+        };
+        if (assignedUser) {
+          activityInput.details = `zugewiesen an ${assignedUser.name}`;
+        }
+        logActivityAsync(activityLogService, activityInput);
+      }
+    }
 
     res.status(200).json({
       success: true,

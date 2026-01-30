@@ -13,6 +13,7 @@ import {
     Share2,
     UserPlus,
     AlertCircle,
+    Calendar as CalendarIcon,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button, IconButton } from '../../components/common'
@@ -22,7 +23,9 @@ import { cn } from '../../utils/cn'
 import { GroupDetailModal } from '../../components/groups'
 import { Tabs as ContentTabs, type Tab } from '../../components/display'
 import { KanbanBoard, type ColumnStatus } from '../../components/board'
+import { MiniCalendar, TaskCalendar } from '../../components/calendar'
 import { useAuth } from '../../contexts/AuthContext'
+import { useViewport } from '../../hooks/useViewport'
 import {
     CreateTaskModal,
     EditTaskModal,
@@ -33,9 +36,18 @@ import { type Task } from '../../api/tasks'
 import { useTaskMutations } from '../../hooks/useTaskMutations'
 import { useTaskModal } from '../../hooks/useTaskModal'
 
-// Tabs für die Navigation
-const tabs: Tab[] = [
+// Tabs für die Navigation (desktop zeigt Kalender als Sidebar)
+const getTabsForViewport = (isDesktop: boolean): Tab[] => [
     { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
+    ...(!isDesktop
+        ? [
+              {
+                  id: 'calendar',
+                  label: 'Kalender',
+                  icon: <CalendarIcon className="size-4" />,
+              },
+          ]
+        : []),
     {
         id: 'messages',
         label: 'Messages',
@@ -48,6 +60,10 @@ export const GroupDetail = () => {
     const { groupId } = useParams<{ groupId: string }>()
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { isDesktop } = useViewport()
+
+    // Get tabs based on viewport (calendar tab only on mobile/tablet)
+    const tabs = getTabsForViewport(isDesktop)
 
     // UI State
     const [activeTab, setActiveTab] = useState('board')
@@ -179,18 +195,40 @@ export const GroupDetail = () => {
 
             {/* Content Area */}
             <div className="min-h-0 flex-1">
-                {activeTab === 'board' && (
-                    <KanbanBoard
-                        tasks={tasks}
-                        onTaskClick={handleTaskClick}
-                        onAddTask={handleAddTask}
-                        onTaskMove={handleTaskMove}
-                        searchQuery={searchQuery}
-                    />
-                )}
-                {activeTab === 'messages' && (
-                    <ComingSoonPlaceholder text="Messages - Coming Soon" />
-                )}
+                <div className="flex h-full gap-4">
+                    {/* Main Content */}
+                    <div className="min-w-0 flex-1">
+                        {activeTab === 'board' && (
+                            <KanbanBoard
+                                tasks={tasks}
+                                onTaskClick={handleTaskClick}
+                                onAddTask={handleAddTask}
+                                onTaskMove={handleTaskMove}
+                                searchQuery={searchQuery}
+                            />
+                        )}
+                        {activeTab === 'calendar' && !isDesktop && (
+                            <TaskCalendar
+                                tasks={tasks}
+                                onTaskClick={handleTaskClick}
+                                className="rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900"
+                            />
+                        )}
+                        {activeTab === 'messages' && (
+                            <ComingSoonPlaceholder text="Messages - Coming Soon" />
+                        )}
+                    </div>
+
+                    {/* Calendar Sidebar (Desktop only) */}
+                    {isDesktop && activeTab === 'board' && (
+                        <div className="hidden w-80 flex-shrink-0 xl:block">
+                            <MiniCalendar
+                                tasks={tasks}
+                                onTaskClick={handleTaskClick}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Modals */}

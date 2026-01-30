@@ -26,6 +26,9 @@ export const queryKeys = {
     statistics: {
         personal: ['personalStatistics'] as const,
         group: (groupId: string) => ['groupStatistics', groupId] as const,
+        activityHeatmap: ['activityHeatmap'] as const,
+        activityLog: (filter: string, limit: number) =>
+            ['activityLog', filter, limit] as const,
     },
 
     // User

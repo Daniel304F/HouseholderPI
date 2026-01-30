@@ -4,6 +4,8 @@ import { User } from "./models/user.js";
 import { Group } from "./models/group.js";
 import { Friendship } from "./models/friend.js";
 import { Task } from "./models/task.js";
+import { ActivityLog } from "./models/activityLog.js";
+import { RecurringTaskTemplate } from "./models/recurringTaskTemplate.js";
 import type { Express } from "express";
 import config from "./config/config.js";
 
@@ -27,6 +29,14 @@ async function startMongoDB(app: Express) {
     "friendships",
   );
   app.locals["taskDAO"] = new MongoGenericDAO<Task>(db, "tasks");
+  app.locals["activityLogDAO"] = new MongoGenericDAO<ActivityLog>(
+    db,
+    "activityLogs",
+  );
+  app.locals["recurringTaskDAO"] = new MongoGenericDAO<RecurringTaskTemplate>(
+    db,
+    "recurringTaskTemplates",
+  );
 }
 
 async function startInMemoryDB(_app: Express) {

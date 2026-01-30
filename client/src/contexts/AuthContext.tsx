@@ -21,6 +21,7 @@ interface AuthContextType {
     login: (data: LoginRequest) => Promise<void>
     register: (data: RegisterRequest) => Promise<void>
     logout: () => Promise<void>
+    updateProfile: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -107,6 +108,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }, [queryClient])
 
+    const updateProfile = useCallback(
+        (updatedUser: User) => {
+            setUser(normalizeUser(updatedUser))
+            queryClient.setQueryData(['user'], normalizeUser(updatedUser))
+        },
+        [queryClient]
+    )
+
     const value: AuthContextType = {
         user,
         isAuthenticated,
@@ -114,6 +123,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         login,
         register,
         logout,
+        updateProfile,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

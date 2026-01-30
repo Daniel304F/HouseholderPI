@@ -12,6 +12,7 @@ import {
   removeMemberSchema,
 } from "../schemas/group.schema.js";
 import taskRoutes from "./taskRoutes.js";
+import recurringTaskRoutes from "./recurringTaskRoutes.js";
 
 const router = Router();
 
@@ -87,5 +88,8 @@ router.get(
 
 // Task-Routen (Sub-Router)
 router.use("/:groupId/tasks", taskRoutes);
+
+// Recurring Task Routes (Sub-Router)
+router.use("/:groupId/recurring-tasks", recurringTaskRoutes);
 
 export default router;
