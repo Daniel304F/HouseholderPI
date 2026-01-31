@@ -6,6 +6,7 @@ import { Friendship } from "./models/friend.js";
 import { Task } from "./models/task.js";
 import { ActivityLog } from "./models/activityLog.js";
 import { RecurringTaskTemplate } from "./models/recurringTaskTemplate.js";
+import { Comment } from "./models/comment.js";
 import type { Express } from "express";
 import config from "./config/config.js";
 
@@ -37,6 +38,7 @@ async function startMongoDB(app: Express) {
     db,
     "recurringTaskTemplates",
   );
+  app.locals["commentDAO"] = new MongoGenericDAO<Comment>(db, "comments");
 }
 
 async function startInMemoryDB(_app: Express) {

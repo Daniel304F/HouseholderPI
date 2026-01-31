@@ -1,8 +1,27 @@
 import { Entity } from "./entity.js";
 
+export type GroupRole = "owner" | "admin" | "member";
+export type PermissionLevel = "owner" | "admin" | "member" | "nobody";
+
+export interface GroupPermissions {
+  createTask: PermissionLevel;
+  assignTask: PermissionLevel;
+  deleteTask: PermissionLevel;
+  editTask: PermissionLevel;
+  manageRecurringTasks: PermissionLevel;
+}
+
+export const DEFAULT_PERMISSIONS: GroupPermissions = {
+  createTask: "member",
+  assignTask: "member",
+  deleteTask: "admin",
+  editTask: "member",
+  manageRecurringTasks: "admin",
+};
+
 export interface GroupMember {
   userId: string;
-  role: "owner" | "admin" | "member";
+  role: GroupRole;
   isActiveResident: boolean;
   joinedAt: Date;
 }
@@ -19,6 +38,7 @@ export interface Group extends Entity {
   members: GroupMember[];
   activeResidentsCount: number;
   picture?: string; // URL zum Bild (empfohlen) oder Base64-String
+  permissions: GroupPermissions;
 }
 
 export interface GroupResponse {
@@ -28,6 +48,7 @@ export interface GroupResponse {
   members: GroupMember[];
   activeResidentsCount: number;
   picture?: string;
+  permissions: GroupPermissions;
   createdAt: string;
   updatedAt: string;
 }

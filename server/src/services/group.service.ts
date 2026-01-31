@@ -4,6 +4,9 @@ import {
   GroupListItem,
   GroupMember,
   GroupMemberWithUser,
+  GroupPermissions,
+  DEFAULT_PERMISSIONS,
+  PermissionLevel,
 } from "../models/group.js";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
@@ -96,6 +99,7 @@ export class GroupService {
       ],
       activeResidentsCount: 1,
       picture,
+      permissions: { ...DEFAULT_PERMISSIONS },
     } as Omit<Group, "id" | "createdAt" | "updatedAt">);
 
     return newGroup;
@@ -388,5 +392,75 @@ export class GroupService {
       members: updatedMembers,
       activeResidentsCount: newActiveCount,
     } as Partial<Group>);
+  }
+
+  async updatePermissions(
+    groupId: string,
+    userId: string,
+    permissions: Partial<GroupPermissions>,
+  ): Promise<GroupPermissions> {
+    const group = await this.groupDAO.findOne({
+      id: groupId,
+    } as Partial<Group>);
+
+    if (!group) {
+      throw new NotFoundError("Gruppe nicht gefunden");
+    }
+
+    // Only owner can change permissions
+    if (getMemberRole(group, userId) !== "owner") {
+      throw new ForbiddenError("Nur der Owner kann Berechtigungen ändern");
+    }
+
+    const currentPermissions = group.permissions || DEFAULT_PERMISSIONS;
+    const updatedPermissions: GroupPermissions = {
+      ...currentPermissions,
+      ...permissions,
+    };
+
+    await this.groupDAO.update({
+      id: groupId,
+      permissions: updatedPermissions,
+    } as Partial<Group>);
+
+    return updatedPermissions;
+  }
+
+  async getPermissions(groupId: string, userId: string): Promise<GroupPermissions> {
+    const group = await this.groupDAO.findOne({
+      id: groupId,
+    } as Partial<Group>);
+
+    if (!group) {
+      throw new NotFoundError("Gruppe nicht gefunden");
+    }
+
+    if (!getMemberRole(group, userId)) {
+      throw new ForbiddenError("Kein Zugriff auf diese Gruppe");
+    }
+
+    return group.permissions || DEFAULT_PERMISSIONS;
+  }
+
+  hasPermission(
+    group: Group,
+    userId: string,
+    permission: keyof GroupPermissions,
+  ): boolean {
+    const role = getMemberRole(group, userId);
+    if (!role) return false;
+
+    const permissions = group.permissions || DEFAULT_PERMISSIONS;
+    const requiredLevel = permissions[permission];
+
+    return this.roleHasPermission(role, requiredLevel);
+  }
+
+  private roleHasPermission(role: GroupMember["role"], requiredLevel: PermissionLevel): boolean {
+    if (requiredLevel === "nobody") return false;
+    if (role === "owner") return true;
+    if (role === "admin") return requiredLevel !== "owner";
+    if (role === "member") return requiredLevel === "member";
+    return false;
   }
 }

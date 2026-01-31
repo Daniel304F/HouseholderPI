@@ -17,6 +17,7 @@ import {
   linkTaskSchema,
   unlinkTaskSchema,
 } from "../schemas/task.schema.js";
+import commentRoutes from "./commentRoutes.js";
 
 const router = Router({ mergeParams: true });
 
@@ -118,5 +119,8 @@ router.post(
   uploadCompletionProof.single("proof"),
   uploadController.completeTaskWithProof as RequestHandler,
 );
+
+// Comment-Routen (Sub-Router)
+router.use("/:taskId/comments", commentRoutes);
 
 export default router;

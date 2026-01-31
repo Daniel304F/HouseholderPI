@@ -307,3 +307,63 @@ export const removeMember = async (
     next(error);
   }
 };
+
+/**
+ * Holt die Berechtigungseinstellungen einer Gruppe
+ * GET /api/groups/:groupId/permissions
+ */
+export const getPermissions = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const groupService = getGroupService(req);
+    const { groupId } = req.params;
+
+    const permissions = await groupService.getPermissions(groupId!, req.userId);
+
+    res.status(200).json({
+      success: true,
+      data: permissions,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Aktualisiert die Berechtigungseinstellungen einer Gruppe (nur Owner)
+ * PATCH /api/groups/:groupId/permissions
+ */
+export const updatePermissions = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const groupService = getGroupService(req);
+    const { groupId } = req.params;
+
+    const permissions = await groupService.updatePermissions(
+      groupId!,
+      req.userId,
+      req.body,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: permissions,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};

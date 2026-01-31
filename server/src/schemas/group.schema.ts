@@ -56,7 +56,23 @@ export const removeMemberSchema = z.object({
   }),
 });
 
+const permissionLevel = z.enum(["owner", "admin", "member", "nobody"]);
+
+export const updatePermissionsSchema = z.object({
+  params: z.object({
+    groupId: z.string().uuid("Ungültige Gruppen-ID"),
+  }),
+  body: z.object({
+    createTask: permissionLevel.optional(),
+    assignTask: permissionLevel.optional(),
+    deleteTask: permissionLevel.optional(),
+    editTask: permissionLevel.optional(),
+    manageRecurringTasks: permissionLevel.optional(),
+  }),
+});
+
 export type CreateGroupInput = z.infer<typeof createGroupSchema>["body"];
 export type UpdateGroupInput = z.infer<typeof updateGroupSchema>["body"];
 export type JoinGroupInput = z.infer<typeof joinGroupSchema>["body"];
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>["body"];
+export type UpdatePermissionsInput = z.infer<typeof updatePermissionsSchema>["body"];

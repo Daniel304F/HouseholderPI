@@ -20,6 +20,8 @@ export const updateProfile = async (
     const userId = (req as AuthenticatedRequest).userId;
     const { name, avatar } = req.body;
 
+    console.log("updateProfile called with userId:", userId);
+
     const user = await userService.updateProfile(userId, { name, avatar });
 
     res.status(200).json({
@@ -51,6 +53,91 @@ export const removeAvatar = async (
     res.status(200).json({
       success: true,
       data: user,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userService = getUserService(req);
+    const userId = (req as AuthenticatedRequest).userId;
+    const { currentPassword, newPassword } = req.body;
+
+    await userService.changePassword(userId, { currentPassword, newPassword });
+
+    res.status(200).json({
+      success: true,
+      message: "Passwort erfolgreich geändert",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+export const changeEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userService = getUserService(req);
+    const userId = (req as AuthenticatedRequest).userId;
+    const { newEmail, password } = req.body;
+
+    const user = await userService.changeEmail(userId, { newEmail, password });
+
+    res.status(200).json({
+      success: true,
+      data: user,
+      message: "E-Mail erfolgreich geändert",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+export const deleteAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userService = getUserService(req);
+    const userId = (req as AuthenticatedRequest).userId;
+    const { password } = req.body;
+
+    await userService.deleteAccount(userId, password);
+
+    // Clear cookies
+    res.clearCookie("refreshToken");
+
+    res.status(200).json({
+      success: true,
+      message: "Konto erfolgreich gelöscht",
     });
   } catch (error) {
     if (error instanceof AppError) {

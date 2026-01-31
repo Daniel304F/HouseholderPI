@@ -10,6 +10,7 @@ import {
   groupIdParamSchema,
   updateMemberSchema,
   removeMemberSchema,
+  updatePermissionsSchema,
 } from "../schemas/group.schema.js";
 import taskRoutes from "./taskRoutes.js";
 import recurringTaskRoutes from "./recurringTaskRoutes.js";
@@ -84,6 +85,19 @@ router.get(
   "/:groupId/statistics",
   validateResource(groupIdParamSchema),
   statisticsController.getGroupStatistics as RequestHandler,
+);
+
+// Permissions
+router.get(
+  "/:groupId/permissions",
+  validateResource(groupIdParamSchema),
+  groupController.getPermissions as RequestHandler,
+);
+
+router.patch(
+  "/:groupId/permissions",
+  validateResource(updatePermissionsSchema),
+  groupController.updatePermissions as RequestHandler,
 );
 
 // Task-Routen (Sub-Router)
