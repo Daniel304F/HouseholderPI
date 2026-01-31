@@ -1,2 +1,5 @@
 export { AvatarUpload } from './AvatarUpload'
 export { ProfileSection } from './ProfileSection'
+export { SecuritySection } from './SecuritySection'
+export { EmailSection } from './EmailSection'
+export { DangerZoneSection } from './DangerZoneSection'

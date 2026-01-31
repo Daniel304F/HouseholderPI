@@ -4,7 +4,7 @@ export { MyTaskCard } from './MyTaskCard'
 export { TaskCardSkeleton } from './TaskCardSkeleton'
 
 // Task modals
-export { CreateTaskModal, type CreateTaskData } from './CreateTaskModal'
+export { CreateTaskModal, type CreateTaskData, type CreateRecurringData } from './CreateTaskModal'
 export { EditTaskModal, type EditTaskData } from './EditTaskModal'
 export { TaskDetailView } from './TaskDetailView'
 

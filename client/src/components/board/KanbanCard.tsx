@@ -1,19 +1,27 @@
 import {
     MessageSquare,
-    Paperclip,
     User,
     Pencil,
+    Trash2,
     ListTree,
     Link2,
+    Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { PriorityBadge } from '../tasks'
 import type { Task } from '../../api/tasks'
 
+interface AssigneeInfo {
+    userId: string
+    name?: string
+    avatar?: string
+}
+
 interface KanbanCardProps {
     task: Task
     onClick: () => void
     onEditClick?: () => void
+    onDeleteClick?: () => void
     dragProps?: {
         draggable: boolean
         onDragStart: (e: React.DragEvent) => void
@@ -21,17 +29,29 @@ interface KanbanCardProps {
     }
     isDragging?: boolean
     subtaskCount?: number
+    assigneeInfo?: AssigneeInfo
+}
+
+// Helper to get first image attachment
+const getFirstImageAttachment = (task: Task): string | null => {
+    const imageAttachment = task.attachments?.find((a) =>
+        a.mimeType.startsWith('image/')
+    )
+    return imageAttachment?.url || null
 }
 
 export const KanbanCard = ({
     task,
     onClick,
     onEditClick,
+    onDeleteClick,
     dragProps,
     isDragging = false,
     subtaskCount = 0,
+    assigneeInfo,
 }: KanbanCardProps) => {
-    const attachments = 0
+    const taskImage = getFirstImageAttachment(task)
+    const hasImage = !!taskImage
     const comments = 0
     const linkedCount = task.linkedTasks?.length || 0
 
@@ -40,11 +60,16 @@ export const KanbanCard = ({
         onEditClick?.()
     }
 
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onDeleteClick?.()
+    }
+
     return (
         <div
             onClick={onClick}
             className={cn(
-                'group relative w-full cursor-pointer rounded-xl p-4 text-left',
+                'group relative w-full cursor-pointer rounded-xl text-left overflow-hidden',
                 'bg-white dark:bg-neutral-800/90',
                 'border border-neutral-200/80 dark:border-neutral-700/80',
                 'shadow-sm',
@@ -59,26 +84,59 @@ export const KanbanCard = ({
             )}
             {...dragProps}
         >
-            {/* Edit Button */}
-            {onEditClick && (
-                <button
-                    onClick={handleEditClick}
-                    className={cn(
-                        'absolute top-3 right-3 z-10',
-                        'flex h-7 w-7 items-center justify-center rounded-lg',
-                        'bg-neutral-100/80 dark:bg-neutral-700/80',
-                        'text-neutral-400 dark:text-neutral-500',
-                        'opacity-0 group-hover:opacity-100',
-                        'hover:bg-brand-100 hover:text-brand-600',
-                        'dark:hover:bg-brand-900/40 dark:hover:text-brand-400',
-                        'transition-all duration-200',
-                        'active:scale-90'
-                    )}
-                    title="Aufgabe bearbeiten"
-                >
-                    <Pencil className="size-3.5" />
-                </button>
+            {/* Task Image */}
+            {taskImage && (
+                <div className="relative h-28 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
+                    <img
+                        src={taskImage}
+                        alt={task.title}
+                        className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
             )}
+
+            <div className="p-4">
+                {/* Action Buttons */}
+                <div className={cn(
+                    'absolute right-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                    taskImage ? 'top-[calc(7rem+0.75rem)]' : 'top-3'
+                )}>
+                    {onEditClick && (
+                        <button
+                            onClick={handleEditClick}
+                            className={cn(
+                                'flex h-7 w-7 items-center justify-center rounded-lg',
+                                'bg-neutral-100/90 dark:bg-neutral-700/90',
+                                'text-neutral-400 dark:text-neutral-500',
+                                'hover:bg-brand-100 hover:text-brand-600',
+                                'dark:hover:bg-brand-900/40 dark:hover:text-brand-400',
+                                'transition-all duration-200 backdrop-blur-sm',
+                                'active:scale-90'
+                            )}
+                            title="Aufgabe bearbeiten"
+                        >
+                            <Pencil className="size-3.5" />
+                        </button>
+                    )}
+                    {onDeleteClick && (
+                        <button
+                            onClick={handleDeleteClick}
+                            className={cn(
+                                'flex h-7 w-7 items-center justify-center rounded-lg',
+                                'bg-neutral-100/90 dark:bg-neutral-700/90',
+                                'text-neutral-400 dark:text-neutral-500',
+                                'hover:bg-error-100 hover:text-error-600',
+                                'dark:hover:bg-error-900/40 dark:hover:text-error-400',
+                                'transition-all duration-200 backdrop-blur-sm',
+                                'active:scale-90'
+                            )}
+                            title="Aufgabe löschen"
+                        >
+                            <Trash2 className="size-3.5" />
+                        </button>
+                    )}
+                </div>
 
             {/* Header: Priority Badge + Title */}
             <div className="flex items-start gap-2.5 pr-8">
@@ -106,18 +164,32 @@ export const KanbanCard = ({
                 {/* Assignee Avatar */}
                 <div className="flex -space-x-1.5">
                     {task.assignedTo ? (
-                        <div
-                            className={cn(
-                                'flex size-6 items-center justify-center rounded-full',
-                                'from-brand-100 to-brand-200 bg-gradient-to-br',
-                                'dark:from-brand-900/50 dark:to-brand-800/50',
-                                'border-2 border-white dark:border-neutral-800',
-                                'text-brand-700 dark:text-brand-300 text-[11px] font-bold',
-                                'shadow-sm'
-                            )}
-                        >
-                            {task.assignedTo.charAt(0).toUpperCase()}
-                        </div>
+                        assigneeInfo?.avatar ? (
+                            <img
+                                src={assigneeInfo.avatar}
+                                alt={assigneeInfo.name || task.assignedTo}
+                                title={assigneeInfo.name || task.assignedTo}
+                                className={cn(
+                                    'size-6 rounded-full object-cover',
+                                    'border-2 border-white dark:border-neutral-800',
+                                    'shadow-sm'
+                                )}
+                            />
+                        ) : (
+                            <div
+                                className={cn(
+                                    'flex size-6 items-center justify-center rounded-full',
+                                    'from-brand-100 to-brand-200 bg-gradient-to-br',
+                                    'dark:from-brand-900/50 dark:to-brand-800/50',
+                                    'border-2 border-white dark:border-neutral-800',
+                                    'text-brand-700 dark:text-brand-300 text-[11px] font-bold',
+                                    'shadow-sm'
+                                )}
+                                title={assigneeInfo?.name || task.assignedTo}
+                            >
+                                {(assigneeInfo?.name || task.assignedTo).charAt(0).toUpperCase()}
+                            </div>
+                        )
                     ) : (
                         <div
                             className={cn(
@@ -147,15 +219,18 @@ export const KanbanCard = ({
                             <span>{linkedCount}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-1 text-[11px]">
-                        <Paperclip className="size-3.5" />
-                        <span>{attachments}</span>
-                    </div>
+                    {/* Image indicator */}
+                    {hasImage && (
+                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1 text-[11px] font-medium">
+                            <ImageIcon className="size-3.5" />
+                        </div>
+                    )}
                     <div className="flex items-center gap-1 text-[11px]">
                         <MessageSquare className="size-3.5" />
                         <span>{comments}</span>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     )

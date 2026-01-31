@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { cn } from '../../utils/cn'
 import type { DailyActivity } from '../../api/statistics'
 
@@ -8,176 +8,236 @@ interface ContributionGraphProps {
 }
 
 const MONTHS_DE = [
-    'Jan',
-    'Feb',
-    'Mär',
-    'Apr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Dez',
+    'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
 ]
 
-const WEEKDAYS_DE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+// GitHub-style color levels
+const LEVEL_COLORS = {
+    0: 'bg-[#ebedf0] dark:bg-[#161b22]',
+    1: 'bg-[#9be9a8] dark:bg-[#0e4429]',
+    2: 'bg-[#40c463] dark:bg-[#006d32]',
+    3: 'bg-[#30a14e] dark:bg-[#26a641]',
+    4: 'bg-[#216e39] dark:bg-[#39d353]',
+} as const
 
-const levelColors = {
-    0: 'bg-neutral-100 dark:bg-neutral-800',
-    1: 'bg-brand-200 dark:bg-brand-900',
-    2: 'bg-brand-400 dark:bg-brand-700',
-    3: 'bg-brand-500 dark:bg-brand-500',
-    4: 'bg-brand-600 dark:bg-brand-400',
-}
+// Cell dimensions - GitHub style
+const CELL_SIZE = 11
+const CELL_GAP = 3
 
 export const ContributionGraph = ({
     data,
     className,
 }: ContributionGraphProps) => {
-    const { weeks, monthLabels, totalCount } = useMemo(() => {
-        // Group data by weeks (starting Monday)
-        const weeks: DailyActivity[][] = []
-        let currentWeek: DailyActivity[] = []
-        let total = 0
+    const [hoveredDay, setHoveredDay] = useState<DailyActivity | null>(null)
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
 
-        // Track month positions for labels
+    const { weeks, monthLabels, totalCount } = useMemo(() => {
+        // Create a map for quick lookup
+        const dataMap = new Map<string, DailyActivity>()
+        data.forEach((d) => dataMap.set(d.date, d))
+
+        // Get date range (last 365 days)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const oneYearAgo = new Date(today)
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+        oneYearAgo.setDate(oneYearAgo.getDate() + 1)
+
+        // Find the Sunday before oneYearAgo (GitHub starts weeks on Sunday)
+        const startDate = new Date(oneYearAgo)
+        const dayOfWeek = startDate.getDay()
+        startDate.setDate(startDate.getDate() - dayOfWeek)
+
+        // Build weeks array (53 weeks to cover a full year)
+        const weeks: (DailyActivity | null)[][] = []
+        let currentWeek: (DailyActivity | null)[] = []
+        let total = 0
         const monthPositions: { month: number; weekIndex: number }[] = []
         let lastMonth = -1
 
-        data.forEach((day) => {
-            const date = new Date(day.date)
-            const dayOfWeek = (date.getDay() + 6) % 7 // Monday = 0
+        const current = new Date(startDate)
+        while (current <= today || currentWeek.length > 0) {
+            const dateStr = current.toISOString().split('T')[0]
+            const isInRange = current >= oneYearAgo && current <= today
 
-            // Start new week on Monday
-            if (dayOfWeek === 0 && currentWeek.length > 0) {
-                weeks.push(currentWeek)
-                currentWeek = []
-            }
+            if (isInRange) {
+                const dayData = dataMap.get(dateStr) || { date: dateStr, count: 0, level: 0 as const }
+                currentWeek.push(dayData)
+                total += dayData.count
 
-            // Fill empty days at start of first week
-            if (weeks.length === 0 && currentWeek.length === 0) {
-                for (let i = 0; i < dayOfWeek; i++) {
-                    currentWeek.push({ date: '', count: 0, level: 0 })
+                // Track month changes (only for first day of each month shown)
+                const month = current.getMonth()
+                const dayOfMonth = current.getDate()
+                if (month !== lastMonth && dayOfMonth <= 7) {
+                    monthPositions.push({
+                        month,
+                        weekIndex: weeks.length,
+                    })
+                    lastMonth = month
                 }
+            } else if (current < oneYearAgo) {
+                currentWeek.push(null) // Empty cell before range
             }
 
-            currentWeek.push(day)
-            total += day.count
-
-            // Track month changes
-            const month = date.getMonth()
-            if (month !== lastMonth) {
-                monthPositions.push({ month, weekIndex: weeks.length })
-                lastMonth = month
+            // New week on Saturday (end of week)
+            if (current.getDay() === 6) {
+                if (currentWeek.length > 0) {
+                    weeks.push(currentWeek)
+                }
+                currentWeek = []
+                if (current > today) break
             }
-        })
 
-        // Push the last week
+            current.setDate(current.getDate() + 1)
+        }
+
+        // Push remaining days
         if (currentWeek.length > 0) {
+            // Pad the last week if needed
+            while (currentWeek.length < 7) {
+                currentWeek.push(null)
+            }
             weeks.push(currentWeek)
         }
 
-        // Create month labels with positions
-        const labels = monthPositions.map(({ month, weekIndex }) => ({
-            label: MONTHS_DE[month],
-            position: weekIndex,
-        }))
-
-        return { weeks, monthLabels: labels, totalCount: total }
+        return { weeks, monthLabels: monthPositions, totalCount: total }
     }, [data])
 
+    const handleMouseEnter = (
+        day: DailyActivity,
+        event: React.MouseEvent<HTMLDivElement>
+    ) => {
+        const rect = event.currentTarget.getBoundingClientRect()
+        setHoveredDay(day)
+        setTooltipPos({
+            x: rect.left + rect.width / 2,
+            y: rect.top - 8,
+        })
+    }
+
+    const handleMouseLeave = () => {
+        setHoveredDay(null)
+    }
+
+    const formatDate = (dateStr: string): string => {
+        const date = new Date(dateStr)
+        return date.toLocaleDateString('de-DE', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        })
+    }
+
+    // Calculate total width
+    const totalWidth = weeks.length * (CELL_SIZE + CELL_GAP)
+
     return (
-        <div className={cn('space-y-2', className)}>
-            {/* Month labels */}
-            <div className="flex text-xs text-neutral-500 dark:text-neutral-400">
-                <div className="w-8 flex-shrink-0" />
-                <div className="relative flex-1">
-                    {monthLabels.map(({ label, position }, idx) => (
-                        <span
-                            key={idx}
-                            className="absolute text-[10px]"
-                            style={{ left: `${(position / weeks.length) * 100}%` }}
-                        >
-                            {label}
+        <div className={cn('relative', className)}>
+            {/* Tooltip */}
+            {hoveredDay && (
+                <div
+                    className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full"
+                    style={{ left: tooltipPos.x, top: tooltipPos.y }}
+                >
+                    <div className="whitespace-nowrap rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs text-white shadow-lg dark:bg-neutral-950">
+                        <span className="font-semibold">
+                            {hoveredDay.count === 0
+                                ? 'Keine Aktivitäten'
+                                : `${hoveredDay.count} Aktivität${hoveredDay.count !== 1 ? 'en' : ''}`}
                         </span>
-                    ))}
+                        <span className="text-neutral-400"> am {formatDate(hoveredDay.date)}</span>
+                    </div>
+                    <div className="mx-auto h-2 w-2 -translate-y-[3px] rotate-45 bg-neutral-800 dark:bg-neutral-950" />
                 </div>
-            </div>
+            )}
 
-            {/* Grid */}
-            <div className="flex gap-0.5">
-                {/* Weekday labels */}
-                <div className="flex flex-col gap-0.5 pr-1 text-[10px] text-neutral-500 dark:text-neutral-400">
-                    {WEEKDAYS_DE.map((day, idx) => (
+            {/* Graph Container - Scrollable */}
+            <div className="overflow-x-auto">
+                <div style={{ minWidth: `${totalWidth + 32}px` }}>
+                    {/* Month Labels */}
+                    <div
+                        className="relative mb-1 ml-8 text-xs text-neutral-600 dark:text-neutral-400"
+                        style={{ height: '16px' }}
+                    >
+                        {monthLabels.map(({ month, weekIndex }, idx) => (
+                            <span
+                                key={idx}
+                                className="absolute"
+                                style={{
+                                    left: `${weekIndex * (CELL_SIZE + CELL_GAP)}px`,
+                                }}
+                            >
+                                {MONTHS_DE[month]}
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* Grid with weekday labels */}
+                    <div className="flex">
+                        {/* Weekday labels - Sun, Mon, Tue... only show Mon, Wed, Fri */}
                         <div
-                            key={day}
-                            className={cn(
-                                'flex h-[11px] items-center justify-end',
-                                idx % 2 === 1 && 'invisible'
-                            )}
+                            className="mr-1 flex w-7 flex-col text-[10px] text-neutral-600 dark:text-neutral-400"
+                            style={{ gap: `${CELL_GAP}px` }}
                         >
-                            {day}
+                            <div style={{ height: CELL_SIZE }} /> {/* Sun - empty */}
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Mo</div>
+                            <div style={{ height: CELL_SIZE }} /> {/* Tue - empty */}
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Mi</div>
+                            <div style={{ height: CELL_SIZE }} /> {/* Thu - empty */}
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Fr</div>
+                            <div style={{ height: CELL_SIZE }} /> {/* Sat - empty */}
                         </div>
-                    ))}
-                </div>
 
-                {/* Contribution cells */}
-                <div className="flex gap-0.5 overflow-x-auto">
-                    {weeks.map((week, weekIndex) => (
-                        <div key={weekIndex} className="flex flex-col gap-0.5">
-                            {week.map((day, dayIndex) => (
+                        {/* Contribution cells */}
+                        <div className="flex" style={{ gap: `${CELL_GAP}px` }}>
+                            {weeks.map((week, weekIndex) => (
                                 <div
-                                    key={`${weekIndex}-${dayIndex}`}
-                                    className={cn(
-                                        'h-[11px] w-[11px] rounded-sm transition-colors',
-                                        day.date ? levelColors[day.level] : 'bg-transparent',
-                                        day.date && 'hover:ring-1 hover:ring-neutral-400'
-                                    )}
-                                    title={
-                                        day.date
-                                            ? `${day.count} Aktivität${day.count !== 1 ? 'en' : ''} am ${formatDate(day.date)}`
-                                            : undefined
-                                    }
-                                />
+                                    key={weekIndex}
+                                    className="flex flex-col"
+                                    style={{ gap: `${CELL_GAP}px` }}
+                                >
+                                    {week.map((day, dayIndex) => (
+                                        <div
+                                            key={`${weekIndex}-${dayIndex}`}
+                                            className={cn(
+                                                'rounded-sm',
+                                                day ? LEVEL_COLORS[day.level] : 'bg-transparent',
+                                                day && 'cursor-pointer hover:ring-1 hover:ring-neutral-400 hover:ring-offset-1 dark:hover:ring-neutral-500'
+                                            )}
+                                            style={{
+                                                width: CELL_SIZE,
+                                                height: CELL_SIZE,
+                                            }}
+                                            onMouseEnter={day ? (e) => handleMouseEnter(day, e) : undefined}
+                                            onMouseLeave={day ? handleMouseLeave : undefined}
+                                        />
+                                    ))}
+                                </div>
                             ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
 
             {/* Legend */}
-            <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600 dark:text-neutral-400">
                 <span>
-                    {totalCount} Aktivität{totalCount !== 1 ? 'en' : ''} im letzten
-                    Jahr
+                    {totalCount.toLocaleString('de-DE')} Aktivitäten im letzten Jahr
                 </span>
                 <div className="flex items-center gap-1">
-                    <span>Weniger</span>
-                    <div className="flex gap-0.5">
-                        {([0, 1, 2, 3, 4] as const).map((level) => (
-                            <div
-                                key={level}
-                                className={cn(
-                                    'h-[11px] w-[11px] rounded-sm',
-                                    levelColors[level]
-                                )}
-                            />
-                        ))}
-                    </div>
-                    <span>Mehr</span>
+                    <span className="mr-1">Weniger</span>
+                    {([0, 1, 2, 3, 4] as const).map((level) => (
+                        <div
+                            key={level}
+                            className={cn('rounded-sm', LEVEL_COLORS[level])}
+                            style={{ width: CELL_SIZE, height: CELL_SIZE }}
+                        />
+                    ))}
+                    <span className="ml-1">Mehr</span>
                 </div>
             </div>
         </div>
     )
-}
-
-function formatDate(dateStr: string): string {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('de-DE', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    })
 }

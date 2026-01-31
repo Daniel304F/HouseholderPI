@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Copy, Check, Link2, UserPlus } from 'lucide-react'
 import { Button } from '../../common'
+import { useToast } from '../../../contexts/ToastContext'
 
 interface StepInviteMembersProps {
     inviteCode: string | undefined
@@ -13,6 +14,7 @@ export const StepInviteMembers = ({
     onCreateGroup,
     isCreating,
 }: StepInviteMembersProps) => {
+    const toast = useToast()
     const [copied, setCopied] = useState(false)
 
     const handleGenerateCode = async () => {
@@ -23,6 +25,7 @@ export const StepInviteMembers = ({
         if (!inviteCode) return
         await navigator.clipboard.writeText(inviteCode)
         setCopied(true)
+        toast.success('Code in die Zwischenablage kopiert!')
         setTimeout(() => setCopied(false), 2000)
     }
 
@@ -43,6 +46,7 @@ export const StepInviteMembers = ({
         } else {
             await navigator.clipboard.writeText(shareUrl)
             setCopied(true)
+            toast.success('Einladungslink kopiert!')
             setTimeout(() => setCopied(false), 2000)
         }
     }

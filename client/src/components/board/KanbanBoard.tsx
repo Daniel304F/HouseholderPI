@@ -10,6 +10,12 @@ import { KanbanColumn, type KanbanColumnData } from './KanbanColumn'
 import { ColumnSelector } from './ColumnSelector'
 import type { Task } from '../../api/tasks'
 
+export interface MemberInfo {
+    userId: string
+    name?: string
+    avatar?: string
+}
+
 interface KanbanBoardProps {
     tasks: Task[]
     onTaskClick: (task: Task) => void
@@ -17,6 +23,7 @@ interface KanbanBoardProps {
     onTaskMove?: (taskId: string, newStatus: ColumnStatus) => Promise<void>
     searchQuery?: string
     className?: string
+    members?: MemberInfo[]
 }
 
 const columns: { id: ColumnStatus; title: string }[] = [
@@ -32,6 +39,7 @@ export const KanbanBoard = ({
     onTaskMove,
     searchQuery = '',
     className,
+    members = [],
 }: KanbanBoardProps) => {
     const { isMobile, isTablet } = useViewport()
     const [activeColumn, setActiveColumn] = useState<ColumnStatus>('pending')
@@ -43,7 +51,7 @@ export const KanbanBoard = ({
         clearColumnFilter,
         hasActiveFilters,
         columnFilters,
-    } = useTaskFilter({ tasks, initialSearchQuery: searchQuery })
+    } = useTaskFilter({ tasks, searchQuery })
 
     // Drag and Drop Hook
     const {
@@ -102,31 +110,44 @@ export const KanbanBoard = ({
                         getDropZoneProps={getDropZoneProps}
                         isDropTarget={isDropTarget(activeColumn)}
                         draggedTaskId={dragState.draggedTask?.id}
+                        members={members}
                     />
                 </div>
             </div>
         )
     }
 
-    // Tablet View: 2x2 Grid with scroll
+    // Tablet View: Horizontal scroll with compact columns
     if (isTablet) {
         return (
-            <div className={cn('flex flex-col gap-4', className)}>
-                <div className="grid grid-cols-2 gap-3">
-                    {columns.map((column) => (
-                        <KanbanColumn
-                            key={column.id}
-                            column={getColumnData(column.id)}
-                            onTaskClick={onTaskClick}
-                            onAddTask={onAddTask}
-                            isCompact
-                            getDragProps={getDragProps}
-                            getDropZoneProps={getDropZoneProps}
-                            isDropTarget={isDropTarget(column.id)}
-                            draggedTaskId={dragState.draggedTask?.id}
-                        />
-                    ))}
-                </div>
+            <div
+                className={cn(
+                    'flex h-full gap-3 overflow-x-auto pb-2',
+                    '-mx-4 px-4',
+                    className,
+                    isUpdating && 'pointer-events-none opacity-70'
+                )}
+            >
+                {columns.map((column) => (
+                    <KanbanColumn
+                        key={column.id}
+                        column={getColumnData(column.id)}
+                        onTaskClick={onTaskClick}
+                        onAddTask={onAddTask}
+                        isCompact
+                        activeFilters={columnFilters[column.id] || []}
+                        onToggleFilter={(priority) =>
+                            toggleColumnFilter(column.id, priority)
+                        }
+                        onClearFilters={() => clearColumnFilter(column.id)}
+                        hasActiveFilters={hasActiveFilters(column.id)}
+                        getDragProps={getDragProps}
+                        getDropZoneProps={getDropZoneProps}
+                        isDropTarget={isDropTarget(column.id)}
+                        draggedTaskId={dragState.draggedTask?.id}
+                        members={members}
+                    />
+                ))}
             </div>
         )
     }
@@ -157,6 +178,7 @@ export const KanbanBoard = ({
                     getDropZoneProps={getDropZoneProps}
                     isDropTarget={isDropTarget(column.id)}
                     draggedTaskId={dragState.draggedTask?.id}
+                    members={members}
                 />
             ))}
         </div>

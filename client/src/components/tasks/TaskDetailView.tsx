@@ -7,6 +7,7 @@ import { tasksApi } from '../../api/tasks'
 import { TaskSubtasks } from './TaskSubtasks'
 import { TaskLinks } from './TaskLinks'
 import { TaskDetailSidebar } from './TaskDetailSidebar'
+import { TaskComments } from './TaskComments'
 
 interface TaskDetailViewProps {
     groupId: string
@@ -103,6 +104,9 @@ export const TaskDetailView = ({
                         linkedTasks={taskDetails.linkedTasks}
                         allTasks={allTasks}
                     />
+
+                    {/* Comments Section */}
+                    <TaskComments groupId={groupId} taskId={taskId} />
                 </div>
 
                 {/* Sidebar - Right Column */}

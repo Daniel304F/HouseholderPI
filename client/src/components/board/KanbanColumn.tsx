@@ -7,6 +7,12 @@ import type { Priority } from '../../hooks/useTaskFilter'
 
 export type ColumnStatus = 'pending' | 'in-progress' | 'completed'
 
+export interface MemberInfo {
+    userId: string
+    name?: string
+    avatar?: string
+}
+
 export interface KanbanColumnData {
     id: ColumnStatus
     title: string
@@ -38,6 +44,7 @@ interface KanbanColumnProps {
     }
     isDropTarget?: boolean
     draggedTaskId?: string
+    members?: MemberInfo[]
 }
 
 const columnColors: Record<ColumnStatus, string> = {
@@ -69,7 +76,13 @@ export const KanbanColumn = ({
     getDropZoneProps,
     isDropTarget = false,
     draggedTaskId,
+    members = [],
 }: KanbanColumnProps) => {
+    // Helper to get member info for assignee
+    const getMemberInfo = (userId: string | null) => {
+        if (!userId) return undefined
+        return members.find((m) => m.userId === userId)
+    }
     const dropZoneProps = getDropZoneProps?.(column.id)
 
     return (
@@ -79,11 +92,11 @@ export const KanbanColumn = ({
                 'border border-neutral-200/50 dark:border-neutral-700/50',
                 'shadow-sm',
                 columnBgColors[column.id],
-                // Desktop: fixed width with max height, Mobile: full width, Compact: flexible
+                // Desktop: fixed width with max height, Mobile: full width, Compact: tablet optimized
                 isMobile
                     ? 'max-h-[70vh] w-full'
                     : isCompact
-                      ? 'max-h-[50vh] min-h-64'
+                      ? 'max-h-[60vh] min-h-64 min-w-56 max-w-64 flex-shrink-0'
                       : 'max-h-[65vh] max-w-72 min-w-72',
                 // Drop target styling
                 isDropTarget &&
@@ -185,6 +198,7 @@ export const KanbanColumn = ({
                             onClick={() => onTaskClick(task)}
                             dragProps={getDragProps?.(task)}
                             isDragging={draggedTaskId === task.id}
+                            assigneeInfo={getMemberInfo(task.assignedTo)}
                         />
                     ))
                 )}

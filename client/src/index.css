@@ -38,17 +38,17 @@
     --color-warning-900: hsl(26, 90%, 20%);
     --color-warning-950: hsl(22, 92%, 12%);
 
-    --color-error-50: hsl(0, 86%, 97%);
-    --color-error-100: hsl(0, 82%, 93%);
-    --color-error-200: hsl(0, 78%, 86%);
-    --color-error-300: hsl(0, 74%, 74%);
-    --color-error-400: hsl(0, 70%, 60%);
-    --color-error-500: hsl(0, 68%, 50%);
-    --color-error-600: hsl(358, 72%, 44%);
-    --color-error-700: hsl(356, 76%, 36%);
-    --color-error-800: hsl(354, 80%, 28%);
-    --color-error-900: hsl(352, 84%, 22%);
-    --color-error-950: hsl(350, 88%, 14%);
+    --color-error-50: hsl(8, 78%, 97%);
+    --color-error-100: hsl(8, 74%, 93%);
+    --color-error-200: hsl(7, 70%, 86%);
+    --color-error-300: hsl(6, 66%, 74%);
+    --color-error-400: hsl(5, 62%, 58%);
+    --color-error-500: hsl(4, 58%, 48%);
+    --color-error-600: hsl(3, 62%, 42%);
+    --color-error-700: hsl(2, 66%, 34%);
+    --color-error-800: hsl(1, 70%, 26%);
+    --color-error-900: hsl(0, 74%, 20%);
+    --color-error-950: hsl(359, 78%, 12%);
 
     --color-info-50: hsl(210, 80%, 97%);
     --color-info-100: hsl(210, 76%, 92%);

@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     ClipboardList,
     Filter,
-    Search,
     CheckCircle2,
     Clock,
     Circle,
@@ -11,7 +10,7 @@ import {
     ChevronDown,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../../components/common'
+import { Button, SearchBar } from '../../components/common'
 import {
     MyTaskCard,
     TaskDetailView,
@@ -19,6 +18,7 @@ import {
 } from '../../components/tasks'
 import { tasksApi, type TaskWithDetails, type Task } from '../../api/tasks'
 import { groupsApi, type GroupMember } from '../../api/groups'
+import { useToast } from '../../contexts/ToastContext'
 
 // ============================================================================
 // Types & Constants
@@ -106,12 +106,13 @@ const useTaskStats = (tasks: TaskWithDetails[]) => {
 
 export const MyTasks = () => {
     const queryClient = useQueryClient()
+    const toast = useToast()
 
     // Filter state
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
     const [sortBy, setSortBy] = useState<SortOption>('dueDate')
-    const [showFilters, setShowFilters] = useState(false)
+    const [showFilters, setShowFilters] = useState(true)
 
     // Modal state
     const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null)
@@ -145,6 +146,10 @@ export const MyTasks = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['myTasks'] })
             setTaskToEdit(null)
+            toast.success('Aufgabe aktualisiert!')
+        },
+        onError: () => {
+            toast.error('Aufgabe konnte nicht aktualisiert werden')
         },
     })
 
@@ -153,6 +158,10 @@ export const MyTasks = () => {
             tasksApi.completeTaskWithProof(groupId, taskId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+            toast.success('Aufgabe erledigt!')
+        },
+        onError: () => {
+            toast.error('Aufgabe konnte nicht abgeschlossen werden')
         },
     })
 
@@ -162,6 +171,10 @@ export const MyTasks = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['myTasks'] })
             setTaskToEdit(null)
+            toast.success('Aufgabe gelöscht')
+        },
+        onError: () => {
+            toast.error('Aufgabe konnte nicht gelöscht werden')
         },
     })
 
@@ -357,26 +370,38 @@ const FilterSection = ({
     onToggleFilters,
 }: FilterSectionProps) => (
     <div className="space-y-4">
+        {/* Status Filter Pills (always visible for better UX) */}
+        <div className="flex flex-wrap gap-2">
+            {STATUS_FILTERS.map((filter) => {
+                const Icon = filter.icon
+                const isActive = statusFilter === filter.value
+                return (
+                    <button
+                        key={filter.value}
+                        onClick={() => onStatusFilterChange(filter.value)}
+                        className={cn(
+                            'flex items-center gap-2 rounded-full px-4 py-2 text-sm',
+                            'border transition-all',
+                            isActive
+                                ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
+                                : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600'
+                        )}
+                    >
+                        <Icon className="size-4" />
+                        {filter.label}
+                    </button>
+                )
+            })}
+        </div>
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search */}
-            <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-                <input
-                    type="text"
-                    placeholder="Aufgaben suchen..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className={cn(
-                        'w-full rounded-lg border py-2 pr-4 pl-10',
-                        'border-neutral-300 dark:border-neutral-600',
-                        'bg-white dark:bg-neutral-800',
-                        'text-neutral-900 dark:text-white',
-                        'placeholder-neutral-400 dark:placeholder-neutral-500',
-                        'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2',
-                        'transition-colors'
-                    )}
-                />
-            </div>
+            <SearchBar
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder="Aufgaben suchen..."
+                className="flex-1"
+            />
 
             {/* Sort */}
             <div className="relative">
@@ -400,40 +425,23 @@ const FilterSection = ({
                 <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-400" />
             </div>
 
-            {/* Filter Toggle */}
+            {/* Additional Filters Toggle */}
             <Button
                 variant="secondary"
                 onClick={onToggleFilters}
                 className={cn(showFilters && 'bg-brand-100 dark:bg-brand-900/30')}
             >
                 <Filter className="mr-2 size-4" />
-                Filter
+                Mehr Filter
             </Button>
         </div>
 
-        {/* Status Filter Pills */}
+        {/* Extended filters (group filter, etc.) */}
         {showFilters && (
-            <div className="flex flex-wrap gap-2">
-                {STATUS_FILTERS.map((filter) => {
-                    const Icon = filter.icon
-                    const isActive = statusFilter === filter.value
-                    return (
-                        <button
-                            key={filter.value}
-                            onClick={() => onStatusFilterChange(filter.value)}
-                            className={cn(
-                                'flex items-center gap-2 rounded-full px-4 py-2 text-sm',
-                                'border transition-all',
-                                isActive
-                                    ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
-                                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600'
-                            )}
-                        >
-                            <Icon className="size-4" />
-                            {filter.label}
-                        </button>
-                    )
-                })}
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    Weitere Filter werden in Kürze verfügbar sein.
+                </p>
             </div>
         )}
     </div>

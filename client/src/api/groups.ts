@@ -1,6 +1,16 @@
 import { apiClient } from '../lib/axios'
 
 // Types
+export type PermissionLevel = 'owner' | 'admin' | 'member' | 'nobody'
+
+export interface GroupPermissions {
+    createTask: PermissionLevel
+    assignTask: PermissionLevel
+    deleteTask: PermissionLevel
+    editTask: PermissionLevel
+    manageRecurringTasks: PermissionLevel
+}
+
 export interface GroupMember {
     userId: string
     role: 'owner' | 'admin' | 'member'
@@ -18,6 +28,7 @@ export interface Group {
     members: GroupMember[]
     activeResidentsCount: number
     picture?: string
+    permissions?: GroupPermissions
     createdAt: string
     updatedAt: string
 }
@@ -138,5 +149,25 @@ export const groupsApi = {
     // Mitglied entfernen
     removeMember: async (groupId: string, memberId: string): Promise<void> => {
         await apiClient.delete(`/groups/${groupId}/members/${memberId}`)
+    },
+
+    // Berechtigungen abrufen
+    getPermissions: async (groupId: string): Promise<GroupPermissions> => {
+        const response = await apiClient.get<ApiResponse<GroupPermissions>>(
+            `/groups/${groupId}/permissions`
+        )
+        return response.data.data
+    },
+
+    // Berechtigungen aktualisieren
+    updatePermissions: async (
+        groupId: string,
+        permissions: Partial<GroupPermissions>
+    ): Promise<GroupPermissions> => {
+        const response = await apiClient.patch<ApiResponse<GroupPermissions>>(
+            `/groups/${groupId}/permissions`,
+            permissions
+        )
+        return response.data.data
     },
 }

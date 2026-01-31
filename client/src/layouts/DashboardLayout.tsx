@@ -17,21 +17,28 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const navigate = useNavigate()
     const location = useLocation()
-    const { isMobile } = useViewport()
+    const { isMobile, isTablet } = useViewport()
 
     const { width, isCollapsed, isResizing, toggle, startResizing } =
         useSidebar({
-            defaultWidth: 260,
-            minWidth: 200,
+            defaultWidth: isTablet ? 220 : 260,
+            minWidth: 180,
             maxWidth: 400,
             storageKey: 'dashboard-sidebar',
         })
 
     const isActive = (path: string) => location.pathname === path
 
+    // Responsive padding: mobile has bottom nav, tablet needs optimized space
+    const contentPadding = isMobile
+        ? 'p-4 pb-20'
+        : isTablet
+            ? 'p-4 lg:p-6'
+            : 'p-6'
+
     return (
         <div className="flex h-full flex-1">
-            {/* Sidebar - Desktop only */}
+            {/* Sidebar - Desktop and Tablet only */}
             {!isMobile && (
                 <Sidebar
                     width={width}
@@ -56,7 +63,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto">
-                <div className={cn('h-full', isMobile ? 'p-4 pb-20' : 'p-6')}>
+                <div className={cn('h-full', contentPadding)}>
                     {children ?? <Outlet />}
                 </div>
             </main>

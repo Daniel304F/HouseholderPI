@@ -10,6 +10,7 @@ export interface ColumnFilters {
 
 interface UseTaskFilterOptions {
     tasks: Task[]
+    searchQuery?: string
     initialSearchQuery?: string
 }
 
@@ -56,9 +57,13 @@ interface UseTaskFilterReturn {
  */
 export const useTaskFilter = ({
     tasks,
+    searchQuery: externalSearchQuery,
     initialSearchQuery = '',
 }: UseTaskFilterOptions): UseTaskFilterReturn => {
-    const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
+    // Use external search query if provided (controlled mode), otherwise use internal state
+    const [internalSearchQuery, setInternalSearchQuery] = useState(initialSearchQuery)
+    const searchQuery = externalSearchQuery ?? internalSearchQuery
+    const setSearchQuery = setInternalSearchQuery
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({})
 
     // Globale Suche über alle Tasks

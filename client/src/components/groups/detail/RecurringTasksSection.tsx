@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { Button } from '../../common'
+import { useToast } from '../../../contexts/ToastContext'
 import {
     recurringTasksApi,
     type RecurringTaskTemplate,
@@ -44,6 +45,7 @@ export const RecurringTasksSection = ({
     isAdmin,
 }: RecurringTasksSectionProps) => {
     const queryClient = useQueryClient()
+    const toast = useToast()
     const [expanded, setExpanded] = useState(false)
     const [showForm, setShowForm] = useState(false)
     const [editingTemplate, setEditingTemplate] =
@@ -63,16 +65,26 @@ export const RecurringTasksSection = ({
                 queryKey: ['recurring-tasks', groupId],
             })
             setShowForm(false)
+            toast.success('Vorlage erstellt!')
+        },
+        onError: () => {
+            toast.error('Vorlage konnte nicht erstellt werden')
         },
     })
 
     const toggleMutation = useMutation({
         mutationFn: (templateId: string) =>
             recurringTasksApi.toggleTemplate(groupId, templateId),
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: ['recurring-tasks', groupId],
             })
+            toast.success(
+                data.isActive ? 'Vorlage aktiviert' : 'Vorlage deaktiviert'
+            )
+        },
+        onError: () => {
+            toast.error('Status konnte nicht geändert werden')
         },
     })
 
@@ -83,6 +95,10 @@ export const RecurringTasksSection = ({
             queryClient.invalidateQueries({
                 queryKey: ['recurring-tasks', groupId],
             })
+            toast.success('Vorlage gelöscht')
+        },
+        onError: () => {
+            toast.error('Vorlage konnte nicht gelöscht werden')
         },
     })
 
@@ -99,6 +115,10 @@ export const RecurringTasksSection = ({
             queryClient.invalidateQueries({
                 queryKey: ['recurring-tasks', groupId],
             })
+            toast.success('Aufgabe aus Vorlage erstellt!')
+        },
+        onError: () => {
+            toast.error('Aufgabe konnte nicht erstellt werden')
         },
     })
 
@@ -228,15 +248,20 @@ export const RecurringTasksSection = ({
                             members={members}
                             template={editingTemplate}
                             onSubmit={async (data) => {
-                                await recurringTasksApi.updateTemplate(
-                                    groupId,
-                                    editingTemplate.id,
-                                    data
-                                )
-                                queryClient.invalidateQueries({
-                                    queryKey: ['recurring-tasks', groupId],
-                                })
-                                setEditingTemplate(null)
+                                try {
+                                    await recurringTasksApi.updateTemplate(
+                                        groupId,
+                                        editingTemplate.id,
+                                        data
+                                    )
+                                    queryClient.invalidateQueries({
+                                        queryKey: ['recurring-tasks', groupId],
+                                    })
+                                    setEditingTemplate(null)
+                                    toast.success('Vorlage aktualisiert!')
+                                } catch {
+                                    toast.error('Vorlage konnte nicht aktualisiert werden')
+                                }
                             }}
                             onCancel={() => setEditingTemplate(null)}
                             isSubmitting={false}

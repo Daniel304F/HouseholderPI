@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Copy, Check, RefreshCw } from 'lucide-react'
 import { Button } from '../../common'
+import { useToast } from '../../../contexts/ToastContext'
 import { cn } from '../../../utils/cn'
 
 interface InviteCodeSectionProps {
@@ -14,11 +15,13 @@ export const InviteCodeSection = ({
     onRegenerate,
     isRegenerating,
 }: InviteCodeSectionProps) => {
+    const toast = useToast()
     const [copied, setCopied] = useState(false)
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(inviteCode)
         setCopied(true)
+        toast.success('Invite-Code in die Zwischenablage kopiert!')
         setTimeout(() => setCopied(false), 2000)
     }
 

@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { Button } from '../common'
 import { BaseModal } from '../modal'
-import { TaskForm, type TaskFormData, type TaskFormErrors } from './TaskForm'
+import {
+    TaskForm,
+    type TaskFormData,
+    type TaskFormErrors,
+    type RecurrenceType,
+} from './TaskForm'
 import { getTomorrowDateValue } from '../../utils/date.utils'
 import type { TaskStatus, TaskPriority } from '../../constants/task.constants'
 import type { GroupMember } from '../../api/groups'
@@ -10,6 +15,7 @@ interface CreateTaskModalProps {
     isOpen: boolean
     onClose: () => void
     onSubmit: (task: CreateTaskData) => Promise<void>
+    onCreateRecurring?: (template: CreateRecurringData) => Promise<void>
     initialStatus?: TaskStatus
     members: GroupMember[]
 }
@@ -24,6 +30,16 @@ export interface CreateTaskData {
     image?: string
 }
 
+export interface CreateRecurringData {
+    title: string
+    description?: string
+    priority: TaskPriority
+    frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly'
+    assignmentStrategy: 'fixed' | 'rotation'
+    fixedAssignee?: string
+    dueDay: number
+}
+
 const createInitialData = (initialStatus: TaskStatus): TaskFormData => ({
     title: '',
     description: '',
@@ -32,12 +48,14 @@ const createInitialData = (initialStatus: TaskStatus): TaskFormData => ({
     assignedTo: null,
     dueDate: getTomorrowDateValue(),
     image: null,
+    recurrence: 'none' as RecurrenceType,
 })
 
 export const CreateTaskModal = ({
     isOpen,
     onClose,
     onSubmit,
+    onCreateRecurring,
     initialStatus = 'pending',
     members,
 }: CreateTaskModalProps) => {
@@ -81,6 +99,16 @@ export const CreateTaskModal = ({
         return Object.keys(newErrors).length === 0
     }
 
+    const getDueDayFromDate = (dateString: string): number => {
+        const date = new Date(dateString)
+        // For weekly/biweekly: return day of week (0-6)
+        // For monthly: return day of month (1-31)
+        if (formData.recurrence === 'monthly') {
+            return date.getDate()
+        }
+        return date.getDay()
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -88,15 +116,29 @@ export const CreateTaskModal = ({
 
         setIsSubmitting(true)
         try {
-            await onSubmit({
-                title: formData.title.trim(),
-                description: formData.description.trim() || undefined,
-                status: formData.status,
-                priority: formData.priority,
-                assignedTo: formData.assignedTo,
-                dueDate: new Date(formData.dueDate).toISOString(),
-                image: formData.image || undefined,
-            })
+            if (formData.recurrence !== 'none' && onCreateRecurring) {
+                // Create recurring task template
+                await onCreateRecurring({
+                    title: formData.title.trim(),
+                    description: formData.description.trim() || undefined,
+                    priority: formData.priority,
+                    frequency: formData.recurrence,
+                    assignmentStrategy: formData.assignedTo ? 'fixed' : 'rotation',
+                    fixedAssignee: formData.assignedTo || undefined,
+                    dueDay: getDueDayFromDate(formData.dueDate),
+                })
+            } else {
+                // Create regular task
+                await onSubmit({
+                    title: formData.title.trim(),
+                    description: formData.description.trim() || undefined,
+                    status: formData.status,
+                    priority: formData.priority,
+                    assignedTo: formData.assignedTo,
+                    dueDate: new Date(formData.dueDate).toISOString(),
+                    image: formData.image || undefined,
+                })
+            }
             handleClose()
         } catch {
             // Error handling wird vom Parent übernommen
@@ -104,6 +146,8 @@ export const CreateTaskModal = ({
             setIsSubmitting(false)
         }
     }
+
+    const isRecurring = formData.recurrence !== 'none'
 
     const footer = (
         <div className="flex justify-end gap-3">
@@ -120,7 +164,7 @@ export const CreateTaskModal = ({
                 form="create-task-form"
                 isLoading={isSubmitting}
             >
-                Aufgabe erstellen
+                {isRecurring ? 'Vorlage erstellen' : 'Aufgabe erstellen'}
             </Button>
         </div>
     )
@@ -129,7 +173,7 @@ export const CreateTaskModal = ({
         <BaseModal
             isOpen={isOpen}
             onClose={handleClose}
-            title="Neue Aufgabe"
+            title={isRecurring ? 'Neue wiederkehrende Aufgabe' : 'Neue Aufgabe'}
             footer={footer}
         >
             <TaskForm

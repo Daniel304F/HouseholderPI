@@ -10,6 +10,8 @@ export interface CalendarDay {
 
 export interface UseCalendarReturn {
     currentDate: Date
+    currentMonth: number
+    currentYear: number
     selectedDate: Date | null
     days: CalendarDay[]
     monthLabel: string
@@ -144,6 +146,8 @@ export const useCalendar = (
 
     return {
         currentDate,
+        currentMonth: currentDate.getMonth(),
+        currentYear: currentDate.getFullYear(),
         selectedDate,
         days,
         monthLabel,

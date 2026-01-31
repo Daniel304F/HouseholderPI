@@ -9,12 +9,14 @@ import {
     PASSWORD_REQUIREMENTS,
 } from '../utils/passwordUtils'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { getErrorMessage, isApiError } from '../lib/axios'
 import { AuthFormLayout } from '../layouts/AuthFormLayout'
 
 export const Register = () => {
     const { register } = useAuth()
     const navigate = useNavigate()
+    const toast = useToast()
 
     const [isLoading, setIsLoading] = useState(false)
     const [name, setName] = useState('')
@@ -84,6 +86,7 @@ export const Register = () => {
 
         try {
             await register({ name, email, password })
+            toast.success('Erfolgreich registriert!')
             navigate('/dashboard', { replace: true })
         } catch (error) {
             if (isApiError(error) && error.response?.status === 409) {

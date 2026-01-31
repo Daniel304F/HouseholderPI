@@ -1,4 +1,4 @@
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
 import { PriorityBadge } from './PriorityBadge'
@@ -19,12 +19,14 @@ export interface Task {
     updatedAt?: string
     parentTaskId?: string | null
     linkedTasks?: TaskLink[]
+    image?: string | null
 }
 
 interface TaskCardProps {
     task: Task
     onClick: () => void
     onEditClick?: () => void
+    onDeleteClick?: () => void
     showGroupBadge?: boolean
     groupName?: string
     subtaskCount?: number
@@ -34,6 +36,7 @@ export const TaskCard = ({
     task,
     onClick,
     onEditClick,
+    onDeleteClick,
     showGroupBadge = false,
     groupName,
     subtaskCount = 0,
@@ -45,12 +48,17 @@ export const TaskCard = ({
         onEditClick?.()
     }
 
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onDeleteClick?.()
+    }
+
     return (
         <div
             onClick={onClick}
             className={cn(
-                'group relative flex w-full cursor-pointer items-start gap-4 p-4 text-left',
-                'rounded-xl border',
+                'group relative flex w-full cursor-pointer flex-col text-left',
+                'rounded-xl border overflow-hidden',
                 'bg-white dark:bg-neutral-800',
                 'border-neutral-200 dark:border-neutral-700',
                 'transition-all duration-300 ease-out',
@@ -61,25 +69,54 @@ export const TaskCard = ({
                 task.status === 'completed' && 'opacity-60'
             )}
         >
-            {/* Edit Button*/}
-            {onEditClick && (
-                <button
-                    onClick={handleEditClick}
-                    className={cn(
-                        'absolute top-2 right-2 z-10',
-                        'flex h-7 w-7 items-center justify-center rounded-md',
-                        'bg-neutral-100 dark:bg-neutral-700',
-                        'text-neutral-500 dark:text-neutral-400',
-                        'opacity-0 group-hover:opacity-100',
-                        'hover:bg-brand-100 hover:text-brand-600',
-                        'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
-                        'transition-all duration-200'
-                    )}
-                    title="Aufgabe bearbeiten"
-                >
-                    <Pencil className="size-3.5" />
-                </button>
+            {/* Task Image */}
+            {task.image && (
+                <div className="relative h-32 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
+                    <img
+                        src={task.image}
+                        alt={task.title}
+                        className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
             )}
+
+            <div className="flex items-start gap-4 p-4">
+                {/* Action Buttons */}
+                <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {onEditClick && (
+                        <button
+                            onClick={handleEditClick}
+                            className={cn(
+                                'flex h-7 w-7 items-center justify-center rounded-md',
+                                'bg-neutral-100/90 dark:bg-neutral-700/90',
+                                'text-neutral-500 dark:text-neutral-400',
+                                'hover:bg-brand-100 hover:text-brand-600',
+                                'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
+                                'transition-all duration-200 backdrop-blur-sm'
+                            )}
+                            title="Aufgabe bearbeiten"
+                        >
+                            <Pencil className="size-3.5" />
+                        </button>
+                    )}
+                    {onDeleteClick && (
+                        <button
+                            onClick={handleDeleteClick}
+                            className={cn(
+                                'flex h-7 w-7 items-center justify-center rounded-md',
+                                'bg-neutral-100/90 dark:bg-neutral-700/90',
+                                'text-neutral-500 dark:text-neutral-400',
+                                'hover:bg-error-100 hover:text-error-600',
+                                'dark:hover:bg-error-900/30 dark:hover:text-error-400',
+                                'transition-all duration-200 backdrop-blur-sm'
+                            )}
+                            title="Aufgabe löschen"
+                        >
+                            <Trash2 className="size-3.5" />
+                        </button>
+                    )}
+                </div>
 
             {/* Status Icon */}
             <div
@@ -133,6 +170,7 @@ export const TaskCard = ({
                         linkedTasks={task.linkedTasks}
                     />
                 </div>
+            </div>
             </div>
         </div>
     )

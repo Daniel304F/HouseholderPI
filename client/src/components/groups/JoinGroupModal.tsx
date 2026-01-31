@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button, Input } from '../common'
 import { groupsApi } from '../../api/groups'
+import { useToast } from '../../contexts/ToastContext'
 import { cn } from '../../utils/cn'
 
 interface JoinGroupModalProps {
@@ -14,6 +15,7 @@ export const JoinGroupModal = ({
     onClose,
     onJoined,
 }: JoinGroupModalProps) => {
+    const toast = useToast()
     const [inviteCode, setInviteCode] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
@@ -33,6 +35,7 @@ export const JoinGroupModal = ({
             handleClose()
         } catch {
             setError('Ungültiger Invite-Code')
+            toast.error('Ungültiger oder abgelaufener Invite-Code')
         } finally {
             setIsLoading(false)
         }

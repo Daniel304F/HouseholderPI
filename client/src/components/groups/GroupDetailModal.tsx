@@ -1,8 +1,24 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { groupsApi, type Group } from '../../api/groups'
+import { useToast } from '../../contexts/ToastContext'
 import { cn } from '../../utils/cn'
-import { InviteCodeSection, MemberList, GroupActions } from './detail'
+import {
+    InviteCodeSection,
+    MemberList,
+    GroupActions,
+    RecurringTasksSection,
+    PermissionsSection,
+} from './detail'
+import type { GroupPermissions } from '../../api/groups'
+
+const DEFAULT_PERMISSIONS: GroupPermissions = {
+    createTask: 'member',
+    assignTask: 'member',
+    deleteTask: 'admin',
+    editTask: 'member',
+    manageRecurringTasks: 'admin',
+}
 
 interface GroupDetailModalProps {
     group: Group | null
@@ -17,6 +33,7 @@ export const GroupDetailModal = ({
     onUpdated,
     currentUserId,
 }: GroupDetailModalProps) => {
+    const toast = useToast()
     const [isRegenerating, setIsRegenerating] = useState(false)
     const [isLeaving, setIsLeaving] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -41,8 +58,9 @@ export const GroupDetailModal = ({
         try {
             const newCode = await groupsApi.regenerateInviteCode(localGroup.id)
             setLocalGroup({ ...localGroup, inviteCode: newCode })
+            toast.success('Neuer Invite-Code generiert!')
         } catch {
-            // Error handling
+            toast.error('Code konnte nicht generiert werden')
         } finally {
             setIsRegenerating(false)
         }
@@ -52,10 +70,11 @@ export const GroupDetailModal = ({
         setIsLeaving(true)
         try {
             await groupsApi.leaveGroup(localGroup.id)
+            toast.success('Gruppe verlassen')
             onUpdated()
             onClose()
         } catch {
-            // Error handling
+            toast.error('Gruppe konnte nicht verlassen werden')
         } finally {
             setIsLeaving(false)
         }
@@ -65,10 +84,11 @@ export const GroupDetailModal = ({
         setIsDeleting(true)
         try {
             await groupsApi.deleteGroup(localGroup.id)
+            toast.success('Gruppe gelöscht')
             onUpdated()
             onClose()
         } catch {
-            // Error handling
+            toast.error('Gruppe konnte nicht gelöscht werden')
         } finally {
             setIsDeleting(false)
         }
@@ -88,8 +108,9 @@ export const GroupDetailModal = ({
                     m.userId === memberId ? { ...m, role: newRole } : m
                 ),
             })
+            toast.success('Rolle geändert')
         } catch {
-            // Error handling
+            toast.error('Rolle konnte nicht geändert werden')
         }
     }
 
@@ -102,8 +123,9 @@ export const GroupDetailModal = ({
                     (m) => m.userId !== memberId
                 ),
             })
+            toast.success('Mitglied entfernt')
         } catch {
-            // Error handling
+            toast.error('Mitglied konnte nicht entfernt werden')
         }
     }
 
@@ -147,6 +169,20 @@ export const GroupDetailModal = ({
                         isRegenerating={isRegenerating}
                     />
                 )}
+
+                {/* Recurring Tasks */}
+                <RecurringTasksSection
+                    groupId={localGroup.id}
+                    members={localGroup.members}
+                    isAdmin={isAdmin}
+                />
+
+                {/* Permissions */}
+                <PermissionsSection
+                    groupId={localGroup.id}
+                    permissions={localGroup.permissions || DEFAULT_PERMISSIONS}
+                    isOwner={isOwner}
+                />
 
                 {/* Members */}
                 <MemberList

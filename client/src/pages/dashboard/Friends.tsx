@@ -13,6 +13,7 @@ import {
 } from '../../components/friends'
 import { Tabs as ContentTabs, type Tab } from '../../components/display'
 import { friendsApi } from '../../api/friends'
+import { useToast } from '../../contexts/ToastContext'
 import { cn } from '../../utils/cn'
 
 const tabs: Tab[] = [
@@ -29,6 +30,7 @@ const queryKeys = {
 
 export const Friends = () => {
     const queryClient = useQueryClient()
+    const toast = useToast()
     const [activeTab, setActiveTab] = useState('friends')
     const [showAddModal, setShowAddModal] = useState(false)
 
@@ -68,6 +70,10 @@ export const Friends = () => {
         mutationFn: (email: string) => friendsApi.sendRequest({ email }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.sent })
+            toast.success('Freundschaftsanfrage gesendet!')
+        },
+        onError: () => {
+            toast.error('Anfrage konnte nicht gesendet werden')
         },
     })
 
@@ -79,9 +85,15 @@ export const Friends = () => {
             requestId: string
             accept: boolean
         }) => friendsApi.respondToRequest(requestId, { accept }),
-        onSuccess: () => {
+        onSuccess: (_, { accept }) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.friends })
             queryClient.invalidateQueries({ queryKey: queryKeys.requests })
+            toast.success(
+                accept ? 'Anfrage angenommen!' : 'Anfrage abgelehnt'
+            )
+        },
+        onError: () => {
+            toast.error('Fehler beim Bearbeiten der Anfrage')
         },
     })
 
@@ -89,6 +101,10 @@ export const Friends = () => {
         mutationFn: friendsApi.cancelRequest,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.sent })
+            toast.success('Anfrage zurückgezogen')
+        },
+        onError: () => {
+            toast.error('Anfrage konnte nicht zurückgezogen werden')
         },
     })
 
@@ -96,6 +112,10 @@ export const Friends = () => {
         mutationFn: friendsApi.removeFriend,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.friends })
+            toast.success('Freund entfernt')
+        },
+        onError: () => {
+            toast.error('Freund konnte nicht entfernt werden')
         },
     })
 

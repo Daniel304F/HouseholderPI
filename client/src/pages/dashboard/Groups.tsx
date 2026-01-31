@@ -10,10 +10,12 @@ import {
     JoinGroupModal,
 } from '../../components/groups'
 import { groupsApi } from '../../api/groups'
+import { useToast } from '../../contexts/ToastContext'
 
 const groupsQueryKey = ['groups'] as const
 
 export const Groups = () => {
+    const toast = useToast()
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showJoinModal, setShowJoinModal] = useState(false)
 
@@ -112,12 +114,18 @@ export const Groups = () => {
             <CreateGroupModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
-                onCreated={() => refetch()}
+                onCreated={() => {
+                    refetch()
+                    toast.success('Gruppe erfolgreich erstellt!')
+                }}
             />
             <JoinGroupModal
                 isOpen={showJoinModal}
                 onClose={() => setShowJoinModal(false)}
-                onJoined={() => refetch()}
+                onJoined={() => {
+                    refetch()
+                    toast.success('Gruppe erfolgreich beigetreten!')
+                }}
             />
         </div>
     )

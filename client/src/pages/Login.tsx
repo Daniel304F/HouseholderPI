@@ -4,6 +4,7 @@ import { LogIn } from 'lucide-react'
 import { Button, Input } from '../components/common'
 import { PasswordInput } from '../components/forms'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { AuthFormLayout } from '../layouts/AuthFormLayout'
 import { isApiError, getErrorMessage } from '../lib/axios'
 
@@ -11,6 +12,7 @@ export const Login = () => {
     const { login } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
+    const toast = useToast()
 
     const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState('')
@@ -56,6 +58,7 @@ export const Login = () => {
 
         try {
             await login({ email, password })
+            toast.success('Erfolgreich eingeloggt')
             navigate(from, { replace: true })
         } catch (error) {
             if (isApiError(error) && error.response?.status === 401) {

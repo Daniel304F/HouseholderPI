@@ -1,3 +1,6 @@
 export { InviteCodeSection } from './InviteCodeSection'
 export { MemberList } from './MemberList'
 export { GroupActions } from './GroupActions'
+export { RecurringTasksSection } from './RecurringTasksSection'
+export { RecurringTaskForm } from './RecurringTaskForm'
+export { PermissionsSection } from './PermissionsSection'
