@@ -6,7 +6,10 @@
       "Bash(npx tsc --noEmit)",
       "Bash(npm run build:*)",
       "Bash(curl:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 10 npm run dev:*)"
     ]
   }
 }

@@ -14,6 +14,7 @@ import {
 } from "../schemas/group.schema.js";
 import taskRoutes from "./taskRoutes.js";
 import recurringTaskRoutes from "./recurringTaskRoutes.js";
+import messageRoutes from "./messageRoutes.js";
 
 const router = Router();
 
@@ -105,5 +106,8 @@ router.use("/:groupId/tasks", taskRoutes);
 
 // Recurring Task Routes (Sub-Router)
 router.use("/:groupId/recurring-tasks", recurringTaskRoutes);
+
+// Message Routes (Sub-Router)
+router.use("/:groupId/messages", messageRoutes);
 
 export default router;
