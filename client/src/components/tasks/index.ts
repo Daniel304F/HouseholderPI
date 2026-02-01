@@ -12,6 +12,8 @@ export { TaskDetailView } from './TaskDetailView'
 export { TaskStatsGrid } from './TaskStatsGrid'
 export { TasksEmptyState } from './TasksEmptyState'
 export { PriorityBadge } from './PriorityBadge'
+export { TaskHistory } from './TaskHistory'
+export { TaskHistoryTable } from './TaskHistoryTable'
 
 // Sub-components for TaskDetailView (can be used independently)
 export { TaskSubtasks } from './TaskSubtasks'

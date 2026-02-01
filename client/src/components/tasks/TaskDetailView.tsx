@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, AlertCircle } from 'lucide-react'
-import { Button } from '../common'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, AlertCircle, FileText } from 'lucide-react'
+import { Button, EditableText, EditableSection } from '../common'
 import { BaseModal } from '../modal'
 import { ModalWidth, ModalHeight } from '../modal/types'
 import { tasksApi } from '../../api/tasks'
@@ -8,6 +8,7 @@ import { TaskSubtasks } from './TaskSubtasks'
 import { TaskLinks } from './TaskLinks'
 import { TaskDetailSidebar } from './TaskDetailSidebar'
 import { TaskComments } from './TaskComments'
+import { useToast } from '../../contexts/ToastContext'
 
 interface TaskDetailViewProps {
     groupId: string
@@ -26,6 +27,9 @@ export const TaskDetailView = ({
     onClose,
     onEditClick,
 }: TaskDetailViewProps) => {
+    const queryClient = useQueryClient()
+    const toast = useToast()
+
     const { data: taskDetails, isLoading } = useQuery({
         queryKey: ['taskDetails', groupId, taskId],
         queryFn: () => tasksApi.getTaskWithDetails(groupId, taskId),
@@ -37,6 +41,24 @@ export const TaskDetailView = ({
         queryFn: () => tasksApi.getGroupTasks(groupId),
         enabled: !!groupId,
     })
+
+    // Inline update mutation
+    const updateMutation = useMutation({
+        mutationFn: (data: { description?: string }) =>
+            tasksApi.updateTask(groupId, taskId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['taskDetails', groupId, taskId] })
+            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+            toast.success('Beschreibung aktualisiert')
+        },
+        onError: () => {
+            toast.error('Aktualisierung fehlgeschlagen')
+        },
+    })
+
+    const handleDescriptionSave = async (value: string) => {
+        await updateMutation.mutateAsync({ description: value || undefined })
+    }
 
     if (isLoading) {
         return (
@@ -85,10 +107,20 @@ export const TaskDetailView = ({
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Main Content - Left 2 Columns */}
                 <div className="space-y-6 lg:col-span-2">
-                    {/* Description */}
-                    <TaskDescription
-                        description={taskDetails.description}
-                    />
+                    {/* Description - Inline Editable */}
+                    <EditableSection
+                        title="Beschreibung"
+                        icon={<FileText className="size-4" />}
+                    >
+                        <EditableText
+                            value={taskDetails.description || ''}
+                            onSave={handleDescriptionSave}
+                            placeholder="Beschreibung hinzufügen..."
+                            emptyText="Keine Beschreibung vorhanden."
+                            multiline
+                            maxLength={2000}
+                        />
+                    </EditableSection>
 
                     {/* Subtasks Section */}
                     <TaskSubtasks
@@ -152,16 +184,3 @@ const ErrorState = ({ onClose }: { onClose: () => void }) => (
     </div>
 )
 
-/**
- * Task description section
- */
-const TaskDescription = ({ description }: { description?: string }) => (
-    <div>
-        <h3 className="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
-            Beschreibung
-        </h3>
-        <p className="text-neutral-600 dark:text-neutral-400">
-            {description || 'Keine Beschreibung vorhanden.'}
-        </p>
-    </div>
-)
