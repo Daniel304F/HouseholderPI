@@ -102,28 +102,35 @@ export const Settings = () => {
                 subtitle="Verwalte dein Profil und Kontoeinstellungen"
             />
 
-            <div className="max-w-2xl space-y-6">
-                <ProfileSection
-                    user={user}
-                    onUpdateProfile={handleUpdateProfile}
-                    isUpdating={updateMutation.isPending}
-                />
+            {/* 2-Column Grid Layout */}
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Left Column - Profile & Email */}
+                <div className="space-y-6">
+                    <ProfileSection
+                        user={user}
+                        onUpdateProfile={handleUpdateProfile}
+                        isUpdating={updateMutation.isPending}
+                    />
 
-                <EmailSection
-                    currentEmail={user.email}
-                    onChangeEmail={handleChangeEmail}
-                    isUpdating={changeEmailMutation.isPending}
-                />
+                    <EmailSection
+                        currentEmail={user.email}
+                        onChangeEmail={handleChangeEmail}
+                        isUpdating={changeEmailMutation.isPending}
+                    />
+                </div>
 
-                <SecuritySection
-                    onChangePassword={handleChangePassword}
-                    isUpdating={changePasswordMutation.isPending}
-                />
+                {/* Right Column - Security & Danger Zone */}
+                <div className="space-y-6">
+                    <SecuritySection
+                        onChangePassword={handleChangePassword}
+                        isUpdating={changePasswordMutation.isPending}
+                    />
 
-                <DangerZoneSection
-                    onDeleteAccount={handleDeleteAccount}
-                    isDeleting={deleteAccountMutation.isPending}
-                />
+                    <DangerZoneSection
+                        onDeleteAccount={handleDeleteAccount}
+                        isDeleting={deleteAccountMutation.isPending}
+                    />
+                </div>
             </div>
         </div>
     )

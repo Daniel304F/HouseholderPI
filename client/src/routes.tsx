@@ -14,6 +14,7 @@ import { MyTasks } from './pages/dashboard/MyTasks'
 import { PersonalStats } from './pages/dashboard/PersonalStats'
 import { GroupStats } from './pages/dashboard/GroupStats'
 import { Settings } from './pages/dashboard/Settings'
+import { TaskHistory } from './pages/dashboard/TaskHistory'
 
 export const routes: RouteObject[] = [
     {
@@ -78,6 +79,10 @@ export const routes: RouteObject[] = [
                     {
                         path: 'settings',
                         element: <Settings />,
+                    },
+                    {
+                        path: 'history',
+                        element: <TaskHistory />,
                     },
                 ],
             },

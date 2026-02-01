@@ -16,7 +16,11 @@ import {
     ProgressRing,
     ChartCard,
 } from '../../components/charts'
-import { PageHeaderSkeleton, StatCardsSkeleton, StatsErrorState } from '../../components/feedback'
+import {
+    PageHeaderSkeleton,
+    StatCardsSkeleton,
+    StatsErrorState,
+} from '../../components/feedback'
 import { PageHeader, Card } from '../../components/common'
 import { ContributionGraph, ActivityLog } from '../../components/activity'
 import { statisticsApi } from '../../api/statistics'
@@ -215,35 +219,6 @@ export const PersonalStats = () => {
             </ChartCard>
 
             {/* Activity Section */}
-            <div className="space-y-6">
-                {/* Contribution Graph */}
-                <Card className="p-6">
-                    <div className="mb-4 flex items-center gap-2">
-                        <Activity className="size-5 text-brand-500" />
-                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                            Aktivitätsverlauf
-                        </h2>
-                    </div>
-                    {heatmapData && heatmapData.length > 0 ? (
-                        <ContributionGraph data={heatmapData} />
-                    ) : (
-                        <p className="py-8 text-center text-neutral-500 dark:text-neutral-400">
-                            Noch keine Aktivitätsdaten vorhanden
-                        </p>
-                    )}
-                </Card>
-
-                {/* Activity Log */}
-                <Card className="p-6">
-                    <div className="mb-4 flex items-center gap-2">
-                        <Activity className="size-5 text-brand-500" />
-                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                            Aktivitätslog
-                        </h2>
-                    </div>
-                    <ActivityLog />
-                </Card>
-            </div>
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { ClipboardList, Users, UserCircle, BarChart3 } from 'lucide-react'
+import { ClipboardList, Users, UserCircle, BarChart3, History } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export interface NavItem {
@@ -35,5 +35,11 @@ export const dashboardNavItems: NavItem[] = [
         label: 'Statistiken',
         path: '/dashboard/stats',
         icon: BarChart3,
+    },
+    {
+        id: 'history',
+        label: 'Historie',
+        path: '/dashboard/history',
+        icon: History,
     },
 ]
