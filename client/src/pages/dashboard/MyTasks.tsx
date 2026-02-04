@@ -5,11 +5,13 @@ import { groupsApi, type GroupMember } from '../../api/groups'
 import { TaskDetailView, EditTaskModal } from '../../components/tasks'
 import { useToast } from '../../contexts/ToastContext'
 import {
-    type StatusFilter,
-    type SortOption,
     useFilteredTasks,
     useTaskStats,
     useTasksByGroup,
+    type StatusFilter,
+    type SortOption,
+} from '../../hooks'
+import {
     PageHeader,
     TaskStatsGrid,
     FilterSection,
@@ -18,7 +20,7 @@ import {
     EmptyState,
     ErrorState,
     MyTasksSkeleton,
-} from './my-tasks'
+} from '../../components/page-my-tasks'
 
 export const MyTasks = () => {
     const queryClient = useQueryClient()

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { TaskWithDetails } from '../../../api/tasks'
+import type { TaskWithDetails } from '../api/tasks'
 
 /**
  * Filter and sort completed tasks

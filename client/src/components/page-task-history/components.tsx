@@ -1,5 +1,5 @@
 import { History, AlertCircle } from 'lucide-react'
-import { Button } from '../../../components/common'
+import { Button } from '../common'
 
 // =============================================================================
 // Page Header

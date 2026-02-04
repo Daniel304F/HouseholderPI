@@ -1,5 +1,5 @@
 import { Users, Inbox, Send } from 'lucide-react'
-import type { Tab } from '../../../components/display'
+import type { Tab } from '../display'
 
 export const TABS: Tab[] = [
     { id: 'friends', label: 'Freunde', icon: <Users className="size-4" /> },

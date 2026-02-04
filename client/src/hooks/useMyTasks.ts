@@ -1,6 +1,11 @@
 import { useMemo } from 'react'
-import type { TaskWithDetails } from '../../../api/tasks'
-import { PRIORITY_ORDER, STATUS_ORDER, type StatusFilter, type SortOption } from './constants'
+import type { TaskWithDetails } from '../api/tasks'
+
+export type StatusFilter = 'pending' | 'in-progress'
+export type SortOption = 'dueDate' | 'priority' | 'status' | 'groupName'
+
+const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 }
+const STATUS_ORDER: Record<string, number> = { 'in-progress': 0, pending: 1, completed: 2 }
 
 /**
  * Custom hook for filtering and sorting tasks

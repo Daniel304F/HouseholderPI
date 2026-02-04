@@ -13,3 +13,14 @@ export {
     type TaskMutations,
 } from './useTaskMutations'
 export { useTaskModal, type TaskModalState } from './useTaskModal'
+
+// Page-specific hooks
+export { useFriendsMutations } from './useFriendsMutations'
+export {
+    useFilteredTasks,
+    useTaskStats,
+    useTasksByGroup,
+    type StatusFilter,
+    type SortOption,
+} from './useMyTasks'
+export { useCompletedTasks, useCompletedTaskStats } from './useTaskHistory'

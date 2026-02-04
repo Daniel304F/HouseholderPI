@@ -1,7 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { friendsApi } from '../../../api/friends'
-import { useToast } from '../../../contexts/ToastContext'
-import { QUERY_KEYS } from './constants'
+import { friendsApi } from '../api/friends'
+import { useToast } from '../contexts/ToastContext'
+
+const QUERY_KEYS = {
+    friends: ['friends'] as const,
+    requests: ['friends', 'requests'] as const,
+    sent: ['friends', 'sent'] as const,
+}
 
 export const useFriendsMutations = () => {
     const queryClient = useQueryClient()

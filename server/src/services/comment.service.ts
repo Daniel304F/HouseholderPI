@@ -54,6 +54,17 @@ export class CommentService {
   }
 
   private toResponse(comment: CommentWithUser): CommentResponse {
+    // Ensure dates are Date objects (they may come as strings from DB)
+    const createdAt = comment.createdAt instanceof Date
+      ? comment.createdAt
+      : new Date(comment.createdAt);
+    const updatedAt = comment.updatedAt instanceof Date
+      ? comment.updatedAt
+      : new Date(comment.updatedAt);
+    const editedAt = comment.editedAt
+      ? (comment.editedAt instanceof Date ? comment.editedAt : new Date(comment.editedAt))
+      : null;
+
     return {
       id: comment.id,
       taskId: comment.taskId,
@@ -62,9 +73,9 @@ export class CommentService {
       userName: comment.userName,
       userAvatar: comment.userAvatar,
       content: comment.content,
-      createdAt: comment.createdAt.toISOString(),
-      updatedAt: comment.updatedAt.toISOString(),
-      editedAt: comment.editedAt ? comment.editedAt.toISOString() : null,
+      createdAt: createdAt.toISOString(),
+      updatedAt: updatedAt.toISOString(),
+      editedAt: editedAt ? editedAt.toISOString() : null,
     };
   }
 
@@ -119,7 +130,11 @@ export class CommentService {
     } as Partial<Comment>);
 
     // Sort by createdAt ascending (oldest first)
-    comments.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    comments.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+      return dateA.getTime() - dateB.getTime();
+    });
 
     // Enrich with user info
     const enrichedComments: CommentResponse[] = [];

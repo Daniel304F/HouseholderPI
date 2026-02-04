@@ -1,6 +1,6 @@
 import { RefreshCw, Inbox, Send } from 'lucide-react'
-import { cn } from '../../../utils/cn'
-import { Button } from '../../../components/common'
+import { cn } from '../../utils/cn'
+import { Button } from '../common'
 import {
     FriendCard,
     FriendCardSkeleton,
@@ -8,8 +8,8 @@ import {
     SentRequestCard,
     RequestCardSkeleton,
     FriendsEmptyState,
-} from '../../../components/friends'
-import type { Friend, FriendRequest, SentFriendRequest } from '../../../api/friends'
+} from '../friends'
+import type { Friend, FriendRequest, SentFriendRequest } from '../../api/friends'
 
 // =============================================================================
 // Loading States

@@ -5,16 +5,16 @@ import { Button } from '../../components/common'
 import { AddFriendModal } from '../../components/friends'
 import { Tabs as ContentTabs } from '../../components/display'
 import { friendsApi } from '../../api/friends'
+import { useFriendsMutations } from '../../hooks'
 import {
     TABS,
     QUERY_KEYS,
-    useFriendsMutations,
     LoadingState,
     ErrorState,
     FriendsTab,
     RequestsTab,
     SentTab,
-} from './friends-page'
+} from '../../components/page-friends'
 
 export const Friends = () => {
     const [activeTab, setActiveTab] = useState('friends')

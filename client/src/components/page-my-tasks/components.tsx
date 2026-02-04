@@ -7,10 +7,10 @@ import {
     AlertCircle,
     ChevronDown,
 } from 'lucide-react'
-import { cn } from '../../../utils/cn'
-import { Button, SearchBar } from '../../../components/common'
-import { MyTaskCard } from '../../../components/tasks'
-import type { TaskWithDetails } from '../../../api/tasks'
+import { cn } from '../../utils/cn'
+import { Button, SearchBar } from '../common'
+import { MyTaskCard } from '../tasks'
+import type { TaskWithDetails } from '../../api/tasks'
 import { STATUS_FILTERS, SORT_OPTIONS, type StatusFilter, type SortOption } from './constants'
 
 // =============================================================================

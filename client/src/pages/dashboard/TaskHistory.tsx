@@ -4,15 +4,14 @@ import { tasksApi, type TaskWithDetails, type Task } from '../../api/tasks'
 import { groupsApi, type GroupMember } from '../../api/groups'
 import { TaskHistoryTable, TaskDetailView, EditTaskModal } from '../../components/tasks'
 import { useToast } from '../../contexts/ToastContext'
+import { useCompletedTasks, useCompletedTaskStats } from '../../hooks'
 import {
-    useCompletedTasks,
-    useCompletedTaskStats,
     PageHeader,
     StatsGrid,
     EmptyState,
     ErrorState,
     TaskHistorySkeleton,
-} from './task-history'
+} from '../../components/page-task-history'
 
 export const TaskHistory = () => {
     const toast = useToast()
