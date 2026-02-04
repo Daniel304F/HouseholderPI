@@ -33,13 +33,13 @@ const PRIORITIES: { value: TaskPriority; label: string }[] = [
 ]
 
 const WEEKDAYS = [
-    { value: 0, label: 'Sonntag' },
-    { value: 1, label: 'Montag' },
-    { value: 2, label: 'Dienstag' },
-    { value: 3, label: 'Mittwoch' },
-    { value: 4, label: 'Donnerstag' },
-    { value: 5, label: 'Freitag' },
-    { value: 6, label: 'Samstag' },
+    { value: 1, label: 'Mo', fullLabel: 'Montag' },
+    { value: 2, label: 'Di', fullLabel: 'Dienstag' },
+    { value: 3, label: 'Mi', fullLabel: 'Mittwoch' },
+    { value: 4, label: 'Do', fullLabel: 'Donnerstag' },
+    { value: 5, label: 'Fr', fullLabel: 'Freitag' },
+    { value: 6, label: 'Sa', fullLabel: 'Samstag' },
+    { value: 0, label: 'So', fullLabel: 'Sonntag' },
 ]
 
 export const RecurringTaskForm = ({
@@ -65,11 +65,32 @@ export const RecurringTaskForm = ({
     const [rotationOrder, setRotationOrder] = useState<string[]>(
         template?.rotationOrder || members.map((m) => m.userId)
     )
-    const [dueDay, setDueDay] = useState(template?.dueDay || 1)
+    // Changed from dueDay to dueDays (array)
+    const [dueDays, setDueDays] = useState<number[]>(
+        template?.dueDays || [1] // Default: Monday
+    )
+    // For monthly, keep a single value input
+    const [monthDay, setMonthDay] = useState(
+        template?.dueDays?.[0] || 1
+    )
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!title.trim()) return
+
+        // Determine dueDays based on frequency
+        let finalDueDays: number[]
+        if (frequency === 'daily') {
+            finalDueDays = [0] // Not really used for daily
+        } else if (frequency === 'monthly') {
+            finalDueDays = [monthDay]
+        } else {
+            finalDueDays = dueDays
+        }
+
+        if (finalDueDays.length === 0 && frequency !== 'daily') {
+            return // Prevent submission without selected days
+        }
 
         const data: CreateRecurringTaskInput = {
             title: title.trim(),
@@ -77,7 +98,7 @@ export const RecurringTaskForm = ({
             priority,
             frequency,
             assignmentStrategy,
-            dueDay,
+            dueDays: finalDueDays,
         }
 
         if (assignmentStrategy === 'fixed' && fixedAssignee) {
@@ -94,6 +115,14 @@ export const RecurringTaskForm = ({
             setRotationOrder(rotationOrder.filter((id) => id !== userId))
         } else {
             setRotationOrder([...rotationOrder, userId])
+        }
+    }
+
+    const toggleWeekday = (day: number) => {
+        if (dueDays.includes(day)) {
+            setDueDays(dueDays.filter((d) => d !== day))
+        } else {
+            setDueDays([...dueDays, day].sort((a, b) => a - b))
         }
     }
 
@@ -191,19 +220,19 @@ export const RecurringTaskForm = ({
                     </select>
                 </div>
 
-                {/* Due Day */}
+                {/* Due Days */}
                 <div>
                     <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         {frequency === 'monthly'
                             ? 'Tag des Monats'
-                            : 'Wochentag'}
+                            : 'Wochentage'}
                     </label>
                     {frequency === 'monthly' ? (
                         <Input
                             type="number"
-                            value={dueDay}
+                            value={monthDay}
                             onChange={(e) =>
-                                setDueDay(
+                                setMonthDay(
                                     Math.max(1, Math.min(31, parseInt(e.target.value) || 1))
                                 )
                             }
@@ -215,21 +244,36 @@ export const RecurringTaskForm = ({
                             Aufgabe wird jeden Tag fällig
                         </p>
                     ) : (
-                        <select
-                            value={dueDay}
-                            onChange={(e) => setDueDay(parseInt(e.target.value))}
-                            className={cn(
-                                'w-full rounded-lg border px-3 py-2 text-sm',
-                                'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
-                                'focus:border-brand-500 focus:ring-brand-500/20 focus:outline-none focus:ring-2'
+                        <div className="space-y-2">
+                            <div className="flex flex-wrap gap-2">
+                                {WEEKDAYS.map((day) => (
+                                    <button
+                                        key={day.value}
+                                        type="button"
+                                        onClick={() => toggleWeekday(day.value)}
+                                        title={day.fullLabel}
+                                        className={cn(
+                                            'flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors',
+                                            dueDays.includes(day.value)
+                                                ? 'bg-brand-500 text-white'
+                                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                                        )}
+                                    >
+                                        {day.label}
+                                    </button>
+                                ))}
+                            </div>
+                            {dueDays.length === 0 && (
+                                <p className="text-xs text-error-500">
+                                    Mindestens einen Tag auswählen
+                                </p>
                             )}
-                        >
-                            {WEEKDAYS.map((d) => (
-                                <option key={d.value} value={d.value}>
-                                    {d.label}
-                                </option>
-                            ))}
-                        </select>
+                            {dueDays.length > 0 && (
+                                <p className="text-xs text-neutral-500">
+                                    Ausgewählt: {dueDays.map(d => WEEKDAYS.find(w => w.value === d)?.fullLabel).join(', ')}
+                                </p>
+                            )}
+                        </div>
                     )}
                 </div>
 
@@ -334,7 +378,8 @@ export const RecurringTaskForm = ({
                         isSubmitting ||
                         !title.trim() ||
                         (assignmentStrategy === 'rotation' &&
-                            rotationOrder.length === 0)
+                            rotationOrder.length === 0) ||
+                        (frequency !== 'daily' && frequency !== 'monthly' && dueDays.length === 0)
                     }
                 >
                     {isSubmitting ? (

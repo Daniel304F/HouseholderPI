@@ -1,9 +1,33 @@
-import { useState } from 'react'
-import { Clock, CheckCircle2, Circle, Pencil, Sparkles } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Clock, CheckCircle2, Circle, Pencil, Sparkles, ImageIcon, AlertTriangle } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
+
+// Helper to check if a mime type is an image
+const isImageMimeType = (mimeType: string) => mimeType.startsWith('image/')
+
+export interface TaskAttachment {
+    id: string
+    filename: string
+    originalName: string
+    mimeType: string
+    size: number
+    uploadedBy: string
+    uploadedAt: string
+    url: string
+}
+
+export interface CompletionProof {
+    filename: string
+    originalName: string
+    mimeType: string
+    uploadedBy: string
+    uploadedAt: string
+    note?: string
+    url: string
+}
 
 export interface Task {
     id: string
@@ -21,6 +45,8 @@ export interface Task {
     linkedTasks?: TaskLink[]
     assignedToName?: string
     createdByName?: string
+    attachments?: TaskAttachment[]
+    completionProof?: CompletionProof | null
 }
 
 interface MyTaskCardProps {
@@ -46,6 +72,27 @@ export const MyTaskCard = ({
     const [showCelebration, setShowCelebration] = useState(false)
 
     const isCompleted = task.status === 'completed'
+
+    // Check if task is overdue
+    const isOverdue = useMemo(() => {
+        if (isCompleted) return false
+        const dueDate = new Date(task.dueDate)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        dueDate.setHours(0, 0, 0, 0)
+        return dueDate < today
+    }, [task.dueDate, isCompleted])
+
+    // Get first image from attachments or completion proof
+    const taskImage = useMemo(() => {
+        // First check completion proof
+        if (task.completionProof && isImageMimeType(task.completionProof.mimeType)) {
+            return task.completionProof.url
+        }
+        // Then check attachments
+        const imageAttachment = task.attachments?.find((a) => isImageMimeType(a.mimeType))
+        return imageAttachment?.url || null
+    }, [task.attachments, task.completionProof])
 
     const handleEditClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -75,20 +122,39 @@ export const MyTaskCard = ({
         <div
             onClick={onClick}
             className={cn(
-                'group relative flex w-full cursor-pointer items-start gap-4 p-4 text-left',
-                'rounded-xl border',
+                'group relative flex w-full cursor-pointer flex-col text-left',
+                'rounded-xl border overflow-hidden',
                 'bg-white dark:bg-neutral-800',
-                'border-neutral-200 dark:border-neutral-700',
                 'transition-all duration-300 ease-out',
-                'hover:border-brand-300 dark:hover:border-brand-600',
-                'hover:shadow-brand-500/10 hover:shadow-lg',
+                'hover:shadow-lg',
                 'hover:-translate-y-0.5',
                 'active:translate-y-0 active:shadow-md',
-                isCompleted && 'opacity-60',
+                isCompleted && 'opacity-60 border-neutral-200 dark:border-neutral-700',
+                isOverdue && !isCompleted && 'border-error-300 bg-error-50/30 dark:border-error-700 dark:bg-error-900/10 hover:border-error-400',
+                !isOverdue && !isCompleted && 'border-neutral-200 dark:border-neutral-700 hover:border-brand-300 dark:hover:border-brand-600 hover:shadow-brand-500/10',
                 isCompleting &&
                     'border-success-400 bg-success-50/50 dark:bg-success-900/20'
             )}
         >
+            {/* Task Image */}
+            {taskImage && (
+                <div className="relative h-32 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
+                    <img
+                        src={taskImage}
+                        alt={task.title}
+                        className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    {task.completionProof && (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded bg-success-500/80 px-1.5 py-0.5 text-xs font-medium text-white">
+                            <ImageIcon className="size-3" />
+                            Beweis
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="flex items-start gap-4 p-4">
             {/* Celebration Animation */}
             {showCelebration && (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
@@ -174,12 +240,20 @@ export const MyTaskCard = ({
             <div className="min-w-0 flex-1 pr-6">
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                        {/* Group Badge */}
-                        {showGroupBadge && groupName && (
-                            <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 mb-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium">
-                                {groupName}
-                            </span>
-                        )}
+                        {/* Badges */}
+                        <div className="flex flex-wrap items-center gap-1 mb-1">
+                            {showGroupBadge && groupName && (
+                                <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 inline-block rounded px-1.5 py-0.5 text-xs font-medium">
+                                    {groupName}
+                                </span>
+                            )}
+                            {isOverdue && (
+                                <span className="bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
+                                    <AlertTriangle className="size-3" />
+                                    Überfällig
+                                </span>
+                            )}
+                        </div>
                         <h3
                             className={cn(
                                 'font-medium text-neutral-900 dark:text-white',
@@ -214,6 +288,7 @@ export const MyTaskCard = ({
                         linkedTasks={task.linkedTasks}
                     />
                 </div>
+            </div>
             </div>
         </div>
     )

@@ -1,9 +1,34 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { useMemo } from 'react'
+import { Pencil, Trash2, ImageIcon, AlertTriangle } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
+
+// Helper to check if a mime type is an image
+const isImageMimeType = (mimeType: string) => mimeType.startsWith('image/')
+
+export interface TaskAttachment {
+    id: string
+    filename: string
+    originalName: string
+    mimeType: string
+    size: number
+    uploadedBy: string
+    uploadedAt: string
+    url: string
+}
+
+export interface CompletionProof {
+    filename: string
+    originalName: string
+    mimeType: string
+    uploadedBy: string
+    uploadedAt: string
+    note?: string
+    url: string
+}
 
 export interface Task {
     id: string
@@ -19,7 +44,8 @@ export interface Task {
     updatedAt?: string
     parentTaskId?: string | null
     linkedTasks?: TaskLink[]
-    image?: string | null
+    attachments?: TaskAttachment[]
+    completionProof?: CompletionProof | null
 }
 
 interface TaskCardProps {
@@ -42,6 +68,27 @@ export const TaskCard = ({
     subtaskCount = 0,
 }: TaskCardProps) => {
     const StatusIcon = STATUS_ICONS[task.status]
+
+    // Get first image from attachments or completion proof
+    const taskImage = useMemo(() => {
+        // First check completion proof
+        if (task.completionProof && isImageMimeType(task.completionProof.mimeType)) {
+            return task.completionProof.url
+        }
+        // Then check attachments
+        const imageAttachment = task.attachments?.find((a) => isImageMimeType(a.mimeType))
+        return imageAttachment?.url || null
+    }, [task.attachments, task.completionProof])
+
+    // Check if task is overdue
+    const isOverdue = useMemo(() => {
+        if (task.status === 'completed') return false
+        const dueDate = new Date(task.dueDate)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        dueDate.setHours(0, 0, 0, 0)
+        return dueDate < today
+    }, [task.dueDate, task.status])
 
     const handleEditClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -66,18 +113,25 @@ export const TaskCard = ({
                 'hover:shadow-brand-500/10 hover:shadow-lg',
                 'hover:-translate-y-0.5',
                 'active:translate-y-0 active:shadow-md',
-                task.status === 'completed' && 'opacity-60'
+                task.status === 'completed' && 'opacity-60',
+                isOverdue && task.status !== 'completed' && 'border-error-300 bg-error-50/30 dark:border-error-700 dark:bg-error-900/10 hover:border-error-400'
             )}
         >
             {/* Task Image */}
-            {task.image && (
+            {taskImage && (
                 <div className="relative h-32 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
                     <img
-                        src={task.image}
+                        src={taskImage}
                         alt={task.title}
                         className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    {task.completionProof && (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded bg-success-500/80 px-1.5 py-0.5 text-xs font-medium text-white">
+                            <ImageIcon className="size-3" />
+                            Beweis
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -151,7 +205,15 @@ export const TaskCard = ({
                     </div>
 
                     {/* Priority Badge */}
-                    <PriorityBadge priority={task.priority} />
+                    <div className="flex items-center gap-1.5">
+                        {isOverdue && (
+                            <span className="inline-flex items-center gap-1 rounded bg-error-100 px-1.5 py-0.5 text-xs font-medium text-error-700 dark:bg-error-900/30 dark:text-error-400">
+                                <AlertTriangle className="size-3" />
+                                Überfällig
+                            </span>
+                        )}
+                        <PriorityBadge priority={task.priority} />
+                    </div>
                 </div>
 
                 {task.description && (

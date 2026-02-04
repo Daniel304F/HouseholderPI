@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/axios'
+import type { TaskAttachment } from './tasks'
 
 export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly'
 export type AssignmentStrategy = 'fixed' | 'rotation'
@@ -15,13 +16,14 @@ export interface RecurringTaskTemplate {
     fixedAssignee?: string
     rotationOrder?: string[]
     currentRotationIndex: number
-    dueDay: number
+    dueDays: number[]
     isActive: boolean
     lastGeneratedAt?: string
     nextSuggestedAssignee?: string
     createdBy: string
     createdAt: string
     updatedAt: string
+    attachments?: TaskAttachment[]
 }
 
 export interface CreateRecurringTaskInput {
@@ -32,7 +34,7 @@ export interface CreateRecurringTaskInput {
     assignmentStrategy: AssignmentStrategy
     fixedAssignee?: string
     rotationOrder?: string[]
-    dueDay: number
+    dueDays: number[]
 }
 
 export interface UpdateRecurringTaskInput {
@@ -43,7 +45,7 @@ export interface UpdateRecurringTaskInput {
     assignmentStrategy?: AssignmentStrategy
     fixedAssignee?: string | null
     rotationOrder?: string[]
-    dueDay?: number
+    dueDays?: number[]
 }
 
 interface ApiResponse<T> {
@@ -116,6 +118,46 @@ export const recurringTasksApi = {
         await apiClient.post(
             `/groups/${groupId}/recurring-tasks/${templateId}/generate`,
             { assignedTo }
+        )
+    },
+
+    // Attachments
+    getAttachments: async (
+        groupId: string,
+        templateId: string
+    ): Promise<TaskAttachment[]> => {
+        const response = await apiClient.get<ApiResponse<TaskAttachment[]>>(
+            `/groups/${groupId}/recurring-tasks/${templateId}/attachments`
+        )
+        return response.data.data
+    },
+
+    uploadAttachment: async (
+        groupId: string,
+        templateId: string,
+        file: File
+    ): Promise<TaskAttachment> => {
+        const formData = new FormData()
+        formData.append('file', file)
+        const response = await apiClient.post<ApiResponse<TaskAttachment>>(
+            `/groups/${groupId}/recurring-tasks/${templateId}/attachments`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        )
+        return response.data.data
+    },
+
+    deleteAttachment: async (
+        groupId: string,
+        templateId: string,
+        attachmentId: string
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/groups/${groupId}/recurring-tasks/${templateId}/attachments/${attachmentId}`
         )
     },
 }

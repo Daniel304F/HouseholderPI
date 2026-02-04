@@ -34,6 +34,7 @@ const getRecurringDatesForMonth = (
         if (!template.isActive) return
 
         const dates: Date[] = []
+        const dueDays = template.dueDays || []
 
         switch (template.frequency) {
             case 'daily':
@@ -45,37 +46,41 @@ const getRecurringDatesForMonth = (
                 break
 
             case 'weekly':
-                // Every week on dueDay (0 = Sunday, 1 = Monday, etc.)
-                const firstDay = new Date(year, month, 1)
-                const lastDay = new Date(year, month + 1, 0)
-                const current = new Date(firstDay)
-                // Find first occurrence of the day
-                while (current.getDay() !== template.dueDay) {
-                    current.setDate(current.getDate() + 1)
-                }
-                while (current <= lastDay) {
-                    dates.push(new Date(current))
-                    current.setDate(current.getDate() + 7)
-                }
+                // Every week on each day in dueDays (0 = Sunday, 1 = Monday, etc.)
+                dueDays.forEach((dueDay) => {
+                    const firstDay = new Date(year, month, 1)
+                    const lastDay = new Date(year, month + 1, 0)
+                    const current = new Date(firstDay)
+                    // Find first occurrence of the day
+                    while (current.getDay() !== dueDay) {
+                        current.setDate(current.getDate() + 1)
+                    }
+                    while (current <= lastDay) {
+                        dates.push(new Date(current))
+                        current.setDate(current.getDate() + 7)
+                    }
+                })
                 break
 
             case 'biweekly':
-                // Every two weeks on dueDay
-                const firstDayBi = new Date(year, month, 1)
-                const lastDayBi = new Date(year, month + 1, 0)
-                const currentBi = new Date(firstDayBi)
-                while (currentBi.getDay() !== template.dueDay) {
-                    currentBi.setDate(currentBi.getDate() + 1)
-                }
-                while (currentBi <= lastDayBi) {
-                    dates.push(new Date(currentBi))
-                    currentBi.setDate(currentBi.getDate() + 14)
-                }
+                // Every two weeks on each day in dueDays
+                dueDays.forEach((dueDay) => {
+                    const firstDayBi = new Date(year, month, 1)
+                    const lastDayBi = new Date(year, month + 1, 0)
+                    const currentBi = new Date(firstDayBi)
+                    while (currentBi.getDay() !== dueDay) {
+                        currentBi.setDate(currentBi.getDate() + 1)
+                    }
+                    while (currentBi <= lastDayBi) {
+                        dates.push(new Date(currentBi))
+                        currentBi.setDate(currentBi.getDate() + 14)
+                    }
+                })
                 break
 
             case 'monthly':
-                // On specific day of month (dueDay = 1-31)
-                const dayOfMonth = Math.min(template.dueDay, new Date(year, month + 1, 0).getDate())
+                // On specific day of month (dueDays[0] = 1-31)
+                const dayOfMonth = Math.min(dueDays[0] || 1, new Date(year, month + 1, 0).getDate())
                 dates.push(new Date(year, month, dayOfMonth))
                 break
         }

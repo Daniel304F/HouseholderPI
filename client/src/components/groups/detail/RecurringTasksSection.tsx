@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     RefreshCw,
@@ -12,6 +12,11 @@ import {
     UserCircle,
     Loader2,
     Calendar,
+    Paperclip,
+    Upload,
+    X,
+    FileText,
+    ImageIcon,
 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { Button } from '../../common'
@@ -21,6 +26,7 @@ import {
     type RecurringTaskTemplate,
     type CreateRecurringTaskInput,
 } from '../../../api/recurringTasks'
+import type { TaskAttachment } from '../../../api/tasks'
 import type { GroupMember } from '../../../api/groups'
 import { RecurringTaskForm } from './RecurringTaskForm'
 
@@ -135,9 +141,15 @@ export const RecurringTasksSection = ({
             template.frequency === 'weekly' ||
             template.frequency === 'biweekly'
         ) {
-            return WEEKDAY_LABELS[template.dueDay] || ''
+            // Handle multiple weekdays
+            const days = template.dueDays || []
+            if (days.length === 0) return ''
+            if (days.length === 7) return 'Jeden Tag'
+            return days.map((d) => WEEKDAY_LABELS[d]).join(', ')
         }
-        return `${template.dueDay}. des Monats`
+        // Monthly: usually single day
+        const monthDay = template.dueDays?.[0] || 1
+        return `${monthDay}. des Monats`
     }
 
     if (!isAdmin) return null
@@ -197,6 +209,7 @@ export const RecurringTasksSection = ({
                             {templates.map((template) => (
                                 <TemplateCard
                                     key={template.id}
+                                    groupId={groupId}
                                     template={template}
                                     getMemberName={getMemberName}
                                     getDueDayLabel={getDueDayLabel}
@@ -274,6 +287,7 @@ export const RecurringTasksSection = ({
 }
 
 interface TemplateCardProps {
+    groupId: string
     template: RecurringTaskTemplate
     getMemberName: (userId: string) => string
     getDueDayLabel: (template: RecurringTaskTemplate) => string
@@ -285,6 +299,7 @@ interface TemplateCardProps {
 }
 
 const TemplateCard = ({
+    groupId,
     template,
     getMemberName,
     getDueDayLabel,
@@ -294,7 +309,53 @@ const TemplateCard = ({
     onEdit,
     isGenerating,
 }: TemplateCardProps) => {
+    const queryClient = useQueryClient()
+    const toast = useToast()
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [showGenerateConfirm, setShowGenerateConfirm] = useState(false)
+    const [showAttachments, setShowAttachments] = useState(false)
+
+    const uploadMutation = useMutation({
+        mutationFn: (file: File) =>
+            recurringTasksApi.uploadAttachment(groupId, template.id, file),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['recurring-tasks', groupId],
+            })
+            toast.success('Datei hochgeladen!')
+        },
+        onError: () => {
+            toast.error('Datei konnte nicht hochgeladen werden')
+        },
+    })
+
+    const deleteAttachmentMutation = useMutation({
+        mutationFn: (attachmentId: string) =>
+            recurringTasksApi.deleteAttachment(groupId, template.id, attachmentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['recurring-tasks', groupId],
+            })
+            toast.success('Anhang gelöscht')
+        },
+        onError: () => {
+            toast.error('Anhang konnte nicht gelöscht werden')
+        },
+    })
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            uploadMutation.mutate(file)
+        }
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    const isImageFile = (mimeType: string) => mimeType.startsWith('image/')
+    const attachments = template.attachments || []
 
     return (
         <div
@@ -325,6 +386,20 @@ const TemplateCard = ({
                     </div>
                 </div>
                 <div className="flex gap-1">
+                    <button
+                        onClick={() => setShowAttachments(!showAttachments)}
+                        className={cn(
+                            'rounded-lg p-1.5 transition-colors',
+                            'hover:bg-neutral-100 dark:hover:bg-neutral-700',
+                            attachments.length > 0 && 'text-brand-500'
+                        )}
+                        title="Anhänge"
+                    >
+                        <Paperclip className="size-4" />
+                        {attachments.length > 0 && (
+                            <span className="sr-only">{attachments.length} Anhänge</span>
+                        )}
+                    </button>
                     <button
                         onClick={onToggle}
                         className={cn(
@@ -361,6 +436,79 @@ const TemplateCard = ({
                     </button>
                 </div>
             </div>
+
+            {/* Attachments Section */}
+            {showAttachments && (
+                <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-700">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                            Anhänge ({attachments.length})
+                        </span>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadMutation.isPending}
+                            className={cn(
+                                'flex items-center gap-1 rounded px-2 py-1 text-xs',
+                                'bg-brand-50 text-brand-600 hover:bg-brand-100',
+                                'dark:bg-brand-900/30 dark:text-brand-400 dark:hover:bg-brand-900/50',
+                                'transition-colors disabled:opacity-50'
+                            )}
+                        >
+                            {uploadMutation.isPending ? (
+                                <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                                <Upload className="size-3" />
+                            )}
+                            Hochladen
+                        </button>
+                    </div>
+                    {attachments.length === 0 ? (
+                        <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                            Keine Anhänge. Anhänge werden zu erstellten Aufgaben kopiert.
+                        </p>
+                    ) : (
+                        <div className="space-y-1">
+                            {attachments.map((attachment) => (
+                                <div
+                                    key={attachment.id}
+                                    className={cn(
+                                        'flex items-center gap-2 rounded-lg px-2 py-1.5',
+                                        'bg-neutral-50 dark:bg-neutral-800/50'
+                                    )}
+                                >
+                                    {isImageFile(attachment.mimeType) ? (
+                                        <ImageIcon className="size-4 flex-shrink-0 text-brand-500" />
+                                    ) : (
+                                        <FileText className="size-4 flex-shrink-0 text-neutral-400" />
+                                    )}
+                                    <span className="min-w-0 flex-1 truncate text-xs text-neutral-700 dark:text-neutral-300">
+                                        {attachment.originalName}
+                                    </span>
+                                    <button
+                                        onClick={() => deleteAttachmentMutation.mutate(attachment.id)}
+                                        disabled={deleteAttachmentMutation.isPending}
+                                        className={cn(
+                                            'rounded p-0.5 transition-colors',
+                                            'hover:bg-error-100 dark:hover:bg-error-900/30',
+                                            'text-neutral-400 hover:text-error-500'
+                                        )}
+                                        title="Anhang löschen"
+                                    >
+                                        <X className="size-3" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Generate button */}
             {template.isActive && (
