@@ -1,13 +1,10 @@
 import { useMemo } from 'react'
-import { Pencil, Trash2, ImageIcon, AlertTriangle } from 'lucide-react'
+import { Pencil, Trash2, AlertTriangle } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
-
-// Helper to check if a mime type is an image
-const isImageMimeType = (mimeType: string) => mimeType.startsWith('image/')
 
 export interface TaskAttachment {
     id: string
@@ -69,17 +66,6 @@ export const TaskCard = ({
 }: TaskCardProps) => {
     const StatusIcon = STATUS_ICONS[task.status]
 
-    // Get first image from attachments or completion proof
-    const taskImage = useMemo(() => {
-        // First check completion proof
-        if (task.completionProof && isImageMimeType(task.completionProof.mimeType)) {
-            return task.completionProof.url
-        }
-        // Then check attachments
-        const imageAttachment = task.attachments?.find((a) => isImageMimeType(a.mimeType))
-        return imageAttachment?.url || null
-    }, [task.attachments, task.completionProof])
-
     // Check if task is overdue
     const isOverdue = useMemo(() => {
         if (task.status === 'completed') return false
@@ -117,24 +103,6 @@ export const TaskCard = ({
                 isOverdue && task.status !== 'completed' && 'border-error-300 bg-error-50/30 dark:border-error-700 dark:bg-error-900/10 hover:border-error-400'
             )}
         >
-            {/* Task Image */}
-            {taskImage && (
-                <div className="relative h-32 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
-                    <img
-                        src={taskImage}
-                        alt={task.title}
-                        className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    {task.completionProof && (
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded bg-success-500/80 px-1.5 py-0.5 text-xs font-medium text-white">
-                            <ImageIcon className="size-3" />
-                            Beweis
-                        </div>
-                    )}
-                </div>
-            )}
-
             <div className="flex items-start gap-4 p-4">
                 {/* Action Buttons */}
                 <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

@@ -123,7 +123,9 @@ export const CreateTaskModal = ({
                     description: formData.description.trim() || undefined,
                     priority: formData.priority,
                     frequency: formData.recurrence,
-                    assignmentStrategy: formData.assignedTo ? 'fixed' : 'rotation',
+                    assignmentStrategy: formData.assignedTo
+                        ? 'fixed'
+                        : 'rotation',
                     fixedAssignee: formData.assignedTo || undefined,
                     dueDay: getDueDayFromDate(formData.dueDate),
                 })

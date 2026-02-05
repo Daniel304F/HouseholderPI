@@ -5,7 +5,6 @@ import {
     Trash2,
     ListTree,
     Link2,
-    Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { PriorityBadge } from '../tasks'
@@ -32,14 +31,6 @@ interface KanbanCardProps {
     assigneeInfo?: AssigneeInfo
 }
 
-// Helper to get first image attachment
-const getFirstImageAttachment = (task: Task): string | null => {
-    const imageAttachment = task.attachments?.find((a) =>
-        a.mimeType.startsWith('image/')
-    )
-    return imageAttachment?.url || null
-}
-
 export const KanbanCard = ({
     task,
     onClick,
@@ -50,8 +41,6 @@ export const KanbanCard = ({
     subtaskCount = 0,
     assigneeInfo,
 }: KanbanCardProps) => {
-    const taskImage = getFirstImageAttachment(task)
-    const hasImage = !!taskImage
     const comments = 0
     const linkedCount = task.linkedTasks?.length || 0
 
@@ -84,24 +73,9 @@ export const KanbanCard = ({
             )}
             {...dragProps}
         >
-            {/* Task Image */}
-            {taskImage && (
-                <div className="relative h-28 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-700">
-                    <img
-                        src={taskImage}
-                        alt={task.title}
-                        className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                </div>
-            )}
-
             <div className="p-4">
                 {/* Action Buttons */}
-                <div className={cn(
-                    'absolute right-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200',
-                    taskImage ? 'top-[calc(7rem+0.75rem)]' : 'top-3'
-                )}>
+                <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     {onEditClick && (
                         <button
                             onClick={handleEditClick}
@@ -217,12 +191,6 @@ export const KanbanCard = ({
                         <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1 text-[11px] font-medium">
                             <Link2 className="size-3.5" />
                             <span>{linkedCount}</span>
-                        </div>
-                    )}
-                    {/* Image indicator */}
-                    {hasImage && (
-                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1 text-[11px] font-medium">
-                            <ImageIcon className="size-3.5" />
                         </div>
                     )}
                     <div className="flex items-center gap-1 text-[11px]">
