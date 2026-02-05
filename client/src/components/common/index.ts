@@ -7,3 +7,17 @@ export { Headline, PageHeader } from './Headline'
 export { SearchBar } from './SearchBar'
 export { EditableText } from './EditableText'
 export { EditableSection } from './EditableSection'
+
+// Table components
+export {
+    Table,
+    SortableHeader,
+    TableRow,
+    TableCell,
+    type TableProps,
+    type ColumnDefinition,
+    type SortDirection,
+    type SortableHeaderProps,
+    type TableRowProps,
+    type TableCellProps,
+} from './table'
