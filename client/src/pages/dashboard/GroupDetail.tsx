@@ -34,7 +34,6 @@ import {
     EditTaskModal,
     TaskDetailView,
     type CreateTaskData,
-    type CreateRecurringData,
 } from '../../components/tasks'
 import { useTaskMutations } from '../../hooks/useTaskMutations'
 import { useTaskModal } from '../../hooks/useTaskModal'
@@ -186,25 +185,6 @@ export const GroupDetail = () => {
         await createTask.mutateAsync(data)
     }
 
-    const handleCreateRecurring = async (data: CreateRecurringData) => {
-        if (!groupId) return
-        try {
-            await recurringTasksApi.createTemplate(groupId, {
-                title: data.title,
-                description: data.description,
-                priority: data.priority,
-                frequency: data.frequency,
-                assignmentStrategy: data.assignmentStrategy,
-                fixedAssignee: data.fixedAssignee,
-                dueDay: data.dueDay,
-            })
-            closeCreateModal()
-            toast.success('Wiederkehrende Aufgabe erfolgreich erstellt')
-        } catch {
-            toast.error('Wiederkehrende Aufgabe konnte nicht erstellt werden')
-        }
-    }
-
     const handleUpdateTask = async (taskId: string, data: Partial<Task>) => {
         await updateTask.mutateAsync({ taskId, data })
     }
@@ -307,7 +287,6 @@ export const GroupDetail = () => {
                 isOpen={showCreateModal}
                 onClose={closeCreateModal}
                 onSubmit={handleCreateTask}
-                onCreateRecurring={handleCreateRecurring}
                 initialStatus={initialStatus}
                 members={group.members}
             />

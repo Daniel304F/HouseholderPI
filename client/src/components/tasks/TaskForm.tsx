@@ -1,4 +1,4 @@
-import { Calendar, Flag, User, Repeat } from 'lucide-react'
+import { Calendar, Flag, User } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { Input } from '../common'
 import { ImageUpload } from '../forms'
@@ -10,16 +10,6 @@ import {
 } from '../../constants/task.constants'
 import type { GroupMember } from '../../api/groups'
 
-export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly'
-
-export const RECURRENCE_OPTIONS: { value: RecurrenceType; label: string }[] = [
-    { value: 'none', label: 'Keine Wiederholung' },
-    { value: 'daily', label: 'Täglich' },
-    { value: 'weekly', label: 'Wöchentlich' },
-    { value: 'biweekly', label: 'Alle 2 Wochen' },
-    { value: 'monthly', label: 'Monatlich' },
-]
-
 export interface TaskFormData {
     title: string
     description: string
@@ -28,7 +18,6 @@ export interface TaskFormData {
     assignedTo: string | null
     dueDate: string
     image: string | null
-    recurrence: RecurrenceType
 }
 
 export interface TaskFormErrors {
@@ -204,32 +193,6 @@ export const TaskForm = ({
                     {errors.dueDate && (
                         <p className="mt-1 text-xs text-red-500">
                             {errors.dueDate}
-                        </p>
-                    )}
-                </div>
-
-                {/* Recurrence */}
-                <div>
-                    <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        <Repeat className="size-4" />
-                        Wiederholung
-                    </label>
-                    <select
-                        value={data.recurrence}
-                        onChange={(e) =>
-                            onChange('recurrence', e.target.value as RecurrenceType)
-                        }
-                        className={cn(inputStyles, normalBorderStyles)}
-                    >
-                        {RECURRENCE_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    {data.recurrence !== 'none' && (
-                        <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-                            Diese Aufgabe wird als wiederkehrende Vorlage erstellt
                         </p>
                     )}
                 </div>

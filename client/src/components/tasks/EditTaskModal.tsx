@@ -34,7 +34,6 @@ const createFormDataFromTask = (task: Task): TaskFormData => ({
     assignedTo: task.assignedTo,
     dueDate: toDateInputValue(task.dueDate),
     image: (task as Task & { image?: string }).image || null,
-    recurrence: 'none',
 })
 
 export const EditTaskModal = ({
@@ -55,7 +54,6 @@ export const EditTaskModal = ({
         assignedTo: null,
         dueDate: '',
         image: null,
-        recurrence: 'none',
     })
     const [errors, setErrors] = useState<TaskFormErrors>({})
 
