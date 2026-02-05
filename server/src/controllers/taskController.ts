@@ -3,9 +3,11 @@ import { Task } from "../models/task.js";
 import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
 import { ActivityLog } from "../models/activityLog.js";
+import { RecurringTaskTemplate } from "../models/recurringTaskTemplate.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { TaskService } from "../services/task.service.js";
+import { RecurringTaskService } from "../services/recurringTask.service.js";
 import {
   ActivityLogService,
   LogActivityInput,
@@ -17,6 +19,16 @@ const getTaskService = (req: Request): TaskService => {
   const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
   const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
   return new TaskService(taskDAO, groupDAO, userDAO);
+};
+
+const getRecurringTaskService = (req: Request): RecurringTaskService => {
+  const recurringTaskDAO = req.app.locals[
+    "recurringTaskDAO"
+  ] as GenericDAO<RecurringTaskTemplate>;
+  const taskDAO = req.app.locals["taskDAO"] as GenericDAO<Task>;
+  const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
+  const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
+  return new RecurringTaskService(recurringTaskDAO, taskDAO, groupDAO, userDAO);
 };
 
 const getActivityLogService = (req: Request): ActivityLogService => {
@@ -101,6 +113,8 @@ export const createTask = async (
 /**
  * Holt alle Aufgaben einer Gruppe
  * GET /api/groups/:groupId/tasks
+ *
+ * Automatisch werden fällige wiederkehrende Aufgaben generiert.
  */
 export const getGroupTasks = async (
   req: AuthenticatedRequest,
@@ -109,7 +123,16 @@ export const getGroupTasks = async (
 ): Promise<void> => {
   try {
     const taskService = getTaskService(req);
+    const recurringTaskService = getRecurringTaskService(req);
     const { groupId } = req.params;
+
+    // First, generate any due recurring tasks for today
+    try {
+      await recurringTaskService.generateDueTasks(groupId!, req.userId);
+    } catch (error) {
+      // Log but don't fail the request if recurring task generation fails
+      console.error("Failed to generate recurring tasks:", error);
+    }
 
     const tasks = await taskService.getGroupTasks(groupId!, req.userId);
 
@@ -510,6 +533,8 @@ export const unlinkTasks = async (
 /**
  * Holt alle Aufgaben die dem aktuellen User zugewiesen sind
  * GET /api/tasks/my
+ *
+ * Automatisch werden fällige wiederkehrende Aufgaben generiert.
  */
 export const getMyTasks = async (
   req: AuthenticatedRequest,
@@ -518,6 +543,27 @@ export const getMyTasks = async (
 ): Promise<void> => {
   try {
     const taskService = getTaskService(req);
+    const recurringTaskService = getRecurringTaskService(req);
+    const groupDAO = getGroupDAO(req);
+
+    // Get all groups the user is a member of
+    const allGroups = await groupDAO.findAll({} as Partial<Group>);
+    const userGroups = allGroups.filter((g) =>
+      g.members.some((m) => m.userId === req.userId)
+    );
+
+    // Generate due recurring tasks for each group
+    for (const group of userGroups) {
+      try {
+        await recurringTaskService.generateDueTasks(group.id, req.userId);
+      } catch (error) {
+        // Log but don't fail the request
+        console.error(
+          `Failed to generate recurring tasks for group ${group.id}:`,
+          error
+        );
+      }
+    }
 
     const tasks = await taskService.getMyTasks(req.userId);
 

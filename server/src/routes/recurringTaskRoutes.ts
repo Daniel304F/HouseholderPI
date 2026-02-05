@@ -1,6 +1,7 @@
 import { Router, RequestHandler } from "express";
 import * as recurringTaskController from "../controllers/recurringTaskController.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
+import { uploadAttachment } from "../config/upload.config.js";
 import {
   createRecurringTaskSchema,
   updateRecurringTaskSchema,
@@ -53,6 +54,24 @@ router.post(
   "/:id/generate",
   validateResource(generateTaskSchema),
   recurringTaskController.generateTask as RequestHandler
+);
+
+// Attachments
+router.get(
+  "/:id/attachments",
+  validateResource(recurringTaskIdSchema),
+  recurringTaskController.getAttachments as RequestHandler
+);
+
+router.post(
+  "/:id/attachments",
+  uploadAttachment.single("file"),
+  recurringTaskController.uploadAttachment as RequestHandler
+);
+
+router.delete(
+  "/:id/attachments/:attachmentId",
+  recurringTaskController.deleteAttachment as RequestHandler
 );
 
 export default router;

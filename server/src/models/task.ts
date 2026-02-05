@@ -52,6 +52,8 @@ export interface Task extends Entity {
   completionProof: CompletionProof | null;
   completedAt: Date | null;
   completedBy: string | null;
+  // Link to recurring task template (if generated from one)
+  recurringTemplateId?: string;
 }
 
 export interface TaskAttachmentResponse {
@@ -93,6 +95,7 @@ export interface TaskResponse {
   completionProof: CompletionProofResponse | null;
   completedAt: string | null;
   completedBy: string | null;
+  recurringTemplateId?: string;
 }
 
 export interface TaskWithSubtasks extends TaskResponse {

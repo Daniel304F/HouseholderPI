@@ -1,12 +1,16 @@
 import { Response, NextFunction, Request } from "express";
 import { RecurringTaskTemplate } from "../models/recurringTaskTemplate.js";
-import { Task } from "../models/task.js";
+import { Task, TaskAttachment } from "../models/task.js";
 import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { RecurringTaskService } from "../services/recurringTask.service.js";
 import { AppError } from "../services/errors.js";
+import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+import path from "path";
+import { UPLOAD_PATH } from "../config/upload.config.js";
 
 const getRecurringTaskService = (req: Request): RecurringTaskService => {
   const recurringTaskDAO = req.app.locals[
@@ -233,6 +237,169 @@ export const generateTask = async (
       success: true,
       data: task,
       message: "Aufgabe erstellt",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Get all attachments for a recurring task template
+ * GET /api/groups/:groupId/recurring-tasks/:id/attachments
+ */
+export const getAttachments = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const service = getRecurringTaskService(req);
+    const { groupId, id } = req.params;
+
+    const template = await service.getTemplate(groupId!, id!, req.userId);
+
+    const attachments = (template.attachments || []).map((a) => ({
+      ...a,
+      uploadedAt:
+        a.uploadedAt instanceof Date ? a.uploadedAt.toISOString() : a.uploadedAt,
+      url: `/uploads/${a.filename}`,
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: attachments,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Upload attachment to a recurring task template
+ * POST /api/groups/:groupId/recurring-tasks/:id/attachments
+ */
+export const uploadAttachment = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const service = getRecurringTaskService(req);
+    const recurringTaskDAO = req.app.locals[
+      "recurringTaskDAO"
+    ] as GenericDAO<RecurringTaskTemplate>;
+    const { groupId, id } = req.params;
+
+    // Verify access by getting the template
+    const template = await service.getTemplate(groupId!, id!, req.userId);
+
+    // Check if file was uploaded
+    if (!req.file) {
+      res
+        .status(400)
+        .json({ success: false, message: "Keine Datei hochgeladen" });
+      return;
+    }
+
+    const newAttachment: TaskAttachment = {
+      id: uuidv4(),
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      uploadedBy: req.userId,
+      uploadedAt: new Date(),
+    };
+
+    const attachments = [...(template.attachments || []), newAttachment];
+
+    await recurringTaskDAO.update({
+      id: id,
+      attachments,
+    } as Partial<RecurringTaskTemplate>);
+
+    res.status(201).json({
+      success: true,
+      data: {
+        ...newAttachment,
+        uploadedAt: newAttachment.uploadedAt.toISOString(),
+        url: `/uploads/${newAttachment.filename}`,
+      },
+      message: "Datei erfolgreich hochgeladen",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Delete an attachment from a recurring task template
+ * DELETE /api/groups/:groupId/recurring-tasks/:id/attachments/:attachmentId
+ */
+export const deleteAttachment = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const service = getRecurringTaskService(req);
+    const recurringTaskDAO = req.app.locals[
+      "recurringTaskDAO"
+    ] as GenericDAO<RecurringTaskTemplate>;
+    const { groupId, id, attachmentId } = req.params;
+
+    // Verify access by getting the template
+    const template = await service.getTemplate(groupId!, id!, req.userId);
+
+    // Find attachment
+    const attachment = (template.attachments || []).find(
+      (a) => a.id === attachmentId
+    );
+
+    if (!attachment) {
+      res
+        .status(404)
+        .json({ success: false, message: "Anhang nicht gefunden" });
+      return;
+    }
+
+    // Delete file from disk
+    const filePath = path.join(UPLOAD_PATH, attachment.filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    // Remove from template
+    const updatedAttachments = (template.attachments || []).filter(
+      (a) => a.id !== attachmentId
+    );
+
+    await recurringTaskDAO.update({
+      id: id,
+      attachments: updatedAttachments,
+    } as Partial<RecurringTaskTemplate>);
+
+    res.status(200).json({
+      success: true,
+      message: "Anhang gelöscht",
     });
   } catch (error) {
     if (error instanceof AppError) {

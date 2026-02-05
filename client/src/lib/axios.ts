@@ -2,6 +2,18 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
+// Server base URL without /api for static files like uploads
+export const SERVER_BASE_URL = BASE_URL.replace(/\/api$/, '')
+
+// Helper to get full URL for uploads
+export const getUploadUrl = (path: string | undefined | null): string => {
+    if (!path) return ''
+    // If already a full URL, return as-is
+    if (path.startsWith('http://') || path.startsWith('https://')) return path
+    // Otherwise prepend server base URL
+    return `${SERVER_BASE_URL}${path}`
+}
+
 export const apiClient = axios.create({
     baseURL: BASE_URL,
     timeout: 10000,

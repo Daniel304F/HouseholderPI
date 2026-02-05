@@ -1,5 +1,5 @@
 import { Entity } from "./entity.js";
-import { TaskPriority } from "./task.js";
+import { TaskAttachment, TaskPriority } from "./task.js";
 
 export type RecurringFrequency = "daily" | "weekly" | "biweekly" | "monthly";
 export type AssignmentStrategy = "fixed" | "rotation";
@@ -14,10 +14,11 @@ export interface RecurringTaskTemplate extends Entity {
   fixedAssignee?: string;
   rotationOrder?: string[]; // UserIds in rotation order
   currentRotationIndex: number;
-  dueDay: number; // Day of week (0-6) or day of month (1-31)
+  dueDays: number[]; // Days of week (0-6) or days of month (1-31)
   isActive: boolean;
   lastGeneratedAt?: Date;
   createdBy: string;
+  attachments?: TaskAttachment[]; // Attachments to be copied to generated tasks
 }
 
 export interface RecurringTaskTemplateResponse {
@@ -31,11 +32,12 @@ export interface RecurringTaskTemplateResponse {
   fixedAssignee?: string;
   rotationOrder?: string[];
   currentRotationIndex: number;
-  dueDay: number;
+  dueDays: number[];
   isActive: boolean;
   lastGeneratedAt?: string;
   nextSuggestedAssignee?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  attachments?: TaskAttachment[];
 }
