@@ -1,5 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Clock, User, Calendar, Flag, Users, CheckCircle2, Circle } from 'lucide-react'
+import {
+    Clock,
+    User,
+    Calendar,
+    Flag,
+    Users,
+    CheckCircle2,
+    Circle,
+} from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { tasksApi, type Task } from '../../api/tasks'
 import { formatDate, isOverdue } from '../../utils/date.utils'
@@ -193,7 +201,7 @@ const StatusSection = ({
                             className={cn(
                                 'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm',
                                 'border transition-all',
-                                'disabled:opacity-50 disabled:cursor-not-allowed',
+                                'disabled:cursor-not-allowed disabled:opacity-50',
                                 isActive
                                     ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
                                     : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'

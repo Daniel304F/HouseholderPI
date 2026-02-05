@@ -48,8 +48,7 @@ export const TaskLinks = ({
     // Filter out already linked tasks and self
     const availableTasks = allTasks.filter(
         (t) =>
-            t.id !== taskId &&
-            !linkedTasks.some((link) => link.taskId === t.id)
+            t.id !== taskId && !linkedTasks.some((link) => link.taskId === t.id)
     )
 
     const linkTaskMutation = useMutation({

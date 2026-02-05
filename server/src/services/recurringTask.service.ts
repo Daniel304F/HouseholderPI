@@ -141,9 +141,10 @@ export class RecurringTaskService {
       fixedAssignee: input.fixedAssignee,
       rotationOrder: input.rotationOrder,
       currentRotationIndex: 0,
-      dueDay: input.dueDay,
+      dueDays: input.dueDays,
       isActive: true,
       createdBy: userId,
+      attachments: [],
     } as Omit<RecurringTaskTemplate, "id" | "createdAt" | "updatedAt">);
 
     return this.toResponse(template);
@@ -205,7 +206,7 @@ export class RecurringTaskService {
     }
     if (input.rotationOrder !== undefined)
       updateData.rotationOrder = input.rotationOrder;
-    if (input.dueDay !== undefined) updateData.dueDay = input.dueDay;
+    if (input.dueDays !== undefined) updateData.dueDays = input.dueDays;
 
     await this.recurringTaskDAO.update(updateData);
 
@@ -302,22 +303,25 @@ export class RecurringTaskService {
       assignedTo = template.rotationOrder[template.currentRotationIndex] ?? null;
     }
 
-    // Calculate due date
-    const dueDate = this.calculateNextDueDate(template);
+    // Calculate due date (use first due day for manual generation)
+    const dueDate = this.calculateNextDueDate(template, template.dueDays[0]);
 
-    // Create the task
+    // Copy attachments from template
+    const attachments = template.attachments ? [...template.attachments] : [];
+
+    // Create the task with status "in-progress"
     const task = await this.taskDAO.create({
       groupId,
       title: template.title,
       description: template.description,
-      status: "pending" as TaskStatus,
+      status: "in-progress" as TaskStatus,
       priority: template.priority,
       assignedTo,
       dueDate,
       createdBy: userId,
       parentTaskId: null,
       linkedTasks: [],
-      attachments: [],
+      attachments,
       completionProof: null,
       completedAt: null,
       completedBy: null,
@@ -343,9 +347,163 @@ export class RecurringTaskService {
     return task;
   }
 
-  private calculateNextDueDate(template: RecurringTaskTemplate): Date {
+  /**
+   * Automatically generate tasks for all active recurring templates that are due today.
+   * This should be called when fetching tasks for a group.
+   */
+  async generateDueTasks(groupId: string, userId: string): Promise<Task[]> {
+    await this.validateGroupAccess(groupId, userId);
+
+    const templates = await this.recurringTaskDAO.findAll({
+      groupId,
+      isActive: true,
+    } as Partial<RecurringTaskTemplate>);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const currentDayOfMonth = today.getDate();
+
+    const generatedTasks: Task[] = [];
+
+    for (const template of templates) {
+      // Check if today is a due day for this template
+      let isDueToday = false;
+
+      if (template.frequency === "daily") {
+        isDueToday = true;
+      } else if (
+        template.frequency === "weekly" ||
+        template.frequency === "biweekly"
+      ) {
+        const dueDays = template.dueDays || [];
+        isDueToday = dueDays.includes(currentDayOfWeek);
+      } else if (template.frequency === "monthly") {
+        const dueDays = template.dueDays || [];
+        isDueToday = dueDays.includes(currentDayOfMonth);
+      }
+
+      if (!isDueToday) continue;
+
+      // Check if we already generated a task today
+      const lastGenerated = template.lastGeneratedAt
+        ? new Date(template.lastGeneratedAt)
+        : null;
+
+      if (lastGenerated) {
+        lastGenerated.setHours(0, 0, 0, 0);
+        if (lastGenerated.getTime() === today.getTime()) {
+          // Already generated today, skip
+          continue;
+        }
+      }
+
+      // For biweekly, check if it's the right week
+      if (template.frequency === "biweekly" && lastGenerated) {
+        const daysSinceLastGeneration = Math.floor(
+          (today.getTime() - lastGenerated.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysSinceLastGeneration < 14) {
+          continue;
+        }
+      }
+
+      // Generate the task
+      try {
+        const task = await this.generateTaskForDay(
+          template,
+          userId,
+          template.frequency === "monthly" ? currentDayOfMonth : currentDayOfWeek
+        );
+        generatedTasks.push(task);
+      } catch (error) {
+        // Log error but continue with other templates
+        console.error(
+          `Failed to generate task for template ${template.id}:`,
+          error
+        );
+      }
+    }
+
+    return generatedTasks;
+  }
+
+  /**
+   * Generate a task for a specific day from a template
+   */
+  private async generateTaskForDay(
+    template: RecurringTaskTemplate,
+    userId: string,
+    targetDay: number
+  ): Promise<Task> {
+    // Determine assignee
+    let assignedTo: string | null = null;
+
+    if (template.assignmentStrategy === "fixed") {
+      assignedTo = template.fixedAssignee || null;
+    } else if (
+      template.assignmentStrategy === "rotation" &&
+      template.rotationOrder &&
+      template.rotationOrder.length > 0
+    ) {
+      assignedTo =
+        template.rotationOrder[template.currentRotationIndex] ?? null;
+    }
+
+    // Set due date to end of today
+    const dueDate = new Date();
+    dueDate.setHours(23, 59, 59, 999);
+
+    // Copy attachments from template
+    const attachments = template.attachments ? [...template.attachments] : [];
+
+    // Create the task with status "in-progress"
+    const task = await this.taskDAO.create({
+      groupId: template.groupId,
+      title: template.title,
+      description: template.description,
+      status: "in-progress" as TaskStatus,
+      priority: template.priority,
+      assignedTo,
+      dueDate,
+      createdBy: userId,
+      parentTaskId: null,
+      linkedTasks: [],
+      attachments,
+      completionProof: null,
+      completedAt: null,
+      completedBy: null,
+      recurringTemplateId: template.id, // Link to the template
+    } as Omit<Task, "id" | "createdAt" | "updatedAt">);
+
+    // Update template: increment rotation index and set lastGeneratedAt
+    const updates: Partial<RecurringTaskTemplate> = {
+      id: template.id,
+      lastGeneratedAt: new Date(),
+    };
+
+    if (
+      template.assignmentStrategy === "rotation" &&
+      template.rotationOrder &&
+      template.rotationOrder.length > 0
+    ) {
+      updates.currentRotationIndex =
+        (template.currentRotationIndex + 1) % template.rotationOrder.length;
+    }
+
+    await this.recurringTaskDAO.update(updates);
+
+    return task;
+  }
+
+  private calculateNextDueDate(
+    template: RecurringTaskTemplate,
+    targetDay?: number
+  ): Date {
     const now = new Date();
     const dueDate = new Date();
+    // Use provided targetDay or first day from dueDays array, default to 1 (Monday or 1st of month)
+    const dueDay = targetDay ?? template.dueDays[0] ?? 1;
 
     switch (template.frequency) {
       case "daily":
@@ -354,24 +512,24 @@ export class RecurringTaskService {
       case "weekly":
         // Find next occurrence of dueDay (0=Sunday, 1=Monday, etc.)
         const currentDay = now.getDay();
-        let daysUntil = template.dueDay - currentDay;
+        let daysUntil = dueDay - currentDay;
         if (daysUntil <= 0) daysUntil += 7;
         dueDate.setDate(now.getDate() + daysUntil);
         break;
       case "biweekly":
         const currentDayBi = now.getDay();
-        let daysUntilBi = template.dueDay - currentDayBi;
+        let daysUntilBi = dueDay - currentDayBi;
         if (daysUntilBi <= 0) daysUntilBi += 14;
         dueDate.setDate(now.getDate() + daysUntilBi);
         break;
       case "monthly":
         // Set to dueDay of next month if today is past dueDay
-        if (now.getDate() >= template.dueDay) {
+        if (now.getDate() >= dueDay) {
           dueDate.setMonth(now.getMonth() + 1);
         }
         dueDate.setDate(
           Math.min(
-            template.dueDay,
+            dueDay,
             new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate()
           )
         );
@@ -407,7 +565,7 @@ export class RecurringTaskService {
       frequency: template.frequency,
       assignmentStrategy: template.assignmentStrategy,
       currentRotationIndex: template.currentRotationIndex,
-      dueDay: template.dueDay,
+      dueDays: template.dueDays,
       isActive: template.isActive,
       createdBy: template.createdBy,
       createdAt: toISOString(template.createdAt),
@@ -428,6 +586,9 @@ export class RecurringTaskService {
     }
     if (nextSuggestedAssignee) {
       response.nextSuggestedAssignee = nextSuggestedAssignee;
+    }
+    if (template.attachments && template.attachments.length > 0) {
+      response.attachments = template.attachments;
     }
 
     return response;

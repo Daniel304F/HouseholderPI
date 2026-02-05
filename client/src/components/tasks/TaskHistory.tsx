@@ -109,7 +109,10 @@ export const TaskHistory = ({
                         ref={scrollRef}
                         onScroll={checkScrollState}
                         className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        style={{
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                        }}
                     >
                         {displayTasks.map((task) => (
                             <HistoryCard
@@ -155,8 +158,8 @@ const HistoryCard = ({ task, onClick }: HistoryCardProps) => {
             className={cn(
                 'flex-shrink-0 snap-start',
                 'w-64 rounded-xl border p-4 text-left transition-all',
-                'border-neutral-200 bg-white hover:border-brand-300 hover:shadow-md',
-                'dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-brand-600'
+                'hover:border-brand-300 border-neutral-200 bg-white hover:shadow-md',
+                'dark:hover:border-brand-600 dark:border-neutral-700 dark:bg-neutral-800'
             )}
         >
             {/* Group Badge */}

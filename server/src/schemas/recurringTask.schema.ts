@@ -16,7 +16,7 @@ export const createRecurringTaskSchema = z.object({
     assignmentStrategy: assignmentStrategyEnum,
     fixedAssignee: z.string().optional(),
     rotationOrder: z.array(z.string()).optional(),
-    dueDay: z.number().int().min(0).max(31),
+    dueDays: z.array(z.number().int().min(0).max(31)).min(1),
   }),
 });
 
@@ -33,7 +33,7 @@ export const updateRecurringTaskSchema = z.object({
     assignmentStrategy: assignmentStrategyEnum.optional(),
     fixedAssignee: z.string().nullable().optional(),
     rotationOrder: z.array(z.string()).optional(),
-    dueDay: z.number().int().min(0).max(31).optional(),
+    dueDays: z.array(z.number().int().min(0).max(31)).min(1).optional(),
   }),
 });
 

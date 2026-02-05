@@ -48,7 +48,13 @@ export const TaskComments = ({ groupId, taskId }: TaskCommentsProps) => {
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ commentId, content }: { commentId: string; content: string }) =>
+        mutationFn: ({
+            commentId,
+            content,
+        }: {
+            commentId: string
+            content: string
+        }) =>
             commentsApi.updateComment(groupId, taskId, commentId, { content }),
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -89,7 +95,10 @@ export const TaskComments = ({ groupId, taskId }: TaskCommentsProps) => {
 
     const handleSaveEdit = () => {
         if (!editContent.trim() || !editingId) return
-        updateMutation.mutate({ commentId: editingId, content: editContent.trim() })
+        updateMutation.mutate({
+            commentId: editingId,
+            content: editContent.trim(),
+        })
     }
 
     const handleCancelEdit = () => {
@@ -161,7 +170,7 @@ export const TaskComments = ({ groupId, taskId }: TaskCommentsProps) => {
                     className={cn(
                         'flex-1 rounded-lg border px-3 py-2 text-sm',
                         'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
-                        'focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500',
+                        'focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none',
                         'text-neutral-900 placeholder:text-neutral-400 dark:text-white'
                     )}
                     disabled={createMutation.isPending}
@@ -230,7 +239,7 @@ const CommentItem = ({
                             className="size-6 rounded-full object-cover"
                         />
                     ) : (
-                        <div className="flex size-6 items-center justify-center rounded-full bg-brand-100 text-xs font-medium text-brand-700 dark:bg-brand-900 dark:text-brand-300">
+                        <div className="bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-300 flex size-6 items-center justify-center rounded-full text-xs font-medium">
                             {comment.userName.charAt(0).toUpperCase()}
                         </div>
                     )}
@@ -282,7 +291,7 @@ const CommentItem = ({
                         className={cn(
                             'flex-1 rounded-lg border px-3 py-1.5 text-sm',
                             'border-neutral-200 bg-white dark:border-neutral-600 dark:bg-neutral-800',
-                            'focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500',
+                            'focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none',
                             'text-neutral-900 dark:text-white'
                         )}
                         autoFocus
@@ -292,7 +301,7 @@ const CommentItem = ({
                         disabled={isUpdating || !editContent.trim()}
                         className={cn(
                             'rounded p-1.5 transition-colors',
-                            'bg-brand-500 text-white hover:bg-brand-600',
+                            'bg-brand-500 hover:bg-brand-600 text-white',
                             'disabled:opacity-50'
                         )}
                     >

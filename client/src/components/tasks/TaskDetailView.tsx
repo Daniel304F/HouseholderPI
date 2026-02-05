@@ -8,6 +8,7 @@ import { TaskSubtasks } from './TaskSubtasks'
 import { TaskLinks } from './TaskLinks'
 import { TaskDetailSidebar } from './TaskDetailSidebar'
 import { TaskComments } from './TaskComments'
+import { TaskAttachments } from './TaskAttachments'
 import { useToast } from '../../contexts/ToastContext'
 
 interface TaskDetailViewProps {
@@ -121,6 +122,13 @@ export const TaskDetailView = ({
                             maxLength={2000}
                         />
                     </EditableSection>
+
+                    {/* Attachments Section */}
+                    <TaskAttachments
+                        groupId={groupId}
+                        taskId={taskId}
+                        attachments={taskDetails.attachments || []}
+                    />
 
                     {/* Subtasks Section */}
                     <TaskSubtasks
