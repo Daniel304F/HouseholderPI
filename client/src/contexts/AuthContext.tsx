@@ -13,6 +13,7 @@ import {
     type LoginRequest,
     type RegisterRequest,
 } from '../api/auth'
+import { silentResubscribe } from '../hooks/usePushNotifications'
 
 interface AuthContextType {
     user: User | null
@@ -58,6 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             try {
                 const userData = await authApi.getMe()
                 setUser(normalizeUser(userData))
+                silentResubscribe()
             } catch {
                 // Token ungültig - aufräumen
                 localStorage.removeItem('accessToken')
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             setUser(normalizeUser(user))
             queryClient.setQueryData(['user'], normalizeUser(user))
+            silentResubscribe()
         },
         [queryClient]
     )
@@ -93,6 +96,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             setUser(normalizeUser(user))
             queryClient.setQueryData(['user'], normalizeUser(user))
+            silentResubscribe()
         },
         [queryClient]
     )

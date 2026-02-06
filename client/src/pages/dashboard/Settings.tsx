@@ -6,6 +6,7 @@ import {
     SecuritySection,
     EmailSection,
     DangerZoneSection,
+    NotificationsSection,
 } from '../../components/settings'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -125,6 +126,8 @@ export const Settings = () => {
                         onChangePassword={handleChangePassword}
                         isUpdating={changePasswordMutation.isPending}
                     />
+
+                    <NotificationsSection />
 
                     <DangerZoneSection
                         onDeleteAccount={handleDeleteAccount}
