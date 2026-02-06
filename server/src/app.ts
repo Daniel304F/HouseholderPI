@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
 import friendRoutes from "./routes/friendRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { loggerMiddleware } from "./middlewares/logger.js";
 import { authMiddleware } from "./middlewares/auth.middleware.js";
 import * as taskController from "./controllers/taskController.js";
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Meine Aufgaben Route (außerhalb von groups)
 app.get(

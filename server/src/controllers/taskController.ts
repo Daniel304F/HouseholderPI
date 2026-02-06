@@ -13,6 +13,10 @@ import {
   LogActivityInput,
 } from "../services/activityLog.service.js";
 import { AppError } from "../services/errors.js";
+import {
+  NotificationService,
+  NotificationPayload,
+} from "../services/notification.service.js";
 
 const getTaskService = (req: Request): TaskService => {
   const taskDAO = req.app.locals["taskDAO"] as GenericDAO<Task>;
@@ -46,6 +50,22 @@ const getUserDAO = (req: Request): GenericDAO<User> => {
   return req.app.locals["userDAO"] as GenericDAO<User>;
 };
 
+const getNotificationService = (req: Request): NotificationService => {
+  const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
+  return new NotificationService(userDAO);
+};
+
+// Helper to send push notification without blocking the response
+const sendNotificationAsync = (
+  notificationService: NotificationService,
+  userId: string,
+  payload: NotificationPayload,
+): void => {
+  notificationService.sendNotificationToUser(userId, payload).catch((err) => {
+    console.error("Failed to send push notification:", err);
+  });
+};
+
 // Helper to log activity without blocking the response
 const logActivityAsync = (
   activityLogService: ActivityLogService,
@@ -68,6 +88,7 @@ export const createTask = async (
   try {
     const taskService = getTaskService(req);
     const activityLogService = getActivityLogService(req);
+    const notificationService = getNotificationService(req);
     const groupDAO = getGroupDAO(req);
     const { groupId } = req.params;
     const { title, description, status, priority, assignedTo, dueDate } =
@@ -92,6 +113,15 @@ export const createTask = async (
         taskTitle: task.title,
         groupId: groupId!,
         groupName: group.name,
+      });
+    }
+
+    // Notify assigned user
+    if (assignedTo && assignedTo !== req.userId) {
+      sendNotificationAsync(notificationService, assignedTo, {
+        title: "Neue Aufgabe zugewiesen",
+        body: `Dir wurde "${task.title}" zugewiesen.`,
+        url: `/dashboard/groups/${groupId}`,
       });
     }
 
@@ -193,6 +223,7 @@ export const updateTask = async (
   try {
     const taskService = getTaskService(req);
     const activityLogService = getActivityLogService(req);
+    const notificationService = getNotificationService(req);
     const groupDAO = getGroupDAO(req);
     const { groupId, taskId } = req.params;
     const { title, description, status, priority, assignedTo, dueDate } =
@@ -234,6 +265,15 @@ export const updateTask = async (
           groupName: group.name,
         });
       }
+    }
+
+    // Notify assigned user about the update
+    if (task.assignedTo && task.assignedTo !== req.userId) {
+      sendNotificationAsync(notificationService, task.assignedTo, {
+        title: "Aufgabe aktualisiert",
+        body: `Die Aufgabe "${task.title}" wurde überarbeitet.`,
+        url: `/dashboard/groups/${groupId}`,
+      });
     }
 
     res.status(200).json({
@@ -293,6 +333,7 @@ export const assignTask = async (
   try {
     const taskService = getTaskService(req);
     const activityLogService = getActivityLogService(req);
+    const notificationService = getNotificationService(req);
     const groupDAO = getGroupDAO(req);
     const userDAO = getUserDAO(req);
     const { groupId, taskId } = req.params;
@@ -325,6 +366,15 @@ export const assignTask = async (
           activityInput.details = `zugewiesen an ${assignedUser.name}`;
         }
         logActivityAsync(activityLogService, activityInput);
+      }
+
+      // Notify assigned user
+      if (assignedTo !== req.userId) {
+        sendNotificationAsync(notificationService, assignedTo, {
+          title: "Aufgabe zugewiesen",
+          body: `Dir wurde "${result.task.title}" zugewiesen.`,
+          url: `/dashboard/groups/${groupId}`,
+        });
       }
     }
 
