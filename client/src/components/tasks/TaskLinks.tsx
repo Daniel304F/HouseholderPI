@@ -15,6 +15,7 @@ interface TaskLinksProps {
     taskId: string
     linkedTasks: TaskLink[] | undefined
     allTasks: Task[]
+    readOnly?: boolean
 }
 
 const linkTypeOptions: { value: TaskLinkType; label: string }[] = [
@@ -39,6 +40,7 @@ export const TaskLinks = ({
     taskId,
     linkedTasks = [],
     allTasks,
+    readOnly = false,
 }: TaskLinksProps) => {
     const queryClient = useQueryClient()
     const [showForm, setShowForm] = useState(false)
@@ -94,15 +96,17 @@ export const TaskLinks = ({
                     <Link2 className="size-4" />
                     Verknüpfte Aufgaben ({linkedTasks.length})
                 </h3>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowForm(!showForm)}
-                    disabled={availableTasks.length === 0}
-                >
-                    <Plus className="mr-1 size-4" />
-                    Verknüpfen
-                </Button>
+                {!readOnly && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowForm(!showForm)}
+                        disabled={availableTasks.length === 0}
+                    >
+                        <Plus className="mr-1 size-4" />
+                        Verknüpfen
+                    </Button>
+                )}
             </div>
 
             {/* Link Form */}
@@ -199,6 +203,7 @@ export const TaskLinks = ({
                                 unlinkTaskMutation.mutate(link.taskId)
                             }
                             isRemoving={unlinkTaskMutation.isPending}
+                            readOnly={readOnly}
                         />
                     )
                 })}
@@ -220,6 +225,7 @@ interface LinkedTaskItemProps {
     linkType: TaskLinkType
     onRemove: () => void
     isRemoving: boolean
+    readOnly?: boolean
 }
 
 const LinkedTaskItem = ({
@@ -227,6 +233,7 @@ const LinkedTaskItem = ({
     linkType,
     onRemove,
     isRemoving,
+    readOnly = false,
 }: LinkedTaskItemProps) => {
     return (
         <div
@@ -245,14 +252,16 @@ const LinkedTaskItem = ({
                     ({getLinkTypeLabel(linkType)})
                 </span>
             </div>
-            <button
-                onClick={onRemove}
-                disabled={isRemoving}
-                className="hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30 rounded p-1 text-neutral-400 disabled:opacity-50"
-                title="Verknüpfung entfernen"
-            >
-                <X className="size-4" />
-            </button>
+            {!readOnly && (
+                <button
+                    onClick={onRemove}
+                    disabled={isRemoving}
+                    className="hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30 rounded p-1 text-neutral-400 disabled:opacity-50"
+                    title="Verknüpfung entfernen"
+                >
+                    <X className="size-4" />
+                </button>
+            )}
         </div>
     )
 }

@@ -20,6 +20,7 @@ interface TaskAttachmentsProps {
     groupId: string
     taskId: string
     attachments: TaskAttachment[]
+    readOnly?: boolean
 }
 
 // Helper to check if a mime type is an image
@@ -43,6 +44,7 @@ export const TaskAttachments = ({
     groupId,
     taskId,
     attachments,
+    readOnly = false,
 }: TaskAttachmentsProps) => {
     const queryClient = useQueryClient()
     const toast = useToast()
@@ -131,34 +133,39 @@ export const TaskAttachments = ({
                             onDelete={() => deleteMutation.mutate(attachment.id)}
                             isDeleting={deleteMutation.isPending}
                             formatDate={formatDate}
+                            readOnly={readOnly}
                         />
                     ))
                 )}
             </div>
 
             {/* Upload Button */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                onChange={handleFileSelect}
-                className="hidden"
-                accept="image/*,.pdf,.doc,.docx,.txt"
-            />
-            <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleUploadClick}
-                disabled={uploadMutation.isPending}
-                icon={
-                    uploadMutation.isPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                        <Upload className="size-4" />
-                    )
-                }
-            >
-                Anhang hinzufügen
-            </Button>
+            {!readOnly && (
+                <>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept="image/*,.pdf,.doc,.docx,.txt"
+                    />
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleUploadClick}
+                        disabled={uploadMutation.isPending}
+                        icon={
+                            uploadMutation.isPending ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Upload className="size-4" />
+                            )
+                        }
+                    >
+                        Anhang hinzufügen
+                    </Button>
+                </>
+            )}
         </div>
     )
 }
@@ -168,6 +175,7 @@ interface AttachmentItemProps {
     onDelete: () => void
     isDeleting: boolean
     formatDate: (date: string) => string
+    readOnly?: boolean
 }
 
 const AttachmentItem = ({
@@ -175,6 +183,7 @@ const AttachmentItem = ({
     onDelete,
     isDeleting,
     formatDate,
+    readOnly = false,
 }: AttachmentItemProps) => {
     const FileIcon = getFileIcon(attachment.mimeType)
     const isImage = isImageMimeType(attachment.mimeType)
@@ -237,21 +246,23 @@ const AttachmentItem = ({
                 >
                     <Download className="size-4 text-neutral-500 dark:text-neutral-400" />
                 </a>
-                <button
-                    onClick={onDelete}
-                    disabled={isDeleting}
-                    className={cn(
-                        'rounded p-1.5 transition-colors',
-                        'hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30'
-                    )}
-                    title="Löschen"
-                >
-                    {isDeleting ? (
-                        <Loader2 className="size-4 animate-spin text-neutral-500" />
-                    ) : (
-                        <Trash2 className="size-4 text-neutral-500 dark:text-neutral-400" />
-                    )}
-                </button>
+                {!readOnly && (
+                    <button
+                        onClick={onDelete}
+                        disabled={isDeleting}
+                        className={cn(
+                            'rounded p-1.5 transition-colors',
+                            'hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30'
+                        )}
+                        title="Löschen"
+                    >
+                        {isDeleting ? (
+                            <Loader2 className="size-4 animate-spin text-neutral-500" />
+                        ) : (
+                            <Trash2 className="size-4 text-neutral-500 dark:text-neutral-400" />
+                        )}
+                    </button>
+                )}
             </div>
         </div>
     )

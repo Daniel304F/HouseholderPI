@@ -17,6 +17,7 @@ interface TaskSubtasksProps {
     groupId: string
     taskId: string
     subtasks: Subtask[] | undefined
+    readOnly?: boolean
 }
 
 /**
@@ -27,6 +28,7 @@ export const TaskSubtasks = ({
     groupId,
     taskId,
     subtasks = [],
+    readOnly = false,
 }: TaskSubtasksProps) => {
     const queryClient = useQueryClient()
     const [showForm, setShowForm] = useState(false)
@@ -70,14 +72,16 @@ export const TaskSubtasks = ({
                     <ListTree className="size-4" />
                     Unteraufgaben ({subtasks.length})
                 </h3>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowForm(!showForm)}
-                >
-                    <Plus className="mr-1 size-4" />
-                    Hinzufügen
-                </Button>
+                {!readOnly && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowForm(!showForm)}
+                    >
+                        <Plus className="mr-1 size-4" />
+                        Hinzufügen
+                    </Button>
+                )}
             </div>
 
             {/* Create Form */}

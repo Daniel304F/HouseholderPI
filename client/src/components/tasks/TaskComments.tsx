@@ -18,9 +18,10 @@ import { useAuth } from '../../contexts/AuthContext'
 interface TaskCommentsProps {
     groupId: string
     taskId: string
+    readOnly?: boolean
 }
 
-export const TaskComments = ({ groupId, taskId }: TaskCommentsProps) => {
+export const TaskComments = ({ groupId, taskId, readOnly = false }: TaskCommentsProps) => {
     const queryClient = useQueryClient()
     const toast = useToast()
     const { user } = useAuth()
@@ -155,41 +156,44 @@ export const TaskComments = ({ groupId, taskId }: TaskCommentsProps) => {
                             isUpdating={updateMutation.isPending}
                             isDeleting={deleteMutation.isPending}
                             formatDate={formatDate}
+                            readOnly={readOnly}
                         />
                     ))
                 )}
             </div>
 
             {/* New Comment Form */}
-            <form onSubmit={handleSubmit} className="flex gap-2">
-                <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Kommentar schreiben..."
-                    className={cn(
-                        'flex-1 rounded-lg border px-3 py-2 text-sm',
-                        'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
-                        'focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none',
-                        'text-neutral-900 placeholder:text-neutral-400 dark:text-white'
-                    )}
-                    disabled={createMutation.isPending}
-                />
-                <Button
-                    type="submit"
-                    size="sm"
-                    disabled={!newComment.trim() || createMutation.isPending}
-                    icon={
-                        createMutation.isPending ? (
-                            <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                            <Send className="size-4" />
-                        )
-                    }
-                >
-                    Senden
-                </Button>
-            </form>
+            {!readOnly && (
+                <form onSubmit={handleSubmit} className="flex gap-2">
+                    <input
+                        type="text"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Kommentar schreiben..."
+                        className={cn(
+                            'flex-1 rounded-lg border px-3 py-2 text-sm',
+                            'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
+                            'focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none',
+                            'text-neutral-900 placeholder:text-neutral-400 dark:text-white'
+                        )}
+                        disabled={createMutation.isPending}
+                    />
+                    <Button
+                        type="submit"
+                        size="sm"
+                        disabled={!newComment.trim() || createMutation.isPending}
+                        icon={
+                            createMutation.isPending ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Send className="size-4" />
+                            )
+                        }
+                    >
+                        Senden
+                    </Button>
+                </form>
+            )}
         </div>
     )
 }
@@ -207,6 +211,7 @@ interface CommentItemProps {
     isUpdating: boolean
     isDeleting: boolean
     formatDate: (date: string) => string
+    readOnly?: boolean
 }
 
 const CommentItem = ({
@@ -222,6 +227,7 @@ const CommentItem = ({
     isUpdating,
     isDeleting,
     formatDate,
+    readOnly = false,
 }: CommentItemProps) => {
     return (
         <div
@@ -251,7 +257,7 @@ const CommentItem = ({
                         {comment.editedAt && ' (bearbeitet)'}
                     </span>
                 </div>
-                {isOwnComment && !isEditing && (
+                {isOwnComment && !isEditing && !readOnly && (
                     <div className="flex gap-1">
                         <button
                             onClick={onEdit}

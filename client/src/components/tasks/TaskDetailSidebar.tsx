@@ -31,6 +31,7 @@ interface TaskDetailSidebarProps {
     groupId: string
     taskId: string
     taskDetails: TaskDetails
+    readOnly?: boolean
 }
 
 const statusOptions = [
@@ -65,6 +66,7 @@ export const TaskDetailSidebar = ({
     groupId,
     taskId,
     taskDetails,
+    readOnly = false,
 }: TaskDetailSidebarProps) => {
     const queryClient = useQueryClient()
 
@@ -93,6 +95,7 @@ export const TaskDetailSidebar = ({
                 currentStatus={taskDetails.status}
                 onStatusChange={(status) => updateStatusMutation.mutate(status)}
                 isUpdating={updateStatusMutation.isPending}
+                readOnly={readOnly}
             />
 
             {/* Details Section */}
@@ -177,12 +180,14 @@ interface StatusSectionProps {
     currentStatus: TaskStatus
     onStatusChange: (status: TaskStatus) => void
     isUpdating: boolean
+    readOnly?: boolean
 }
 
 const StatusSection = ({
     currentStatus,
     onStatusChange,
     isUpdating,
+    readOnly = false,
 }: StatusSectionProps) => {
     return (
         <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
@@ -197,7 +202,7 @@ const StatusSection = ({
                         <button
                             key={option.value}
                             onClick={() => onStatusChange(option.value)}
-                            disabled={isUpdating}
+                            disabled={isUpdating || readOnly}
                             className={cn(
                                 'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm',
                                 'border transition-all',

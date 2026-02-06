@@ -15,7 +15,8 @@ interface TaskDetailViewProps {
     groupId: string
     taskId: string
     onClose: () => void
-    onEditClick: () => void
+    onEditClick?: () => void
+    readOnly?: boolean
 }
 
 /**
@@ -27,6 +28,7 @@ export const TaskDetailView = ({
     taskId,
     onClose,
     onEditClick,
+    readOnly = false,
 }: TaskDetailViewProps) => {
     const queryClient = useQueryClient()
     const toast = useToast()
@@ -101,26 +103,34 @@ export const TaskDetailView = ({
                         <ArrowLeft className="mr-2 size-4" />
                         Zurück
                     </Button>
-                    <Button onClick={onEditClick}>Bearbeiten</Button>
+                    {!readOnly && onEditClick && (
+                        <Button onClick={onEditClick}>Bearbeiten</Button>
+                    )}
                 </div>
             }
         >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Main Content - Left 2 Columns */}
                 <div className="space-y-6 lg:col-span-2">
-                    {/* Description - Inline Editable */}
+                    {/* Description */}
                     <EditableSection
                         title="Beschreibung"
                         icon={<FileText className="size-4" />}
                     >
-                        <EditableText
-                            value={taskDetails.description || ''}
-                            onSave={handleDescriptionSave}
-                            placeholder="Beschreibung hinzufügen..."
-                            emptyText="Keine Beschreibung vorhanden."
-                            multiline
-                            maxLength={2000}
-                        />
+                        {readOnly ? (
+                            <p className="text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+                                {taskDetails.description || 'Keine Beschreibung vorhanden.'}
+                            </p>
+                        ) : (
+                            <EditableText
+                                value={taskDetails.description || ''}
+                                onSave={handleDescriptionSave}
+                                placeholder="Beschreibung hinzufügen..."
+                                emptyText="Keine Beschreibung vorhanden."
+                                multiline
+                                maxLength={2000}
+                            />
+                        )}
                     </EditableSection>
 
                     {/* Attachments Section */}
@@ -128,6 +138,7 @@ export const TaskDetailView = ({
                         groupId={groupId}
                         taskId={taskId}
                         attachments={taskDetails.attachments || []}
+                        readOnly={readOnly}
                     />
 
                     {/* Subtasks Section */}
@@ -135,6 +146,7 @@ export const TaskDetailView = ({
                         groupId={groupId}
                         taskId={taskId}
                         subtasks={taskDetails.subtasks}
+                        readOnly={readOnly}
                     />
 
                     {/* Linked Tasks Section */}
@@ -143,16 +155,18 @@ export const TaskDetailView = ({
                         taskId={taskId}
                         linkedTasks={taskDetails.linkedTasks}
                         allTasks={allTasks}
+                        readOnly={readOnly}
                     />
 
                     {/* Comments Section */}
-                    <TaskComments groupId={groupId} taskId={taskId} />
+                    <TaskComments groupId={groupId} taskId={taskId} readOnly={readOnly} />
                 </div>
 
                 {/* Sidebar - Right Column */}
                 <TaskDetailSidebar
                     groupId={groupId}
                     taskId={taskId}
+                    readOnly={readOnly}
                     taskDetails={{
                         status: taskDetails.status,
                         priority: taskDetails.priority,
