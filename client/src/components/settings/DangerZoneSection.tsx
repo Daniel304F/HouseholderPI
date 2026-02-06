@@ -29,7 +29,9 @@ export const DangerZoneSection = ({
         try {
             await onDeleteAccount(password)
         } catch {
-            setError('Konto konnte nicht gelöscht werden. Bitte überprüfe dein Passwort.')
+            setError(
+                'Konto konnte nicht gelöscht werden. Bitte überprüfe dein Passwort.'
+            )
         }
     }
 
@@ -41,19 +43,21 @@ export const DangerZoneSection = ({
     }
 
     return (
-        <Card className="border-error-200 bg-error-50/50 p-6 dark:border-error-800/50 dark:bg-error-900/10">
+        <Card className="border-error-200 bg-error-50/50 dark:border-error-800/50 dark:bg-error-900/10 p-6">
             <div className="mb-4 flex items-center gap-2">
-                <AlertTriangle className="size-5 text-error-500" />
-                <h2 className="text-lg font-semibold text-error-700 dark:text-error-400">
-                    Gefahrenzone
+                <AlertTriangle className="text-error-500 size-5" />
+                <h2 className="text-error-700 dark:text-error-400 text-lg font-semibold">
+                    Achtung
                 </h2>
             </div>
 
             {!showConfirm ? (
                 <div>
                     <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-                        Wenn du dein Konto löschst, werden alle deine Daten unwiderruflich gelöscht.
-                        Du wirst aus allen Gruppen entfernt und deine Aufgaben werden nicht mehr zugeordnet.
+                        Wenn du dein Konto löschst, werden alle deine Daten
+                        unwiderruflich gelöscht. Du wirst aus allen Gruppen
+                        entfernt und deine Aufgaben werden nicht mehr
+                        zugeordnet.
                     </p>
                     <Button
                         variant="ghost"
@@ -66,9 +70,10 @@ export const DangerZoneSection = ({
                 </div>
             ) : (
                 <form onSubmit={handleDelete} className="space-y-4">
-                    <div className="rounded-lg bg-error-100 p-4 dark:bg-error-900/30">
-                        <p className="text-sm font-medium text-error-800 dark:text-error-300">
-                            Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.
+                    <div className="bg-error-100 dark:bg-error-900/30 rounded-lg p-4">
+                        <p className="text-error-800 dark:text-error-300 text-sm font-medium">
+                            Bist du sicher? Diese Aktion kann nicht rückgängig
+                            gemacht werden.
                         </p>
                     </div>
 
@@ -82,7 +87,11 @@ export const DangerZoneSection = ({
 
                     <div>
                         <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                            Gib <span className="font-bold text-error-600">DELETE</span> ein um zu bestätigen
+                            Gib{' '}
+                            <span className="text-error-600 font-bold">
+                                DELETE
+                            </span>{' '}
+                            ein um zu bestätigen
                         </label>
                         <input
                             type="text"
@@ -92,15 +101,16 @@ export const DangerZoneSection = ({
                             className={cn(
                                 'w-full rounded-lg border px-4 py-2.5 text-sm transition-colors',
                                 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
-                                'focus:border-error-500 focus:ring-error-500/20 focus:outline-none focus:ring-2',
-                                confirmation === 'DELETE' && 'border-error-500 bg-error-50 dark:bg-error-900/20'
+                                'focus:border-error-500 focus:ring-error-500/20 focus:ring-2 focus:outline-none',
+                                confirmation === 'DELETE' &&
+                                    'border-error-500 bg-error-50 dark:bg-error-900/20'
                             )}
                             required
                         />
                     </div>
 
                     {error && (
-                        <p className="text-sm text-error-600 dark:text-error-400">
+                        <p className="text-error-600 dark:text-error-400 text-sm">
                             {error}
                         </p>
                     )}
@@ -116,11 +126,23 @@ export const DangerZoneSection = ({
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isDeleting || !password || confirmation !== 'DELETE'}
+                            disabled={
+                                isDeleting ||
+                                !password ||
+                                confirmation !== 'DELETE'
+                            }
                             className="bg-error-600 hover:bg-error-700"
-                            icon={isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                            icon={
+                                isDeleting ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="size-4" />
+                                )
+                            }
                         >
-                            {isDeleting ? 'Wird gelöscht...' : 'Konto endgültig löschen'}
+                            {isDeleting
+                                ? 'Wird gelöscht...'
+                                : 'Konto endgültig löschen'}
                         </Button>
                     </div>
                 </form>
