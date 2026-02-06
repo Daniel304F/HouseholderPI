@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 import { Button, Input } from '../components/common'
+import { AlertBanner } from '../components/ui'
 import { PasswordInput, PasswordStrengthMeter } from '../components/forms'
 import { PasswordRequirementsList } from '../components/auth/PasswordRequirementsList'
 import {
@@ -120,9 +121,7 @@ export const Register = () => {
         >
             <form onSubmit={handleRegister} className="space-y-4">
                 {errors.general && (
-                    <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-800 dark:bg-error-950 dark:text-error-400 rounded-lg border p-3 text-sm">
-                        {errors.general}
-                    </div>
+                    <AlertBanner message={errors.general} />
                 )}
 
                 <Input

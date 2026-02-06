@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { Button, Input } from '../components/common'
+import { AlertBanner } from '../components/ui'
 import { PasswordInput } from '../components/forms'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
@@ -90,9 +91,7 @@ export const Login = () => {
         >
             <form onSubmit={handleLogin} className="space-y-4">
                 {errors.general && (
-                    <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-800 dark:bg-error-950 dark:text-error-400 rounded-lg border p-3 text-sm">
-                        {errors.general}
-                    </div>
+                    <AlertBanner message={errors.general} />
                 )}
 
                 <Input

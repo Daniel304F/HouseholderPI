@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Loader2 } from 'lucide-react'
+import { ScreenLoader } from '../components/ui'
 import type { ReactNode } from 'react'
 
 interface ProtectedRouteProps {
@@ -16,14 +16,7 @@ export const ProtectedRoute = ({
     const location = useLocation()
 
     if (isLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="text-brand-500 h-10 w-10 animate-spin" />
-                    <p className="text-text-muted text-sm">Wird geladen...</p>
-                </div>
-            </div>
-        )
+        return <ScreenLoader />
     }
 
     if (!isAuthenticated) {
