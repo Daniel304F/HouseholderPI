@@ -16,14 +16,14 @@ export { useTaskModal, type TaskModalState } from './useTaskModal'
 
 // Page-specific hooks
 export { useFriendsMutations } from './useFriendsMutations'
+export { useMyTasksPage } from './useMyTasksPage'
 export {
     useFilteredTasks,
     useTaskStats,
     useTasksByGroup,
-    type StatusFilter,
-    type SortOption,
 } from './useMyTasks'
 export { useCompletedTasks, useCompletedTaskStats } from './useTaskHistory'
+export { type StatusFilter, type SortOption } from '../constants/myTasks.constants'
 
 // Push notifications
 export { usePushNotifications } from './usePushNotifications'

@@ -11,7 +11,8 @@ import { cn } from '../../utils/cn'
 import { Button, SearchBar } from '../common'
 import { MyTaskCard } from '../tasks'
 import type { TaskWithDetails } from '../../api/tasks'
-import { STATUS_FILTERS, SORT_OPTIONS, type StatusFilter, type SortOption } from './constants'
+import type { StatusFilter, SortOption } from '../../constants/myTasks.constants'
+import { STATUS_FILTERS, SORT_OPTIONS } from './constants'
 
 // =============================================================================
 // Page Header
