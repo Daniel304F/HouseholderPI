@@ -6,7 +6,8 @@ import { messagesApi, type Message } from '../../api/messages'
 import { useSocket } from '../../hooks/useSocket'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { Button, Input } from '../common'
+import { Button, Input, IconButton } from '../common'
+import { DropdownMenuItem } from '../ui'
 
 interface GroupChatProps {
     groupId: string
@@ -456,35 +457,35 @@ const MessageBubble = ({
                     {/* Menu */}
                     {isOwn && !isEditing && (
                         <div className="absolute top-0 -right-8 opacity-0 transition-opacity group-hover:opacity-100">
-                            <button
+                            <IconButton
+                                icon={<MoreVertical className="size-4" />}
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setShowMenu(!showMenu)}
-                                className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-                            >
-                                <MoreVertical className="size-4" />
-                            </button>
+                                aria-label="Nachricht-Optionen"
+                            />
 
                             {showMenu && (
                                 <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
-                                    <button
+                                    <DropdownMenuItem
+                                        icon={<Pencil className="size-4" />}
                                         onClick={() => {
                                             setShowMenu(false)
                                             onStartEdit()
                                         }}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
                                     >
-                                        <Pencil className="size-4" />
                                         Bearbeiten
-                                    </button>
-                                    <button
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        icon={<Trash2 className="size-4" />}
+                                        variant="danger"
                                         onClick={() => {
                                             setShowMenu(false)
                                             onDelete()
                                         }}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-error-600 hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-900/20"
                                     >
-                                        <Trash2 className="size-4" />
                                         Löschen
-                                    </button>
+                                    </DropdownMenuItem>
                                 </div>
                             )}
                         </div>

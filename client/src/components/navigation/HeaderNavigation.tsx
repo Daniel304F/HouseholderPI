@@ -7,6 +7,7 @@ import { ThemeToggle } from '../ThemeToggle'
 import { useAuth } from '../../contexts/AuthContext'
 import { NavItem } from '../NavItem'
 import { cn } from '../../utils/cn'
+import { DropdownMenuItem } from '../ui'
 
 export const HeaderNavigation = () => {
     const navigate = useNavigate()
@@ -117,52 +118,35 @@ export const HeaderNavigation = () => {
                                             <p className="font-medium text-neutral-900 dark:text-white truncate">{user.name}</p>
                                             <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{user.email}</p>
                                         </div>
-                                        <button
+                                        <DropdownMenuItem
+                                            icon={<Settings className="size-4" />}
                                             onClick={() => {
                                                 navigate('/dashboard/settings')
                                                 setShowProfileMenu(false)
                                             }}
-                                            className={cn(
-                                                'flex w-full items-center gap-3 px-4 py-2',
-                                                'text-sm text-neutral-700 dark:text-neutral-300',
-                                                'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                                                'transition-colors'
-                                            )}
                                         >
-                                            <Settings className="size-4" />
                                             Einstellungen
-                                        </button>
-                                        <button
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            icon={<BarChart3 className="size-4" />}
                                             onClick={() => {
                                                 navigate('/dashboard/stats')
                                                 setShowProfileMenu(false)
                                             }}
-                                            className={cn(
-                                                'flex w-full items-center gap-3 px-4 py-2',
-                                                'text-sm text-neutral-700 dark:text-neutral-300',
-                                                'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                                                'transition-colors'
-                                            )}
                                         >
-                                            <BarChart3 className="size-4" />
                                             Statistiken
-                                        </button>
-                                        <div className="border-t border-neutral-200 dark:border-neutral-700 mt-1 pt-1">
-                                            <button
+                                        </DropdownMenuItem>
+                                        <div className="mt-1 border-t border-neutral-200 pt-1 dark:border-neutral-700">
+                                            <DropdownMenuItem
+                                                icon={<LogOut className="size-4" />}
+                                                variant="danger"
                                                 onClick={() => {
                                                     handleLogout()
                                                     setShowProfileMenu(false)
                                                 }}
-                                                className={cn(
-                                                    'flex w-full items-center gap-3 px-4 py-2',
-                                                    'text-sm text-red-600 dark:text-red-400',
-                                                    'hover:bg-red-50 dark:hover:bg-red-900/20',
-                                                    'transition-colors'
-                                                )}
                                             >
-                                                <LogOut className="size-4" />
                                                 Ausloggen
-                                            </button>
+                                            </DropdownMenuItem>
                                         </div>
                                     </div>
                                 )}

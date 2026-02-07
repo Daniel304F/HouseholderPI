@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
-import { Button, Input, Card } from '../common'
+import { Lock, Loader2, CheckCircle } from 'lucide-react'
+import { Button, Card } from '../common'
+import { PasswordInput } from '../forms'
+import { AlertBanner } from '../ui'
 
 interface SecuritySectionProps {
     onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
@@ -14,8 +16,6 @@ export const SecuritySection = ({
     const [currentPassword, setCurrentPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-    const [showNewPassword, setShowNewPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
 
@@ -56,61 +56,28 @@ export const SecuritySection = ({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                    <Input
-                        label="Aktuelles Passwort"
-                        type={showCurrentPassword ? 'text' : 'password'}
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        required
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-3 top-9 text-neutral-400 hover:text-neutral-600"
-                    >
-                        {showCurrentPassword ? (
-                            <EyeOff className="size-4" />
-                        ) : (
-                            <Eye className="size-4" />
-                        )}
-                    </button>
-                </div>
+                <PasswordInput
+                    label="Aktuelles Passwort"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                />
 
-                <div className="relative">
-                    <Input
-                        label="Neues Passwort"
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-9 text-neutral-400 hover:text-neutral-600"
-                    >
-                        {showNewPassword ? (
-                            <EyeOff className="size-4" />
-                        ) : (
-                            <Eye className="size-4" />
-                        )}
-                    </button>
-                </div>
+                <PasswordInput
+                    label="Neues Passwort"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                />
 
-                <Input
+                <PasswordInput
                     label="Neues Passwort bestätigen"
-                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                 />
 
-                {error && (
-                    <p className="text-sm text-error-600 dark:text-error-400">
-                        {error}
-                    </p>
-                )}
+                {error && <AlertBanner message={error} />}
 
                 {success && (
                     <div className="flex items-center gap-2 text-sm text-success-600 dark:text-success-400">

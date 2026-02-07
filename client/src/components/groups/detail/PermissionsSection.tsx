@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Shield, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { Shield, Loader2 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { useToast } from '../../../contexts/ToastContext'
+import { CollapsibleSection } from '../../ui'
 import {
     groupsApi,
     type GroupPermissions,
@@ -39,7 +40,6 @@ export const PermissionsSection = ({
 }: PermissionsSectionProps) => {
     const queryClient = useQueryClient()
     const toast = useToast()
-    const [expanded, setExpanded] = useState(false)
     const [localPermissions, setLocalPermissions] =
         useState<GroupPermissions>(permissions)
 
@@ -68,53 +68,31 @@ export const PermissionsSection = ({
     if (!isOwner) return null
 
     return (
-        <div className="mb-6">
-            <button
-                onClick={() => setExpanded(!expanded)}
-                className={cn(
-                    'flex w-full items-center justify-between rounded-xl p-3',
-                    'bg-neutral-50 dark:bg-neutral-800/50',
-                    'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                )}
-            >
-                <div className="flex items-center gap-2">
-                    <Shield className="size-5 text-brand-500" />
-                    <span className="font-medium text-neutral-900 dark:text-white">
-                        Berechtigungen
-                    </span>
-                </div>
-                {expanded ? (
-                    <ChevronUp className="size-5 text-neutral-500" />
-                ) : (
-                    <ChevronDown className="size-5 text-neutral-500" />
-                )}
-            </button>
+        <CollapsibleSection
+            icon={<Shield className="size-5 text-brand-500" />}
+            title="Berechtigungen"
+        >
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Lege fest, welche Rollen welche Aktionen durchführen
+                können.
+            </p>
 
-            {expanded && (
-                <div className="mt-3 space-y-3">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                        Lege fest, welche Rollen welche Aktionen durchführen
-                        können.
-                    </p>
-
-                    {(
-                        Object.keys(PERMISSION_LABELS) as Array<
-                            keyof GroupPermissions
-                        >
-                    ).map((permission) => (
-                        <PermissionRow
-                            key={permission}
-                            label={PERMISSION_LABELS[permission]}
-                            value={localPermissions[permission]}
-                            onChange={(level) =>
-                                handlePermissionChange(permission, level)
-                            }
-                            isUpdating={updateMutation.isPending}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
+            {(
+                Object.keys(PERMISSION_LABELS) as Array<
+                    keyof GroupPermissions
+                >
+            ).map((permission) => (
+                <PermissionRow
+                    key={permission}
+                    label={PERMISSION_LABELS[permission]}
+                    value={localPermissions[permission]}
+                    onChange={(level) =>
+                        handlePermissionChange(permission, level)
+                    }
+                    isUpdating={updateMutation.isPending}
+                />
+            ))}
+        </CollapsibleSection>
     )
 }
 
