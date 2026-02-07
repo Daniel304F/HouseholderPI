@@ -5,9 +5,9 @@ import {
     Circle,
     Pencil,
     Sparkles,
-    AlertTriangle,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { CardActionButton, OverdueBadge, GroupBadge } from '../ui'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
@@ -169,22 +169,12 @@ export const MyTaskCard = ({
 
                 {/* Edit Button */}
                 {onEditClick && (
-                    <button
+                    <CardActionButton
+                        icon={<Pencil className="size-3.5" />}
                         onClick={handleEditClick}
-                        className={cn(
-                            'absolute top-2 right-2 z-10',
-                            'flex h-7 w-7 items-center justify-center rounded-md',
-                            'bg-neutral-100 dark:bg-neutral-700',
-                            'text-neutral-500 dark:text-neutral-400',
-                            'opacity-0 group-hover:opacity-100',
-                            'hover:bg-brand-100 hover:text-brand-600',
-                            'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
-                            'transition-all duration-200'
-                        )}
                         title="Aufgabe bearbeiten"
-                    >
-                        <Pencil className="size-3.5" />
-                    </button>
+                        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100"
+                    />
                 )}
 
                 {/* Checkbox / Status Icon */}
@@ -225,16 +215,9 @@ export const MyTaskCard = ({
                             {/* Badges */}
                             <div className="mb-1 flex flex-wrap items-center gap-1">
                                 {showGroupBadge && groupName && (
-                                    <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 inline-block rounded px-1.5 py-0.5 text-xs font-medium">
-                                        {groupName}
-                                    </span>
+                                    <GroupBadge name={groupName} />
                                 )}
-                                {isOverdue && (
-                                    <span className="bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium">
-                                        <AlertTriangle className="size-3" />
-                                        Überfällig
-                                    </span>
-                                )}
+                                {isOverdue && <OverdueBadge />}
                             </div>
                             <h3
                                 className={cn(
