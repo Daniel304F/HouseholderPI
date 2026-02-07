@@ -10,7 +10,7 @@ import {
     Check,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../common'
+import { Button, IconButton } from '../common'
 import { commentsApi, type Comment } from '../../api/comments'
 import { useToast } from '../../contexts/ToastContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -259,31 +259,21 @@ const CommentItem = ({
                 </div>
                 {isOwnComment && !isEditing && !readOnly && (
                     <div className="flex gap-1">
-                        <button
+                        <IconButton
+                            icon={<Pencil className="size-3.5" />}
+                            variant="ghost"
+                            size="sm"
                             onClick={onEdit}
-                            className={cn(
-                                'rounded p-1 transition-colors',
-                                'hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                            )}
-                            title="Bearbeiten"
-                        >
-                            <Pencil className="size-3.5 text-neutral-500" />
-                        </button>
-                        <button
+                            aria-label="Bearbeiten"
+                        />
+                        <IconButton
+                            icon={isDeleting ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+                            variant="ghost"
+                            size="sm"
                             onClick={onDelete}
                             disabled={isDeleting}
-                            className={cn(
-                                'rounded p-1 transition-colors',
-                                'hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30'
-                            )}
-                            title="Löschen"
-                        >
-                            {isDeleting ? (
-                                <Loader2 className="size-3.5 animate-spin text-neutral-500" />
-                            ) : (
-                                <Trash2 className="size-3.5 text-neutral-500" />
-                            )}
-                        </button>
+                            aria-label="Löschen"
+                        />
                     </div>
                 )}
             </div>

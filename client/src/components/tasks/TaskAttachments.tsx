@@ -11,7 +11,7 @@ import {
     Download,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../common'
+import { Button, IconButton } from '../common'
 import { tasksApi, type TaskAttachment } from '../../api/tasks'
 import { useToast } from '../../contexts/ToastContext'
 import { getUploadUrl } from '../../lib/axios'
@@ -247,21 +247,14 @@ const AttachmentItem = ({
                     <Download className="size-4 text-neutral-500 dark:text-neutral-400" />
                 </a>
                 {!readOnly && (
-                    <button
+                    <IconButton
+                        icon={isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={onDelete}
                         disabled={isDeleting}
-                        className={cn(
-                            'rounded p-1.5 transition-colors',
-                            'hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30'
-                        )}
-                        title="Löschen"
-                    >
-                        {isDeleting ? (
-                            <Loader2 className="size-4 animate-spin text-neutral-500" />
-                        ) : (
-                            <Trash2 className="size-4 text-neutral-500 dark:text-neutral-400" />
-                        )}
-                    </button>
+                        aria-label="Löschen"
+                    />
                 )}
             </div>
         </div>

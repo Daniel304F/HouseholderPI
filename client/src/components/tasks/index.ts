@@ -1,5 +1,5 @@
 // Task cards
-export { TaskCard, type Task } from './TaskCard'
+export { TaskCard } from './TaskCard'
 export { MyTaskCard } from './MyTaskCard'
 export { TaskCardSkeleton } from './TaskCardSkeleton'
 

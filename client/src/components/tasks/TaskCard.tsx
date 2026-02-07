@@ -5,46 +5,7 @@ import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
 import { CardActionButton, OverdueBadge, GroupBadge } from '../ui'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
-import type { TaskLink } from '../../api/tasks'
-
-export interface TaskAttachment {
-    id: string
-    filename: string
-    originalName: string
-    mimeType: string
-    size: number
-    uploadedBy: string
-    uploadedAt: string
-    url: string
-}
-
-export interface CompletionProof {
-    filename: string
-    originalName: string
-    mimeType: string
-    uploadedBy: string
-    uploadedAt: string
-    note?: string
-    url: string
-}
-
-export interface Task {
-    id: string
-    title: string
-    description?: string
-    status: 'pending' | 'in-progress' | 'completed'
-    priority: 'low' | 'medium' | 'high'
-    assignedTo: string | null
-    dueDate: string
-    groupId?: string
-    createdBy?: string
-    createdAt?: string
-    updatedAt?: string
-    parentTaskId?: string | null
-    linkedTasks?: TaskLink[]
-    attachments?: TaskAttachment[]
-    completionProof?: CompletionProof | null
-}
+import type { Task } from '../../api/tasks'
 
 interface TaskCardProps {
     task: Task

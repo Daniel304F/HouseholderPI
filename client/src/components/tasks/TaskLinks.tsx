@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link2, Plus, X, ExternalLink } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button } from '../common'
+import { Button, IconButton } from '../common'
 import { tasksApi, type Task, type TaskLinkType } from '../../api/tasks'
 
 interface TaskLink {
@@ -253,14 +253,14 @@ const LinkedTaskItem = ({
                 </span>
             </div>
             {!readOnly && (
-                <button
+                <IconButton
+                    icon={<X className="size-4" />}
+                    variant="ghost"
+                    size="sm"
                     onClick={onRemove}
                     disabled={isRemoving}
-                    className="hover:bg-error-100 hover:text-error-600 dark:hover:bg-error-900/30 rounded p-1 text-neutral-400 disabled:opacity-50"
-                    title="Verknüpfung entfernen"
-                >
-                    <X className="size-4" />
-                </button>
+                    aria-label="Verknüpfung entfernen"
+                />
             )}
         </div>
     )

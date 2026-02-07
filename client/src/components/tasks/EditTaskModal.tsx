@@ -5,7 +5,7 @@ import { BaseModal } from '../modal'
 import { TaskForm, type TaskFormData, type TaskFormErrors } from './TaskForm'
 import { toDateInputValue } from '../../utils/date.utils'
 import type { TaskStatus, TaskPriority } from '../../constants/task.constants'
-import type { Task } from './TaskCard'
+import type { Task } from '../../api/tasks'
 import type { GroupMember } from '../../api/groups'
 
 interface EditTaskModalProps {

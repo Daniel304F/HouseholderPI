@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { History, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { IconButton } from '../common'
+import { PriorityBadge } from './PriorityBadge'
 import type { TaskWithDetails } from '../../api/tasks'
 
 interface TaskHistoryProps {
@@ -63,32 +65,22 @@ export const TaskHistory = ({
                 {/* Scroll Controls */}
                 {useSwipe && (
                     <div className="flex gap-1">
-                        <button
+                        <IconButton
+                            icon={<ChevronLeft className="size-5" />}
+                            variant="ghost"
+                            size="sm"
                             onClick={() => scroll('left')}
                             disabled={!canScrollLeft}
-                            className={cn(
-                                'rounded-lg p-1.5 transition-colors',
-                                canScrollLeft
-                                    ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600'
-                                    : 'text-neutral-300 dark:text-neutral-600'
-                            )}
                             aria-label="Nach links scrollen"
-                        >
-                            <ChevronLeft className="size-5" />
-                        </button>
-                        <button
+                        />
+                        <IconButton
+                            icon={<ChevronRight className="size-5" />}
+                            variant="ghost"
+                            size="sm"
                             onClick={() => scroll('right')}
                             disabled={!canScrollRight}
-                            className={cn(
-                                'rounded-lg p-1.5 transition-colors',
-                                canScrollRight
-                                    ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600'
-                                    : 'text-neutral-300 dark:text-neutral-600'
-                            )}
                             aria-label="Nach rechts scrollen"
-                        >
-                            <ChevronRight className="size-5" />
-                        </button>
+                        />
                     </div>
                 )}
             </div>
@@ -183,22 +175,7 @@ const HistoryCard = ({ task, onClick }: HistoryCardProps) => {
 
             {/* Priority Badge */}
             <div className="mt-3 flex items-center justify-between">
-                <span
-                    className={cn(
-                        'rounded px-2 py-0.5 text-xs font-medium',
-                        task.priority === 'high'
-                            ? 'bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400'
-                            : task.priority === 'medium'
-                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                              : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
-                    )}
-                >
-                    {task.priority === 'high'
-                        ? 'Hoch'
-                        : task.priority === 'medium'
-                          ? 'Mittel'
-                          : 'Niedrig'}
-                </span>
+                <PriorityBadge priority={task.priority} size="sm" />
 
                 <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                     Erledigt
