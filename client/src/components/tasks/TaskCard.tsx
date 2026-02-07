@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
+import { CardActionButton, OverdueBadge, GroupBadge } from '../ui'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskLink } from '../../api/tasks'
@@ -107,36 +108,19 @@ export const TaskCard = ({
                 {/* Action Buttons */}
                 <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     {onEditClick && (
-                        <button
+                        <CardActionButton
+                            icon={<Pencil className="size-3.5" />}
                             onClick={handleEditClick}
-                            className={cn(
-                                'flex h-7 w-7 items-center justify-center rounded-md',
-                                'bg-neutral-100/90 dark:bg-neutral-700/90',
-                                'text-neutral-500 dark:text-neutral-400',
-                                'hover:bg-brand-100 hover:text-brand-600',
-                                'dark:hover:bg-brand-900/30 dark:hover:text-brand-400',
-                                'transition-all duration-200 backdrop-blur-sm'
-                            )}
                             title="Aufgabe bearbeiten"
-                        >
-                            <Pencil className="size-3.5" />
-                        </button>
+                        />
                     )}
                     {onDeleteClick && (
-                        <button
+                        <CardActionButton
+                            icon={<Trash2 className="size-3.5" />}
+                            variant="danger"
                             onClick={handleDeleteClick}
-                            className={cn(
-                                'flex h-7 w-7 items-center justify-center rounded-md',
-                                'bg-neutral-100/90 dark:bg-neutral-700/90',
-                                'text-neutral-500 dark:text-neutral-400',
-                                'hover:bg-error-100 hover:text-error-600',
-                                'dark:hover:bg-error-900/30 dark:hover:text-error-400',
-                                'transition-all duration-200 backdrop-blur-sm'
-                            )}
                             title="Aufgabe löschen"
-                        >
-                            <Trash2 className="size-3.5" />
-                        </button>
+                        />
                     )}
                 </div>
 
@@ -156,9 +140,7 @@ export const TaskCard = ({
                     <div className="min-w-0 flex-1">
                         {/* Group Badge */}
                         {showGroupBadge && groupName && (
-                            <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 mb-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium">
-                                {groupName}
-                            </span>
+                            <GroupBadge name={groupName} />
                         )}
                         <h3
                             className={cn(
@@ -174,12 +156,7 @@ export const TaskCard = ({
 
                     {/* Priority Badge */}
                     <div className="flex items-center gap-1.5">
-                        {isOverdue && (
-                            <span className="inline-flex items-center gap-1 rounded bg-error-100 px-1.5 py-0.5 text-xs font-medium text-error-700 dark:bg-error-900/30 dark:text-error-400">
-                                <AlertTriangle className="size-3" />
-                                Überfällig
-                            </span>
-                        )}
+                        {isOverdue && <OverdueBadge />}
                         <PriorityBadge priority={task.priority} />
                     </div>
                 </div>

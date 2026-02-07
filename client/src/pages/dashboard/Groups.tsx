@@ -35,42 +35,29 @@ export const Groups = () => {
     // Loading State
     if (isLoading) {
         return (
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                        <div className="h-8 w-40 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                        <div className="h-5 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                    </div>
-                </div>
+            <section className="space-y-6">
+                <PageHeaderSkeleton />
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <GroupCardSkeleton count={6} />
                 </div>
-            </div>
+            </section>
         )
     }
 
     // Error State
     if (isError) {
         return (
-            <div className="flex flex-col items-center justify-center gap-4 py-12">
-                <p className="text-neutral-500 dark:text-neutral-400">
-                    Gruppen konnten nicht geladen werden.
-                </p>
-                <Button
-                    variant="secondary"
-                    onClick={() => refetch()}
-                    icon={<RefreshCw className="size-5" />}
-                >
-                    Erneut versuchen
-                </Button>
-            </div>
+            <ErrorState
+                title="Gruppen konnten nicht geladen werden"
+                onRetry={() => refetch()}
+            />
         )
     }
 
     return (
-        <div className="space-y-6">
+        <section className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
                         Meine Gruppen
@@ -96,7 +83,7 @@ export const Groups = () => {
                         </Button>
                     </div>
                 )}
-            </div>
+            </header>
 
             {/* Groups List or Empty State */}
             {groups.length === 0 ? (
@@ -129,6 +116,6 @@ export const Groups = () => {
                     toast.success('Gruppe erfolgreich beigetreten!')
                 }}
             />
-        </div>
+        </section>
     )
 }
