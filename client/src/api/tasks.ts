@@ -54,6 +54,7 @@ export interface Task {
     completionProof: CompletionProof | null
     completedAt: string | null
     completedBy: string | null
+    archived?: boolean
 }
 
 export interface TaskWithDetails extends Task {
@@ -214,6 +215,16 @@ export const tasksApi = {
         const response = await apiClient.delete<ApiResponse<Task>>(
             `/groups/${groupId}/tasks/${taskId}/links/${linkedTaskId}`
         )
+        return response.data.data
+    },
+
+    // Alle erledigten Aufgaben einer Gruppe archivieren
+    archiveCompletedTasks: async (
+        groupId: string
+    ): Promise<{ archivedCount: number }> => {
+        const response = await apiClient.post<
+            ApiResponse<{ archivedCount: number }>
+        >(`/groups/${groupId}/tasks/archive-completed`)
         return response.data.data
     },
 

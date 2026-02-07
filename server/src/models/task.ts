@@ -54,6 +54,8 @@ export interface Task extends Entity {
   completedBy: string | null;
   // Link to recurring task template (if generated from one)
   recurringTemplateId?: string;
+  // Archived tasks are hidden from group board but visible in personal history
+  archived?: boolean;
 }
 
 export interface TaskAttachmentResponse {
@@ -96,6 +98,7 @@ export interface TaskResponse {
   completedAt: string | null;
   completedBy: string | null;
   recurringTemplateId?: string;
+  archived?: boolean;
 }
 
 export interface TaskWithSubtasks extends TaskResponse {

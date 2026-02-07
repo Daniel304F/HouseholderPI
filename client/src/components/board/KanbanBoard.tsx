@@ -24,6 +24,7 @@ interface KanbanBoardProps {
     searchQuery?: string
     className?: string
     members?: MemberInfo[]
+    onArchiveCompleted?: () => void
 }
 
 const columns: { id: ColumnStatus; title: string }[] = [
@@ -40,6 +41,7 @@ export const KanbanBoard = ({
     searchQuery = '',
     className,
     members = [],
+    onArchiveCompleted,
 }: KanbanBoardProps) => {
     const { isMobile, isTablet } = useViewport()
     const [activeColumn, setActiveColumn] = useState<ColumnStatus>('pending')
@@ -111,6 +113,7 @@ export const KanbanBoard = ({
                         isDropTarget={isDropTarget(activeColumn)}
                         draggedTaskId={dragState.draggedTask?.id}
                         members={members}
+                        onArchiveCompleted={onArchiveCompleted}
                     />
                 </div>
             </div>
@@ -146,6 +149,7 @@ export const KanbanBoard = ({
                         isDropTarget={isDropTarget(column.id)}
                         draggedTaskId={dragState.draggedTask?.id}
                         members={members}
+                        onArchiveCompleted={onArchiveCompleted}
                     />
                 ))}
             </div>
@@ -179,6 +183,7 @@ export const KanbanBoard = ({
                     isDropTarget={isDropTarget(column.id)}
                     draggedTaskId={dragState.draggedTask?.id}
                     members={members}
+                    onArchiveCompleted={onArchiveCompleted}
                 />
             ))}
         </div>

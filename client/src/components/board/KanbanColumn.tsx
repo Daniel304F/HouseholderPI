@@ -1,4 +1,4 @@
-import { MoreHorizontal, Plus } from 'lucide-react'
+import { Archive, MoreHorizontal, Plus } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { IconButton } from '../common/IconButton'
 import { KanbanCard } from './KanbanCard'
@@ -46,6 +46,7 @@ interface KanbanColumnProps {
     isDropTarget?: boolean
     draggedTaskId?: string
     members?: MemberInfo[]
+    onArchiveCompleted?: () => void
 }
 
 const columnColors: Record<ColumnStatus, string> = {
@@ -78,6 +79,7 @@ export const KanbanColumn = ({
     isDropTarget = false,
     draggedTaskId,
     members = [],
+    onArchiveCompleted,
 }: KanbanColumnProps) => {
     // Helper to get member info for assignee
     const getMemberInfo = (userId: string | null) => {
@@ -149,6 +151,16 @@ export const KanbanColumn = ({
                                     onToggleFilter={onToggleFilter}
                                     onClearFilters={onClearFilters}
                                     hasActiveFilters={hasActiveFilters}
+                                />
+                            )}
+                            {column.id === 'completed' && column.tasks.length > 0 && onArchiveCompleted && (
+                                <IconButton
+                                    icon={<Archive className="size-4" />}
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={onArchiveCompleted}
+                                    aria-label="Alle erledigten Aufgaben archivieren"
+                                    title="Alle archivieren"
                                 />
                             )}
                             <IconButton

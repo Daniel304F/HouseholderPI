@@ -59,7 +59,7 @@ export const KanbanCard = ({
         <div
             onClick={onClick}
             className={cn(
-                'group relative w-full cursor-pointer rounded-xl text-left overflow-hidden',
+                'group relative w-full flex-shrink-0 cursor-pointer rounded-xl text-left overflow-hidden',
                 'bg-white dark:bg-neutral-800/90',
                 'border border-neutral-200/80 dark:border-neutral-700/80',
                 'shadow-sm',

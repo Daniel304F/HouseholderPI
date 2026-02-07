@@ -581,6 +581,40 @@ export const unlinkTasks = async (
 };
 
 /**
+ * Archiviert alle erledigten Aufgaben einer Gruppe
+ * POST /api/groups/:groupId/tasks/archive-completed
+ */
+export const archiveCompletedTasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskService = getTaskService(req);
+    const { groupId } = req.params;
+
+    const result = await taskService.archiveCompletedTasks(
+      groupId!,
+      req.userId,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+      message: `${result.archivedCount} Aufgabe(n) archiviert`,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
  * Holt alle Aufgaben die dem aktuellen User zugewiesen sind
  * GET /api/tasks/my
  *

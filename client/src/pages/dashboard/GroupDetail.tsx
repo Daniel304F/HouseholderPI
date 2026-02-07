@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
     LayoutGrid,
     MessageSquare,
@@ -59,6 +59,7 @@ export const GroupDetail = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
     const toast = useToast()
+    const queryClient = useQueryClient()
     const { isDesktop } = useViewport()
 
     // State
@@ -135,6 +136,17 @@ export const GroupDetail = () => {
         },
     })
 
+    const archiveCompleted = useMutation({
+        mutationFn: () => tasksApi.archiveCompletedTasks(groupId!),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+            toast.success(`${data.archivedCount} Aufgabe(n) archiviert`)
+        },
+        onError: () => {
+            toast.error('Aufgaben konnten nicht archiviert werden')
+        },
+    })
+
     // Derived state
     const tabs = useMemo(() => getTabs(isDesktop), [isDesktop])
 
@@ -192,6 +204,8 @@ export const GroupDetail = () => {
     const handleTaskMove = async (taskId: string, newStatus: ColumnStatus) => {
         await updateTask.mutateAsync({ taskId, data: { status: newStatus } })
     }
+
+    const handleArchiveCompleted = () => archiveCompleted.mutate()
 
     const toggleMember = (id: string) => {
         setSelectedMembers((prev) =>
@@ -266,6 +280,7 @@ export const GroupDetail = () => {
                 onRecurringClick={handleRecurringClick}
                 onAddTask={handleAddTask}
                 onTaskMove={handleTaskMove}
+                onArchiveCompleted={handleArchiveCompleted}
             />
 
             {/* Modals */}
@@ -328,6 +343,7 @@ interface ContentAreaProps {
     onRecurringClick: (template: RecurringTaskTemplate) => void
     onAddTask: (status: ColumnStatus) => void
     onTaskMove: (taskId: string, newStatus: ColumnStatus) => Promise<void>
+    onArchiveCompleted: () => void
 }
 
 const ContentArea = ({
@@ -342,6 +358,7 @@ const ContentArea = ({
     onRecurringClick,
     onAddTask,
     onTaskMove,
+    onArchiveCompleted,
 }: ContentAreaProps) => (
     <main className="min-h-0 flex-1">
         {activeTab === 'board' && (
@@ -357,6 +374,7 @@ const ContentArea = ({
                         onTaskMove={onTaskMove}
                         searchQuery={searchQuery}
                         members={members}
+                        onArchiveCompleted={onArchiveCompleted}
                     />
                 </div>
 

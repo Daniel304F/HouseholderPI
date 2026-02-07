@@ -50,6 +50,7 @@ const toTaskResponse = (task: Task): TaskResponse => ({
     : null,
   completedAt: task.completedAt ? toISOString(task.completedAt) : null,
   completedBy: task.completedBy || null,
+  ...(task.archived && { archived: true }),
 });
 
 // Hilfsfunktion: Inverse Link-Typen ermitteln
@@ -160,7 +161,7 @@ export class TaskService {
     await this.validateGroupAccess(groupId, userId);
 
     const tasks = await this.taskDAO.findAll({ groupId } as Partial<Task>);
-    return tasks.map(toTaskResponse);
+    return tasks.filter((t) => !t.archived).map(toTaskResponse);
   }
 
   async getTask(
@@ -497,6 +498,37 @@ export class TaskService {
       task: toTaskResponse(updatedTask!),
       message: "Verknüpfung entfernt",
     };
+  }
+
+  async getArchivedTasks(
+    groupId: string,
+    userId: string,
+  ): Promise<TaskResponse[]> {
+    await this.validateGroupAccess(groupId, userId);
+
+    const tasks = await this.taskDAO.findAll({ groupId } as Partial<Task>);
+    return tasks.filter((t) => t.archived).map(toTaskResponse);
+  }
+
+  async archiveCompletedTasks(
+    groupId: string,
+    userId: string,
+  ): Promise<{ archivedCount: number }> {
+    await this.validateGroupAccess(groupId, userId);
+
+    const tasks = await this.taskDAO.findAll({ groupId } as Partial<Task>);
+    const completedTasks = tasks.filter(
+      (t) => t.status === "completed" && !t.archived,
+    );
+
+    for (const task of completedTasks) {
+      await this.taskDAO.update({
+        id: task.id,
+        archived: true,
+      } as Partial<Task>);
+    }
+
+    return { archivedCount: completedTasks.length };
   }
 
   async getMyTasks(userId: string): Promise<TaskWithDetails[]> {
