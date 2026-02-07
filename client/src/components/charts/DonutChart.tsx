@@ -14,7 +14,6 @@ interface DonutChartProps {
     showTotal?: boolean
     totalLabel?: string
     className?: string
-    title?: string
 }
 
 export const DonutChart = ({
@@ -25,7 +24,6 @@ export const DonutChart = ({
     showTotal = true,
     totalLabel = 'Gesamt',
     className,
-    title,
 }: DonutChartProps) => {
     const total = data.reduce((sum, item) => sum + item.value, 0)
     const radius = (size - strokeWidth) / 2
@@ -49,90 +47,75 @@ export const DonutChart = ({
     })
 
     return (
-        <div
-            className={cn(
-                'rounded-2xl p-5',
-                'bg-white dark:bg-neutral-800',
-                'border border-neutral-200 dark:border-neutral-700',
-                'shadow-sm',
-                className
-            )}
-        >
-            {title && (
-                <h3 className="mb-4 text-sm font-semibold text-neutral-700 dark:text-neutral-200">
-                    {title}
-                </h3>
-            )}
-            <div className="flex items-center gap-6">
-                <div
-                    className="relative flex-shrink-0"
-                    style={{ width: size, height: size }}
+        <div className={cn('flex items-center gap-6', className)}>
+            <div
+                className="relative flex-shrink-0"
+                style={{ width: size, height: size }}
+            >
+                <svg
+                    width={size}
+                    height={size}
+                    className="relative -rotate-90"
                 >
-                    <svg
-                        width={size}
-                        height={size}
-                        className="relative -rotate-90"
-                    >
-                        {/* Background circle */}
+                    {/* Background circle */}
+                    <circle
+                        cx={center}
+                        cy={center}
+                        r={radius}
+                        fill="none"
+                        className="stroke-neutral-200/80 dark:stroke-neutral-700/60"
+                        strokeWidth={strokeWidth}
+                    />
+                    {/* Data segments */}
+                    {segments.map((segment, index) => (
                         <circle
+                            key={index}
                             cx={center}
                             cy={center}
                             r={radius}
                             fill="none"
-                            className="stroke-neutral-200/80 dark:stroke-neutral-700/60"
+                            stroke={segment.color}
                             strokeWidth={strokeWidth}
+                            strokeDasharray={segment.strokeDasharray}
+                            strokeDashoffset={segment.strokeDashoffset}
+                            strokeLinecap="round"
+                            className="transition-all duration-500 ease-out"
                         />
-                        {/* Data segments */}
-                        {segments.map((segment, index) => (
-                            <circle
-                                key={index}
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke={segment.color}
-                                strokeWidth={strokeWidth}
-                                strokeDasharray={segment.strokeDasharray}
-                                strokeDashoffset={segment.strokeDashoffset}
-                                strokeLinecap="round"
-                                className="transition-all duration-500 ease-out"
-                            />
-                        ))}
-                    </svg>
-                    {showTotal && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-                                {total}
-                            </span>
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                {totalLabel}
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {showLegend && (
-                    <div className="flex flex-col gap-2.5">
-                        {data.map((item, index) => (
-                            <div
-                                key={index}
-                                className="group flex items-center gap-2.5 rounded-lg px-2 py-1 transition-colors hover:bg-neutral-100/60 dark:hover:bg-neutral-800/40"
-                            >
-                                <div
-                                    className="size-3 rounded-full transition-transform group-hover:scale-110"
-                                    style={{ backgroundColor: item.color }}
-                                />
-                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
-                                    {item.label}
-                                </span>
-                                <span className="ml-auto text-sm font-bold text-neutral-800 dark:text-neutral-200">
-                                    {item.value}
-                                </span>
-                            </div>
-                        ))}
+                    ))}
+                </svg>
+                {showTotal && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
+                            {total}
+                        </span>
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                            {totalLabel}
+                        </span>
                     </div>
                 )}
             </div>
+
+            {showLegend && (
+                <div className="flex flex-col gap-2.5">
+                    {data.map((item, index) => (
+                        <div
+                            key={index}
+                            className="group flex items-center gap-2.5 rounded-lg px-2 py-1 transition-colors hover:bg-neutral-100/60 dark:hover:bg-neutral-800/40"
+                        >
+                            <div
+                                className="size-3 rounded-full transition-transform group-hover:scale-110"
+                                style={{ backgroundColor: item.color }}
+                            />
+                            <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                {item.label}
+                            </span>
+                            <span className="ml-auto text-sm font-bold text-neutral-800 dark:text-neutral-200">
+                                {item.value}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

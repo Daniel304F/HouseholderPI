@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Settings, BarChart3, LogOut } from 'lucide-react'
 import { useNavItems, LogoutNavItem } from './navItems'
@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { NavItem } from '../NavItem'
 import { cn } from '../../utils/cn'
 import { DropdownMenuItem } from '../ui'
+import { useClickOutside } from '../../hooks/useClickOutside'
 
 export const HeaderNavigation = () => {
     const navigate = useNavigate()
@@ -17,22 +18,7 @@ export const HeaderNavigation = () => {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const profileMenuRef = useRef<HTMLDivElement>(null)
 
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-                setShowProfileMenu(false)
-            }
-        }
-
-        if (showProfileMenu) {
-            document.addEventListener('mousedown', handleClickOutside)
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [showProfileMenu])
+    useClickOutside(profileMenuRef, () => setShowProfileMenu(false), showProfileMenu)
 
     const handleNavigate = (path: string) => {
         navigate(path)

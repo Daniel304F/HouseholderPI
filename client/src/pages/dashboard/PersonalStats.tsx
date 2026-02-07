@@ -26,6 +26,11 @@ import { ContributionGraph, ActivityLog } from '../../components/activity'
 import { statisticsApi } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
 import { CHART_COLORS } from '../../constants'
+import {
+    buildMonthlyBarData,
+    buildMonthlyLineSeries,
+    buildStatusDonutData,
+} from '../../utils/stats.utils'
 
 export const PersonalStats = () => {
     const {
@@ -55,48 +60,9 @@ export const PersonalStats = () => {
         return <StatsErrorState />
     }
 
-    const monthlyChartData = stats.monthlyStats.map((m) => ({
-        label: m.monthName.substring(0, 3),
-        value: m.completed,
-        color: CHART_COLORS.completed,
-    }))
-
-    const lineChartSeries = [
-        {
-            name: 'Erledigt',
-            data: stats.monthlyStats.map((m) => ({
-                label: m.monthName.substring(0, 3),
-                value: m.completed,
-            })),
-            color: CHART_COLORS.completed,
-        },
-        {
-            name: 'Erstellt',
-            data: stats.monthlyStats.map((m) => ({
-                label: m.monthName.substring(0, 3),
-                value: m.created,
-            })),
-            color: CHART_COLORS.primary,
-        },
-    ]
-
-    const statusDonutData = [
-        {
-            label: 'Erledigt',
-            value: stats.completedTasks,
-            color: CHART_COLORS.completed,
-        },
-        {
-            label: 'Offen',
-            value: stats.pendingTasks,
-            color: CHART_COLORS.pending,
-        },
-        {
-            label: 'In Bearbeitung',
-            value: stats.inProgressTasks,
-            color: CHART_COLORS.inProgress,
-        },
-    ]
+    const monthlyChartData = buildMonthlyBarData(stats.monthlyStats)
+    const lineChartSeries = buildMonthlyLineSeries(stats.monthlyStats)
+    const statusDonutData = buildStatusDonutData(stats)
 
     const streakBadge =
         stats.streak > 0 ? (

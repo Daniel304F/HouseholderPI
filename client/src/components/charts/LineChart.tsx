@@ -20,7 +20,6 @@ interface LineChartProps {
     showGrid?: boolean
     showArea?: boolean
     className?: string
-    title?: string
 }
 
 export const LineChart = ({
@@ -32,7 +31,6 @@ export const LineChart = ({
     showGrid = true,
     showArea = false,
     className,
-    title,
 }: LineChartProps) => {
     // Find global min/max
     const allValues = series.flatMap((s) => s.data.map((d) => d.value))
@@ -58,21 +56,7 @@ export const LineChart = ({
         padding.top + chartHeight - ((value - minValue) / valueRange) * chartHeight
 
     return (
-        <div
-            className={cn(
-                'rounded-2xl p-5',
-                'bg-white dark:bg-neutral-800',
-                'border border-neutral-200 dark:border-neutral-700',
-                'shadow-sm',
-                className
-            )}
-        >
-            {title && (
-                <h3 className="mb-4 text-sm font-semibold text-neutral-700 dark:text-neutral-200">
-                    {title}
-                </h3>
-            )}
-
+        <div className={className}>
             {showLegend && series.length > 1 && (
                 <div className="mb-4 flex flex-wrap gap-3">
                     {series.map((s, index) => (

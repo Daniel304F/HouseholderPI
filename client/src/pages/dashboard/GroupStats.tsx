@@ -21,7 +21,12 @@ import { MemberLeaderboard, FrequentTasksList } from '../../components/stats'
 import { statisticsApi } from '../../api/statistics'
 import { groupsApi } from '../../api/groups'
 import { queryKeys } from '../../lib/queryKeys'
-import { CHART_COLORS, getMemberColor } from '../../constants'
+import { getMemberColor } from '../../constants'
+import {
+    buildMonthlyBarData,
+    buildMonthlyLineSeries,
+    buildStatusDonutData,
+} from '../../utils/stats.utils'
 
 export const GroupStats = () => {
     const { groupId } = useParams<{ groupId: string }>()
@@ -65,48 +70,9 @@ export const GroupStats = () => {
         )
     }
 
-    const monthlyChartData = stats.monthlyStats.map((m) => ({
-        label: m.monthName.substring(0, 3),
-        value: m.completed,
-        color: CHART_COLORS.completed,
-    }))
-
-    const lineChartSeries = [
-        {
-            name: 'Erledigt',
-            data: stats.monthlyStats.map((m) => ({
-                label: m.monthName.substring(0, 3),
-                value: m.completed,
-            })),
-            color: CHART_COLORS.completed,
-        },
-        {
-            name: 'Erstellt',
-            data: stats.monthlyStats.map((m) => ({
-                label: m.monthName.substring(0, 3),
-                value: m.created,
-            })),
-            color: CHART_COLORS.primary,
-        },
-    ]
-
-    const statusDonutData = [
-        {
-            label: 'Erledigt',
-            value: stats.completedTasks,
-            color: CHART_COLORS.completed,
-        },
-        {
-            label: 'Offen',
-            value: stats.pendingTasks,
-            color: CHART_COLORS.pending,
-        },
-        {
-            label: 'In Bearbeitung',
-            value: stats.inProgressTasks,
-            color: CHART_COLORS.inProgress,
-        },
-    ]
+    const monthlyChartData = buildMonthlyBarData(stats.monthlyStats)
+    const lineChartSeries = buildMonthlyLineSeries(stats.monthlyStats)
+    const statusDonutData = buildStatusDonutData(stats)
 
     const memberChartData = stats.memberStats.map((m, i) => ({
         label: m.userName,

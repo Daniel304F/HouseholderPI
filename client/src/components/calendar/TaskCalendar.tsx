@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Repeat } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useCalendar, type CalendarDay } from '../../hooks/useCalendar'
+import { getRecurringDatesForMonth } from './calendar.utils'
+import { CalendarTaskItem } from './CalendarTaskItem'
+import { CalendarRecurringItem } from './CalendarRecurringItem'
 import type { Task } from '../../api/tasks'
 import type { RecurringTaskTemplate } from '../../api/recurringTasks'
 
@@ -21,80 +24,6 @@ interface TaskCalendarProps {
 }
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-
-// Helper to calculate recurring task dates for a given month
-const getRecurringDatesForMonth = (
-    templates: RecurringTaskTemplate[],
-    year: number,
-    month: number
-): Map<string, RecurringTaskTemplate[]> => {
-    const map = new Map<string, RecurringTaskTemplate[]>()
-
-    templates.forEach((template) => {
-        if (!template.isActive) return
-
-        const dates: Date[] = []
-        const dueDays = template.dueDays || []
-
-        switch (template.frequency) {
-            case 'daily':
-                // Every day of the month
-                const daysInMonth = new Date(year, month + 1, 0).getDate()
-                for (let d = 1; d <= daysInMonth; d++) {
-                    dates.push(new Date(year, month, d))
-                }
-                break
-
-            case 'weekly':
-                // Every week on each day in dueDays (0 = Sunday, 1 = Monday, etc.)
-                dueDays.forEach((dueDay) => {
-                    const firstDay = new Date(year, month, 1)
-                    const lastDay = new Date(year, month + 1, 0)
-                    const current = new Date(firstDay)
-                    // Find first occurrence of the day
-                    while (current.getDay() !== dueDay) {
-                        current.setDate(current.getDate() + 1)
-                    }
-                    while (current <= lastDay) {
-                        dates.push(new Date(current))
-                        current.setDate(current.getDate() + 7)
-                    }
-                })
-                break
-
-            case 'biweekly':
-                // Every two weeks on each day in dueDays
-                dueDays.forEach((dueDay) => {
-                    const firstDayBi = new Date(year, month, 1)
-                    const lastDayBi = new Date(year, month + 1, 0)
-                    const currentBi = new Date(firstDayBi)
-                    while (currentBi.getDay() !== dueDay) {
-                        currentBi.setDate(currentBi.getDate() + 1)
-                    }
-                    while (currentBi <= lastDayBi) {
-                        dates.push(new Date(currentBi))
-                        currentBi.setDate(currentBi.getDate() + 14)
-                    }
-                })
-                break
-
-            case 'monthly':
-                // On specific day of month (dueDays[0] = 1-31)
-                const dayOfMonth = Math.min(dueDays[0] || 1, new Date(year, month + 1, 0).getDate())
-                dates.push(new Date(year, month, dayOfMonth))
-                break
-        }
-
-        dates.forEach((date) => {
-            const dateKey = date.toDateString()
-            const existing = map.get(dateKey) || []
-            existing.push(template)
-            map.set(dateKey, existing)
-        })
-    })
-
-    return map
-}
 
 export const TaskCalendar = ({
     tasks,
@@ -287,14 +216,14 @@ export const TaskCalendar = ({
                     {selectedDateTasks.length > 0 || selectedDateRecurring.length > 0 ? (
                         <div className="space-y-2">
                             {selectedDateTasks.map((task) => (
-                                <TaskItem
+                                <CalendarTaskItem
                                     key={task.id}
                                     task={task}
                                     onClick={() => onTaskClick?.(task)}
                                 />
                             ))}
                             {selectedDateRecurring.map((template) => (
-                                <RecurringItem
+                                <CalendarRecurringItem
                                     key={template.id}
                                     template={template}
                                     onClick={() => onRecurringClick?.(template)}
@@ -309,95 +238,5 @@ export const TaskCalendar = ({
                 </div>
             )}
         </div>
-    )
-}
-
-interface TaskItemProps {
-    task: Task
-    onClick?: () => void
-}
-
-const TaskItem = ({ task, onClick }: TaskItemProps) => {
-    const isOverdue =
-        task.status !== 'completed' && new Date(task.dueDate) < new Date()
-
-    return (
-        <button
-            onClick={onClick}
-            className={cn(
-                'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors',
-                'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                'border-l-2',
-                task.status === 'completed'
-                    ? 'border-emerald-500'
-                    : isOverdue
-                      ? 'border-error-500'
-                      : 'border-amber-500'
-            )}
-        >
-            <div className="min-w-0 flex-1">
-                <p
-                    className={cn(
-                        'truncate text-sm font-medium',
-                        task.status === 'completed'
-                            ? 'text-neutral-500 line-through'
-                            : 'text-neutral-900 dark:text-white'
-                    )}
-                >
-                    {task.title}
-                </p>
-            </div>
-            <span
-                className={cn(
-                    'rounded px-1.5 py-0.5 text-xs font-medium',
-                    task.priority === 'high'
-                        ? 'bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400'
-                        : task.priority === 'medium'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                          : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
-                )}
-            >
-                {task.priority === 'high'
-                    ? 'Hoch'
-                    : task.priority === 'medium'
-                      ? 'Mittel'
-                      : 'Niedrig'}
-            </span>
-        </button>
-    )
-}
-
-interface RecurringItemProps {
-    template: RecurringTaskTemplate
-    onClick?: () => void
-}
-
-const FREQUENCY_LABELS: Record<string, string> = {
-    daily: 'Täglich',
-    weekly: 'Wöchentlich',
-    biweekly: 'Alle 2 Wochen',
-    monthly: 'Monatlich',
-}
-
-const RecurringItem = ({ template, onClick }: RecurringItemProps) => {
-    return (
-        <button
-            onClick={onClick}
-            className={cn(
-                'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors',
-                'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                'border-l-2 border-info-500'
-            )}
-        >
-            <Repeat className="size-4 flex-shrink-0 text-info-500" />
-            <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-neutral-900 dark:text-white">
-                    {template.title}
-                </p>
-            </div>
-            <span className="rounded bg-info-100 px-1.5 py-0.5 text-xs font-medium text-info-700 dark:bg-info-900/30 dark:text-info-400">
-                {FREQUENCY_LABELS[template.frequency] || template.frequency}
-            </span>
-        </button>
     )
 }
