@@ -581,6 +581,36 @@ export const unlinkTasks = async (
 };
 
 /**
+ * Holt alle archivierten Aufgaben einer Gruppe
+ * GET /api/groups/:groupId/tasks/archived
+ */
+export const getArchivedTasks = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskService = getTaskService(req);
+    const { groupId } = req.params;
+
+    const tasks = await taskService.getArchivedTasks(groupId!, req.userId);
+
+    res.status(200).json({
+      success: true,
+      data: tasks,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
  * Archiviert alle erledigten Aufgaben einer Gruppe
  * POST /api/groups/:groupId/tasks/archive-completed
  */

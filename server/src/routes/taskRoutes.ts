@@ -37,6 +37,13 @@ router.get(
   taskController.getGroupTasks as RequestHandler,
 );
 
+// Archivierte Aufgaben abrufen
+router.get(
+  "/archived",
+  validateResource(groupTasksParamSchema),
+  taskController.getArchivedTasks as RequestHandler,
+);
+
 // Archivierung aller erledigten Aufgaben
 router.post(
   "/archive-completed",

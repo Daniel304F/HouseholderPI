@@ -4,6 +4,7 @@ import {
     LayoutGrid,
     MessageSquare,
     Calendar as CalendarIcon,
+    Archive,
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { groupsApi } from '../../api/groups'
@@ -19,7 +20,7 @@ import {
     type MemberInfo,
 } from '../../components/groups/detail'
 import { Tabs, type Tab } from '../../components/display'
-import { KanbanBoard, type ColumnStatus } from '../../components/board'
+import { KanbanBoard, ArchivedTasksList, type ColumnStatus } from '../../components/board'
 import { TaskCalendar, RecurringTaskModal } from '../../components/calendar'
 import { GroupChat } from '../../components/chat'
 import { useAuth } from '../../contexts/AuthContext'
@@ -34,7 +35,7 @@ import {
 import { useTaskMutations } from '../../hooks/useTaskMutations'
 import { useTaskModal } from '../../hooks/useTaskModal'
 
-type TabId = 'board' | 'calendar' | 'messages'
+type TabId = 'board' | 'calendar' | 'messages' | 'archive'
 
 const getTabs = (isDesktop: boolean): Tab[] => [
     { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
@@ -51,6 +52,11 @@ const getTabs = (isDesktop: boolean): Tab[] => [
         id: 'messages',
         label: 'Messages',
         icon: <MessageSquare className="size-4" />,
+    },
+    {
+        id: 'archive',
+        label: 'Archiv',
+        icon: <Archive className="size-4" />,
     },
 ]
 
@@ -111,6 +117,12 @@ export const GroupDetail = () => {
         enabled: !!groupId,
     })
 
+    const { data: archivedTasks = [], isLoading: isLoadingArchived } = useQuery({
+        queryKey: ['archivedTasks', groupId],
+        queryFn: () => tasksApi.getArchivedTasks(groupId!),
+        enabled: !!groupId && activeTab === 'archive',
+    })
+
     // Mutations
     const { createTask, updateTask, deleteTask } = useTaskMutations({
         groupId,
@@ -140,6 +152,7 @@ export const GroupDetail = () => {
         mutationFn: () => tasksApi.archiveCompletedTasks(groupId!),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+            queryClient.invalidateQueries({ queryKey: ['archivedTasks', groupId] })
             toast.success(`${data.archivedCount} Aufgabe(n) archiviert`)
         },
         onError: () => {
@@ -254,18 +267,20 @@ export const GroupDetail = () => {
                 onTabChange={(id) => setActiveTab(id as TabId)}
             />
 
-            {/* Toolbar */}
-            <Toolbar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onAddTask={() => handleAddTask('pending')}
-                members={members}
-                selectedMembers={selectedMembers}
-                onMemberToggle={toggleMember}
-                selectedPriorities={selectedPriorities}
-                onPriorityToggle={togglePriority}
-                onClearFilters={clearFilters}
-            />
+            {/* Toolbar - nur im Board-Tab */}
+            {activeTab === 'board' && (
+                <Toolbar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onAddTask={() => handleAddTask('pending')}
+                    members={members}
+                    selectedMembers={selectedMembers}
+                    onMemberToggle={toggleMember}
+                    selectedPriorities={selectedPriorities}
+                    onPriorityToggle={togglePriority}
+                    onClearFilters={clearFilters}
+                />
+            )}
 
             {/* Content */}
             <ContentArea
@@ -281,6 +296,8 @@ export const GroupDetail = () => {
                 onAddTask={handleAddTask}
                 onTaskMove={handleTaskMove}
                 onArchiveCompleted={handleArchiveCompleted}
+                archivedTasks={archivedTasks}
+                isLoadingArchived={isLoadingArchived}
             />
 
             {/* Modals */}
@@ -344,6 +361,8 @@ interface ContentAreaProps {
     onAddTask: (status: ColumnStatus) => void
     onTaskMove: (taskId: string, newStatus: ColumnStatus) => Promise<void>
     onArchiveCompleted: () => void
+    archivedTasks: Task[]
+    isLoadingArchived: boolean
 }
 
 const ContentArea = ({
@@ -359,6 +378,8 @@ const ContentArea = ({
     onAddTask,
     onTaskMove,
     onArchiveCompleted,
+    archivedTasks,
+    isLoadingArchived,
 }: ContentAreaProps) => (
     <main className="min-h-0 flex-1">
         {activeTab === 'board' && (
@@ -400,6 +421,16 @@ const ContentArea = ({
                 onRecurringClick={onRecurringClick}
                 className="rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900"
             />
+        )}
+
+        {activeTab === 'archive' && (
+            <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900 sm:p-6">
+                <ArchivedTasksList
+                    tasks={archivedTasks}
+                    onTaskClick={onTaskClick}
+                    isLoading={isLoadingArchived}
+                />
+            </div>
         )}
 
         {activeTab === 'messages' && groupId && (

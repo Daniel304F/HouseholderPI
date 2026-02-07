@@ -218,6 +218,14 @@ export const tasksApi = {
         return response.data.data
     },
 
+    // Archivierte Aufgaben einer Gruppe abrufen
+    getArchivedTasks: async (groupId: string): Promise<Task[]> => {
+        const response = await apiClient.get<ApiResponse<Task[]>>(
+            `/groups/${groupId}/tasks/archived`
+        )
+        return response.data.data
+    },
+
     // Alle erledigten Aufgaben einer Gruppe archivieren
     archiveCompletedTasks: async (
         groupId: string

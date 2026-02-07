@@ -7,3 +7,4 @@ export {
 export { KanbanCard } from './KanbanCard'
 export { ColumnSelector } from './ColumnSelector'
 export { PriorityFilterDropdown } from './PriorityFilterDropdown'
+export { ArchivedTasksList } from './ArchivedTasksList'
