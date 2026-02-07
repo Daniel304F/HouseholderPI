@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UserPlus, X, Mail, Loader2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { Button, Input } from '../common'
+import { Button, Input, IconButton } from '../common'
 
 interface AddFriendModalProps {
     isOpen: boolean
@@ -89,17 +89,13 @@ export const AddFriendModal = ({
                             Freund hinzufügen
                         </h2>
                     </div>
-                    <button
+                    <IconButton
+                        icon={<X className="size-5" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={handleClose}
-                        className={cn(
-                            'rounded-lg p-2 transition-colors',
-                            'text-neutral-400 hover:text-neutral-600',
-                            'dark:text-neutral-500 dark:hover:text-neutral-300',
-                            'hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                        )}
-                    >
-                        <X className="size-5" />
-                    </button>
+                        aria-label="Schließen"
+                    />
                 </div>
 
                 {/* Form */}

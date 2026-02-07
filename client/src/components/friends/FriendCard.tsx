@@ -2,6 +2,8 @@ import { MoreHorizontal, UserMinus, MessageCircle } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import type { Friend } from '../../api/friends'
 import { cn } from '../../utils/cn'
+import { IconButton } from '../common/IconButton'
+import { DropdownMenuItem } from '../ui'
 
 interface FriendCardProps {
     friend: Friend
@@ -92,17 +94,13 @@ export const FriendCard = ({
 
             {/* Actions */}
             <div className="relative" ref={menuRef}>
-                <button
+                <IconButton
+                    icon={<MoreHorizontal className="size-5" />}
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setShowMenu(!showMenu)}
-                    className={cn(
-                        'rounded-lg p-2 transition-colors',
-                        'text-neutral-400 hover:text-neutral-600',
-                        'dark:text-neutral-500 dark:hover:text-neutral-300',
-                        'hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                    )}
-                >
-                    <MoreHorizontal className="size-5" />
-                </button>
+                    aria-label="Menü öffnen"
+                />
 
                 {/* Dropdown Menu */}
                 {showMenu && (
@@ -116,35 +114,26 @@ export const FriendCard = ({
                         )}
                     >
                         {onMessage && (
-                            <button
+                            <DropdownMenuItem
+                                icon={<MessageCircle className="size-4" />}
                                 onClick={() => {
                                     onMessage(friend.friendId)
                                     setShowMenu(false)
                                 }}
-                                className={cn(
-                                    'flex w-full items-center gap-2 rounded-md px-3 py-2',
-                                    'text-sm text-neutral-700 dark:text-neutral-300',
-                                    'hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                                )}
                             >
-                                <MessageCircle className="size-4" />
                                 Nachricht senden
-                            </button>
+                            </DropdownMenuItem>
                         )}
-                        <button
+                        <DropdownMenuItem
+                            icon={<UserMinus className="size-4" />}
+                            variant="danger"
                             onClick={() => {
                                 onRemove(friend.friendId)
                                 setShowMenu(false)
                             }}
-                            className={cn(
-                                'flex w-full items-center gap-2 rounded-md px-3 py-2',
-                                'text-sm text-red-600 dark:text-red-400',
-                                'hover:bg-red-50 dark:hover:bg-red-900/20'
-                            )}
                         >
-                            <UserMinus className="size-4" />
                             Freund entfernen
-                        </button>
+                        </DropdownMenuItem>
                     </div>
                 )}
             </div>
