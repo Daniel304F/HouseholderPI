@@ -42,10 +42,7 @@ export const TaskHistory = () => {
             <PageHeader />
 
             <StatsGrid
-                total={stats.total}
-                high={stats.high}
-                medium={stats.medium}
-                low={stats.low}
+                stats={stats}
             />
 
             {completedTasks.length === 0 ? (

@@ -25,7 +25,7 @@ export const useSocket = ({
     const { isAuthenticated } = useAuth()
     const socketRef = useRef<Socket | null>(null)
     const [isConnected, setIsConnected] = useState(false)
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // Initialize socket connection
     useEffect(() => {

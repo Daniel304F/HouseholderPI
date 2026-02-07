@@ -1,13 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import {
-    TrendingUp,
-    CheckCircle2,
-    Clock,
-    Target,
-    Flame,
-    Users,
-    Activity,
-} from 'lucide-react'
+import { TrendingUp, CheckCircle2, Clock, Target, Flame, Users } from 'lucide-react'
 import {
     StatCard,
     BarChart,
@@ -21,7 +13,7 @@ import {
     StatCardsSkeleton,
     StatsErrorState,
 } from '../../components/feedback'
-import { PageHeader, Card } from '../../components/common'
+import { PageHeader } from '../../components/common'
 import { ContributionGraph, ActivityLog } from '../../components/activity'
 import { statisticsApi } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
@@ -33,16 +25,12 @@ import {
 } from '../../utils/stats.utils'
 
 export const PersonalStats = () => {
-    const {
-        data: stats,
-        isLoading,
-        isError,
-    } = useQuery({
+    const { data: stats, isLoading, isError } = useQuery({
         queryKey: queryKeys.statistics.personal,
         queryFn: () => statisticsApi.getPersonalStatistics(),
     })
 
-    const { data: heatmapData } = useQuery({
+    const { data: heatmapData = [] } = useQuery({
         queryKey: queryKeys.statistics.activityHeatmap,
         queryFn: () => statisticsApi.getActivityHeatmap(),
     })
@@ -76,11 +64,10 @@ export const PersonalStats = () => {
         <div className="space-y-6">
             <PageHeader
                 title="Meine Statistiken"
-                subtitle="Dein persönlicher Fortschritt auf einen Blick"
+                subtitle="Dein persoenlicher Fortschritt auf einen Blick"
                 badge={streakBadge}
             />
 
-            {/* Stat Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                     title="Zugewiesene Aufgaben"
@@ -108,7 +95,6 @@ export const PersonalStats = () => {
                 />
             </div>
 
-            {/* Charts Row */}
             <div className="grid gap-6 lg:grid-cols-2">
                 <ChartCard title="Monatlicher Fortschritt">
                     <LineChart series={lineChartSeries} height={220} />
@@ -119,7 +105,6 @@ export const PersonalStats = () => {
                 </ChartCard>
             </div>
 
-            {/* Completion Rate Ring & Tasks by Group */}
             <div className="grid gap-6 lg:grid-cols-2">
                 <ChartCard title="Abschlussfortschritt" centerContent>
                     <div className="flex items-center gap-8">
@@ -158,15 +143,15 @@ export const PersonalStats = () => {
                 >
                     {stats.tasksByGroup.length > 0 ? (
                         <BarChart
-                            data={stats.tasksByGroup.map((g, i) => ({
-                                label: g.groupName,
-                                value: g.count,
+                            data={stats.tasksByGroup.map((group, index) => ({
+                                label: group.groupName,
+                                value: group.count,
                                 color: [
                                     CHART_COLORS.primary,
                                     CHART_COLORS.completed,
                                     CHART_COLORS.inProgress,
                                     CHART_COLORS.pending,
-                                ][i % 4],
+                                ][index % 4],
                             }))}
                             horizontal
                             showValues
@@ -179,12 +164,25 @@ export const PersonalStats = () => {
                 </ChartCard>
             </div>
 
-            {/* Monthly Bar Chart */}
             <ChartCard title="Erledigte Aufgaben pro Monat">
                 <BarChart data={monthlyChartData} height={200} />
             </ChartCard>
 
-            {/* Activity Section */}
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <ChartCard title="Aktivitaet im Jahresverlauf">
+                    {heatmapData.length > 0 ? (
+                        <ContributionGraph data={heatmapData} />
+                    ) : (
+                        <p className="py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                            Keine Aktivitaetsdaten vorhanden.
+                        </p>
+                    )}
+                </ChartCard>
+
+                <ChartCard title="Aktivitaetsprotokoll">
+                    <ActivityLog />
+                </ChartCard>
+            </div>
         </div>
     )
 }

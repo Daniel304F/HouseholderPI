@@ -1,26 +1,26 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { UserPlus } from 'lucide-react'
 import { Button } from '../../components/common'
-import { AddFriendModal } from '../../components/friends'
 import { Tabs as ContentTabs } from '../../components/display'
-import { friendsApi } from '../../api/friends'
-import { useFriendsMutations } from '../../hooks'
+import { AddFriendModal } from '../../components/friends'
 import {
-    TABS,
-    QUERY_KEYS,
-    LoadingState,
     ErrorState,
     FriendsTab,
+    LoadingState,
+    QUERY_KEYS,
     RequestsTab,
     SentTab,
+    TABS,
 } from '../../components/page-friends'
+import { PageIntro } from '../../components/ui'
+import { friendsApi } from '../../api/friends'
+import { useFriendsMutations } from '../../hooks'
 
 export const Friends = () => {
     const [activeTab, setActiveTab] = useState('friends')
     const [showAddModal, setShowAddModal] = useState(false)
 
-    // Mutations
     const {
         sendRequestMutation,
         respondMutation,
@@ -28,7 +28,6 @@ export const Friends = () => {
         removeFriendMutation,
     } = useFriendsMutations()
 
-    // Queries
     const {
         data: friends = [],
         isLoading: friendsLoading,
@@ -59,7 +58,6 @@ export const Friends = () => {
         queryFn: friendsApi.getSentRequests,
     })
 
-    // Handlers
     const handleSendRequest = async (email: string) => {
         await sendRequestMutation.mutateAsync(email)
     }
@@ -77,19 +75,19 @@ export const Friends = () => {
     }
 
     const handleRemoveFriend = (friendId: string) => {
-        if (confirm('Möchtest du diesen Freund wirklich entfernen?')) {
+        if (confirm('Moechtest du diesen Freund wirklich entfernen?')) {
             removeFriendMutation.mutate(friendId)
         }
     }
 
-    // Badge counts for tabs
     const requestCount = requests.length
-    const tabsWithBadges = TABS.map((tab) => ({
-        ...tab,
-        badge: tab.id === 'requests' && requestCount > 0 ? requestCount : undefined,
-    }))
+    const tabsWithBadges = useMemo(() => {
+        return TABS.map((tab) => ({
+            ...tab,
+            badge: tab.id === 'requests' && requestCount > 0 ? requestCount : undefined,
+        }))
+    }, [requestCount])
 
-    // Loading states
     const isLoading =
         (activeTab === 'friends' && friendsLoading) ||
         (activeTab === 'requests' && requestsLoading) ||
@@ -106,73 +104,62 @@ export const Friends = () => {
         else refetchSent()
     }
 
+    const summary = `${friends.length} Freund${friends.length !== 1 ? 'e' : ''}${
+        requestCount > 0
+            ? ` - ${requestCount} neue Anfrage${requestCount !== 1 ? 'n' : ''}`
+            : ''
+    }`
+
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        Freunde
-                    </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400">
-                        {friends.length} Freund{friends.length !== 1 ? 'e' : ''}
-                        {requestCount > 0 &&
-                            ` • ${requestCount} neue Anfrage${requestCount !== 1 ? 'n' : ''}`}
-                    </p>
-                </div>
-                <Button
-                    onClick={() => setShowAddModal(true)}
-                    icon={<UserPlus className="size-5" />}
-                >
-                    <span className="hidden sm:inline">Freund hinzufügen</span>
-                    <span className="sm:hidden">Hinzufügen</span>
-                </Button>
-            </div>
+            <PageIntro
+                title="Freunde"
+                description={summary}
+                action={
+                    <Button
+                        onClick={() => setShowAddModal(true)}
+                        icon={<UserPlus className="size-5" />}
+                    >
+                        <span className="hidden sm:inline">Freund hinzufuegen</span>
+                        <span className="sm:hidden">Hinzufuegen</span>
+                    </Button>
+                }
+            />
 
-            {/* Tabs */}
             <ContentTabs
                 tabs={tabsWithBadges}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
             />
 
-            {/* Error State */}
             {isError && <ErrorState onRetry={refetch} />}
-
-            {/* Loading State */}
             {isLoading && !isError && <LoadingState activeTab={activeTab} />}
 
-            {/* Content */}
-            {!isLoading && !isError && (
-                <>
-                    {activeTab === 'friends' && (
-                        <FriendsTab
-                            friends={friends}
-                            onRemove={handleRemoveFriend}
-                            onAddFriend={() => setShowAddModal(true)}
-                        />
-                    )}
-
-                    {activeTab === 'requests' && (
-                        <RequestsTab
-                            requests={requests}
-                            onAccept={handleAcceptRequest}
-                            onReject={handleRejectRequest}
-                            isLoading={respondMutation.isPending}
-                        />
-                    )}
-
-                    {activeTab === 'sent' && (
-                        <SentTab
-                            sentRequests={sentRequests}
-                            onCancel={handleCancelRequest}
-                            isLoading={cancelRequestMutation.isPending}
-                        />
-                    )}
-                </>
+            {!isLoading && !isError && activeTab === 'friends' && (
+                <FriendsTab
+                    friends={friends}
+                    onRemove={handleRemoveFriend}
+                    onAddFriend={() => setShowAddModal(true)}
+                />
             )}
 
-            {/* Add Friend Modal */}
+            {!isLoading && !isError && activeTab === 'requests' && (
+                <RequestsTab
+                    requests={requests}
+                    onAccept={handleAcceptRequest}
+                    onReject={handleRejectRequest}
+                    isLoading={respondMutation.isPending}
+                />
+            )}
+
+            {!isLoading && !isError && activeTab === 'sent' && (
+                <SentTab
+                    sentRequests={sentRequests}
+                    onCancel={handleCancelRequest}
+                    isLoading={cancelRequestMutation.isPending}
+                />
+            )}
+
             <AddFriendModal
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}

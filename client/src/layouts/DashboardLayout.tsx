@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useSidebar } from '../hooks/useSidebar'
 import { useViewport } from '../hooks/useViewport'
@@ -29,16 +29,15 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     const isActive = (path: string) => location.pathname === path
 
-    // Responsive padding: mobile has bottom nav, tablet needs optimized space
+    // Mobile keeps space for bottom navigation.
     const contentPadding = isMobile
         ? 'p-4 pb-20'
         : isTablet
-            ? 'p-4 lg:p-6'
-            : 'p-6'
+          ? 'p-4 lg:p-6'
+          : 'p-6'
 
     return (
         <div className="flex h-full flex-1">
-            {/* Sidebar - Desktop and Tablet only */}
             {!isMobile && (
                 <Sidebar
                     width={width}
@@ -47,7 +46,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     onToggle={toggle}
                     onResizeStart={startResizing}
                 >
-                    <SidebarSection title="Menü">
+                    <SidebarSection title="Menue">
                         {dashboardNavItems.map((item) => (
                             <SidebarNavItem
                                 key={item.id}
@@ -61,11 +60,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </Sidebar>
             )}
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto">
-                <div className={cn('h-full', contentPadding)}>
-                    {children ?? <Outlet />}
-                </div>
+            <main className={cn('h-full flex-1 overflow-y-auto', contentPadding)}>
+                {children ?? <Outlet />}
             </main>
         </div>
     )

@@ -1,5 +1,10 @@
-// Constants
 export * from './constants'
-
-// Components
-export * from './components'
+export * from './types'
+export { PageHeader } from './PageHeader'
+export { TaskStatsGrid } from './TaskStatsGrid'
+export { FilterSection } from './FilterSection'
+export { GroupedTaskList } from './GroupedTaskList'
+export { FlatTaskList } from './FlatTaskList'
+export { EmptyState } from './EmptyState'
+export { ErrorState } from './ErrorState'
+export { MyTasksSkeleton } from './MyTasksSkeleton'

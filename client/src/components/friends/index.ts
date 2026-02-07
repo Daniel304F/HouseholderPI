@@ -1,8 +1,7 @@
-export { FriendCard, FriendCardSkeleton } from './FriendCard'
-export {
-    FriendRequestCard,
-    SentRequestCard,
-    RequestCardSkeleton,
-} from './FriendRequestCard'
+export { FriendCard } from './FriendCard'
+export { FriendCardSkeleton } from './FriendCardSkeleton'
+export { FriendRequestCard } from './FriendRequestCard'
+export { SentRequestCard } from './SentRequestCard'
+export { RequestCardSkeleton } from './RequestCardSkeleton'
 export { AddFriendModal } from './AddFriendModal'
 export { FriendsEmptyState } from './FriendsEmptyState'

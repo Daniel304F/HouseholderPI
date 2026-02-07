@@ -25,7 +25,6 @@ import {
     type RecurringTaskTemplate,
     type CreateRecurringTaskInput,
 } from '../../../api/recurringTasks'
-import type { TaskAttachment } from '../../../api/tasks'
 import type { GroupMember } from '../../../api/groups'
 import { RecurringTaskForm } from './RecurringTaskForm'
 

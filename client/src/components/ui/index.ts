@@ -15,3 +15,5 @@ export {
     CollapsibleSection,
     type CollapsibleSectionProps,
 } from './CollapsibleSection'
+export { PageIntro, type PageIntroProps } from './PageIntro'
+export { MetricCard, type MetricCardProps } from './MetricCard'

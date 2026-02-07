@@ -34,7 +34,8 @@ export const AppLayout = () => {
                             'mx-auto w-full flex-grow',
                             isDashboard
                                 ? 'w-full'
-                                : cn('max-w-5xl', isMobile ? 'pb-20' : 'p-4')
+                                : 'max-w-5xl',
+                            !isDashboard && (isMobile ? 'pb-20' : 'p-4')
                         )}
                     >
                         <Outlet />

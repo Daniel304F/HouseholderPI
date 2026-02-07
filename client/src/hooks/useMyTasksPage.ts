@@ -2,9 +2,15 @@ import { useCallback, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { groupsApi, type GroupMember } from '../api/groups'
 import { tasksApi, type Task, type TaskWithDetails } from '../api/tasks'
-import { DEFAULT_MY_TASKS_SORT, type SortOption, type StatusFilter } from '../constants/myTasks.constants'
+import {
+    DEFAULT_MY_TASKS_SORT,
+    type SortOption,
+    type StatusFilter,
+} from '../constants/myTasks.constants'
 import { useToast } from '../contexts/ToastContext'
 import { useFilteredTasks, useTaskStats, useTasksByGroup } from './useMyTasks'
+
+const MY_TASKS_QUERY_KEY = ['myTasks'] as const
 
 export const useMyTasksPage = () => {
     const queryClient = useQueryClient()
@@ -18,8 +24,12 @@ export const useMyTasksPage = () => {
     const [taskToEdit, setTaskToEdit] = useState<TaskWithDetails | null>(null)
     const [groupMembers, setGroupMembers] = useState<GroupMember[]>([])
 
+    const invalidateMyTasks = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: MY_TASKS_QUERY_KEY })
+    }, [queryClient])
+
     const { data: tasks = [], isLoading, isError } = useQuery({
-        queryKey: ['myTasks'],
+        queryKey: MY_TASKS_QUERY_KEY,
         queryFn: () => tasksApi.getMyTasks(),
     })
 
@@ -28,10 +38,17 @@ export const useMyTasksPage = () => {
     const tasksByGroup = useTasksByGroup(filteredTasks)
 
     const updateTaskMutation = useMutation({
-        mutationFn: ({ groupId, taskId, data }: { groupId: string; taskId: string; data: Partial<Task> }) =>
-            tasksApi.updateTask(groupId, taskId, data),
+        mutationFn: ({
+            groupId,
+            taskId,
+            data,
+        }: {
+            groupId: string
+            taskId: string
+            data: Partial<Task>
+        }) => tasksApi.updateTask(groupId, taskId, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+            invalidateMyTasks()
             setTaskToEdit(null)
             toast.success('Aufgabe aktualisiert!')
         },
@@ -44,7 +61,7 @@ export const useMyTasksPage = () => {
         mutationFn: ({ groupId, taskId }: { groupId: string; taskId: string }) =>
             tasksApi.completeTaskWithProof(groupId, taskId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+            invalidateMyTasks()
             toast.success('Aufgabe erledigt!')
         },
         onError: () => {
@@ -56,12 +73,12 @@ export const useMyTasksPage = () => {
         mutationFn: ({ groupId, taskId }: { groupId: string; taskId: string }) =>
             tasksApi.deleteTask(groupId, taskId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+            invalidateMyTasks()
             setTaskToEdit(null)
-            toast.success('Aufgabe gelöscht')
+            toast.success('Aufgabe geloescht')
         },
         onError: () => {
-            toast.error('Aufgabe konnte nicht gelöscht werden')
+            toast.error('Aufgabe konnte nicht geloescht werden')
         },
     })
 
@@ -73,10 +90,6 @@ export const useMyTasksPage = () => {
             setGroupMembers([])
         }
     }, [])
-
-    const retry = useCallback(() => {
-        queryClient.invalidateQueries({ queryKey: ['myTasks'] })
-    }, [queryClient])
 
     const toggleFilters = useCallback(() => {
         setShowFilters((prev) => !prev)
@@ -94,37 +107,49 @@ export const useMyTasksPage = () => {
         setTaskToEdit(null)
     }, [])
 
-    const handleEditClick = useCallback(async (task: TaskWithDetails) => {
-        await loadGroupMembers(task.groupId)
-        setTaskToEdit(task)
-        setSelectedTask(null)
-    }, [loadGroupMembers])
+    const handleEditClick = useCallback(
+        async (task: TaskWithDetails) => {
+            await loadGroupMembers(task.groupId)
+            setTaskToEdit(task)
+            setSelectedTask(null)
+        },
+        [loadGroupMembers]
+    )
 
-    const handleCompleteTask = useCallback(async (task: TaskWithDetails) => {
-        await completeTaskMutation.mutateAsync({
-            groupId: task.groupId,
-            taskId: task.id,
-        })
-    }, [completeTaskMutation])
+    const handleCompleteTask = useCallback(
+        async (task: TaskWithDetails) => {
+            await completeTaskMutation.mutateAsync({
+                groupId: task.groupId,
+                taskId: task.id,
+            })
+        },
+        [completeTaskMutation]
+    )
 
-    const handleUpdateTask = useCallback(async (taskId: string, data: Partial<Task>) => {
-        if (!taskToEdit) return
+    const handleUpdateTask = useCallback(
+        async (taskId: string, data: Partial<Task>) => {
+            if (!taskToEdit) return
 
-        await updateTaskMutation.mutateAsync({
-            groupId: taskToEdit.groupId,
-            taskId,
-            data,
-        })
-    }, [taskToEdit, updateTaskMutation])
+            await updateTaskMutation.mutateAsync({
+                groupId: taskToEdit.groupId,
+                taskId,
+                data,
+            })
+        },
+        [taskToEdit, updateTaskMutation]
+    )
 
-    const handleDeleteTask = useCallback(async (taskId: string) => {
-        if (!taskToEdit) return
+    const handleDeleteTask = useCallback(
+        async (taskId: string) => {
+            if (!taskToEdit) return
 
-        await deleteTaskMutation.mutateAsync({
-            groupId: taskToEdit.groupId,
-            taskId,
-        })
-    }, [taskToEdit, deleteTaskMutation])
+            await deleteTaskMutation.mutateAsync({
+                groupId: taskToEdit.groupId,
+                taskId,
+            })
+        },
+        [taskToEdit, deleteTaskMutation]
+    )
 
     return {
         searchQuery,
@@ -140,7 +165,7 @@ export const useMyTasksPage = () => {
         tasksByGroup,
         isLoading,
         isError,
-        retry,
+        retry: invalidateMyTasks,
         selectedTask,
         closeTaskDetail,
         taskToEdit,

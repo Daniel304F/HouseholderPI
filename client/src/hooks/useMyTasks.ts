@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { TaskWithDetails } from '../api/tasks'
+import type { TaskPriority, TaskStatus, TaskWithDetails } from '../api/tasks'
 import {
     MY_TASKS_PRIORITY_ORDER,
     MY_TASKS_STATUS_ORDER,
@@ -7,9 +7,33 @@ import {
     type StatusFilter,
 } from '../constants/myTasks.constants'
 
-/**
- * Custom hook for filtering and sorting tasks
- */
+const UNKNOWN_GROUP_LABEL = 'Unbekannte Gruppe'
+
+const matchesQuery = (task: TaskWithDetails, normalizedQuery: string) => {
+    if (!normalizedQuery) return true
+
+    return (
+        task.title.toLowerCase().includes(normalizedQuery) ||
+        task.description?.toLowerCase().includes(normalizedQuery) ||
+        task.groupName?.toLowerCase().includes(normalizedQuery)
+    )
+}
+
+const compareTasks = (sortBy: SortOption, a: TaskWithDetails, b: TaskWithDetails) => {
+    switch (sortBy) {
+        case 'dueDate':
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+        case 'priority':
+            return MY_TASKS_PRIORITY_ORDER[a.priority] - MY_TASKS_PRIORITY_ORDER[b.priority]
+        case 'status':
+            return MY_TASKS_STATUS_ORDER[a.status] - MY_TASKS_STATUS_ORDER[b.status]
+        case 'groupName':
+            return (a.groupName || '').localeCompare(b.groupName || '')
+        default:
+            return 0
+    }
+}
+
 export const useFilteredTasks = (
     tasks: TaskWithDetails[],
     searchQuery: string,
@@ -17,60 +41,55 @@ export const useFilteredTasks = (
     sortBy: SortOption
 ) => {
     return useMemo(() => {
+        const normalizedQuery = searchQuery.trim().toLowerCase()
+
         return tasks
             .filter((task) => {
-                // Exclude completed tasks from main list (they go to history)
                 if (task.status === 'completed') return false
                 if (statusFilter && task.status !== statusFilter) return false
-                if (searchQuery) {
-                    const query = searchQuery.toLowerCase()
-                    return (
-                        task.title.toLowerCase().includes(query) ||
-                        task.description?.toLowerCase().includes(query) ||
-                        task.groupName?.toLowerCase().includes(query)
-                    )
-                }
-                return true
+                return matchesQuery(task, normalizedQuery)
             })
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case 'dueDate':
-                        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-                    case 'priority':
-                        return MY_TASKS_PRIORITY_ORDER[a.priority] - MY_TASKS_PRIORITY_ORDER[b.priority]
-                    case 'status':
-                        return MY_TASKS_STATUS_ORDER[a.status] - MY_TASKS_STATUS_ORDER[b.status]
-                    case 'groupName':
-                        return (a.groupName || '').localeCompare(b.groupName || '')
-                    default:
-                        return 0
-                }
-            })
+            .sort((a, b) => compareTasks(sortBy, a, b))
     }, [tasks, searchQuery, statusFilter, sortBy])
 }
 
-/**
- * Custom hook for task statistics
- */
 export const useTaskStats = (tasks: TaskWithDetails[]) => {
-    return useMemo(() => ({
-        total: tasks.length,
-        pending: tasks.filter((t) => t.status === 'pending').length,
-        inProgress: tasks.filter((t) => t.status === 'in-progress').length,
-        completed: tasks.filter((t) => t.status === 'completed').length,
-    }), [tasks])
+    return useMemo(() => {
+        return tasks.reduce(
+            (acc, task) => {
+                acc.total += 1
+                if (task.status === 'pending') acc.pending += 1
+                if (task.status === 'in-progress') acc.inProgress += 1
+                if (task.status === 'completed') acc.completed += 1
+                return acc
+            },
+            { total: 0, pending: 0, inProgress: 0, completed: 0 }
+        )
+    }, [tasks])
 }
 
-/**
- * Custom hook for grouping tasks by group name
- */
 export const useTasksByGroup = (tasks: TaskWithDetails[]) => {
     return useMemo(() => {
-        return tasks.reduce((acc, task) => {
-            const groupName = task.groupName || 'Unbekannte Gruppe'
+        const grouped = tasks.reduce((acc, task) => {
+            const groupName = task.groupName || UNKNOWN_GROUP_LABEL
             if (!acc[groupName]) acc[groupName] = []
             acc[groupName].push(task)
             return acc
         }, {} as Record<string, TaskWithDetails[]>)
+
+        const sortedGroups = Object.keys(grouped).sort((a, b) =>
+            a.localeCompare(b)
+        )
+
+        return sortedGroups.reduce((acc, groupName) => {
+            acc[groupName] = grouped[groupName].sort(
+                (a, b) =>
+                    new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+            )
+            return acc
+        }, {} as Record<string, TaskWithDetails[]>)
     }, [tasks])
 }
+
+export type MyTasksPriorityOrder = Record<TaskPriority, number>
+export type MyTasksStatusOrder = Record<TaskStatus, number>

@@ -1,5 +1,8 @@
-// Constants
 export * from './constants'
-
-// Components
-export * from './components'
+export { LoadingState } from './LoadingState'
+export { ErrorState } from './ErrorState'
+export { RequestsEmptyState } from './RequestsEmptyState'
+export { SentEmptyState } from './SentEmptyState'
+export { FriendsTab } from './FriendsTab'
+export { RequestsTab } from './RequestsTab'
+export { SentTab } from './SentTab'

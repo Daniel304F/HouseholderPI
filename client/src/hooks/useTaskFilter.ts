@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Task } from '../api/tasks'
 
 export type Priority = 'low' | 'medium' | 'high'
@@ -15,98 +15,90 @@ interface UseTaskFilterOptions {
 }
 
 interface UseTaskFilterReturn {
-    /** Aktueller Suchbegriff */
     searchQuery: string
-    /** Suchbegriff setzen */
     setSearchQuery: (query: string) => void
-    /** Suche zurücksetzen */
     clearSearch: () => void
-    /** Ob gerade gesucht wird (Query nicht leer) */
     isSearching: boolean
-    /** Gefilterte Tasks basierend auf Suche und Prioritätsfiltern */
     filteredTasks: Task[]
-    /** Anzahl der Suchergebnisse */
     resultCount: number
-    /** Suchergebnisse nach Status gruppiert */
     resultsByStatus: {
         pending: Task[]
         'in-progress': Task[]
         completed: Task[]
     }
-    /** Aktive Filter pro Spalte */
     columnFilters: ColumnFilters
-    /** Filter für eine Spalte setzen */
     setColumnFilter: (columnId: ColumnStatus, priorities: Priority[]) => void
-    /** Einzelnen Filter für Spalte umschalten */
     toggleColumnFilter: (columnId: ColumnStatus, priority: Priority) => void
-    /** Filter für eine Spalte zurücksetzen */
     clearColumnFilter: (columnId: ColumnStatus) => void
-    /** Alle Filter zurücksetzen */
     clearAllFilters: () => void
-    /** Prüfen ob ein Filter aktiv ist */
     isFilterActive: (columnId: ColumnStatus, priority: Priority) => boolean
-    /** Prüfen ob Spalte gefiltert wird */
     hasActiveFilters: (columnId: ColumnStatus) => boolean
-    /** Tasks für eine bestimmte Spalte abrufen (mit Filtern) */
     getFilteredTasksForColumn: (columnId: ColumnStatus) => Task[]
 }
 
-/**
- * Hook zum Filtern von Tasks nach Priorität innerhalb von Spalten
- * und globaler Suche über alle Spalten
- */
 export const useTaskFilter = ({
     tasks,
     searchQuery: externalSearchQuery,
     initialSearchQuery = '',
 }: UseTaskFilterOptions): UseTaskFilterReturn => {
-    // Use external search query if provided (controlled mode), otherwise use internal state
     const [internalSearchQuery, setInternalSearchQuery] = useState(initialSearchQuery)
-    const searchQuery = externalSearchQuery ?? internalSearchQuery
-    const setSearchQuery = setInternalSearchQuery
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({})
 
-    // Globale Suche über alle Tasks
-    const searchFilteredTasks = useMemo(() => {
-        if (!searchQuery.trim()) return tasks
+    const isControlled = externalSearchQuery !== undefined
+    const searchQuery = externalSearchQuery ?? internalSearchQuery
 
-        const query = searchQuery.toLowerCase().trim()
-        return tasks.filter(
-            (task) =>
-                task.title.toLowerCase().includes(query) ||
-                task.description?.toLowerCase().includes(query) ||
-                task.assignedTo?.toLowerCase().includes(query)
-        )
+    const setSearchQuery = useCallback(
+        (query: string) => {
+            if (isControlled) return
+            setInternalSearchQuery(query)
+        },
+        [isControlled]
+    )
+
+    const searchFilteredTasks = useMemo(() => {
+        const normalizedQuery = searchQuery.trim().toLowerCase()
+        if (!normalizedQuery) return tasks
+
+        return tasks.filter((task) => {
+            return (
+                task.title.toLowerCase().includes(normalizedQuery) ||
+                task.description?.toLowerCase().includes(normalizedQuery) ||
+                task.assignedTo?.toLowerCase().includes(normalizedQuery)
+            )
+        })
     }, [tasks, searchQuery])
 
-    // Tasks nach Spalten-Filtern filtern
     const filteredTasks = useMemo(() => {
         return searchFilteredTasks.filter((task) => {
-            const columnFilter = columnFilters[task.status]
-            // Wenn kein Filter für die Spalte gesetzt ist, Task anzeigen
-            if (!columnFilter || columnFilter.length === 0) return true
-            // Sonst nur anzeigen, wenn Priorität im Filter enthalten
-            return columnFilter.includes(task.priority)
+            const filtersForColumn = columnFilters[task.status]
+            if (!filtersForColumn || filtersForColumn.length === 0) return true
+            return filtersForColumn.includes(task.priority)
         })
     }, [searchFilteredTasks, columnFilters])
 
-    // Suchergebnisse nach Status gruppiert
     const resultsByStatus = useMemo(() => {
-        return {
-            pending: filteredTasks.filter((t) => t.status === 'pending'),
-            'in-progress': filteredTasks.filter(
-                (t) => t.status === 'in-progress'
-            ),
-            completed: filteredTasks.filter((t) => t.status === 'completed'),
-        }
+        return filteredTasks.reduce(
+            (acc, task) => {
+                acc[task.status].push(task)
+                return acc
+            },
+            {
+                pending: [],
+                'in-progress': [],
+                completed: [],
+            } as {
+                pending: Task[]
+                'in-progress': Task[]
+                completed: Task[]
+            }
+        )
     }, [filteredTasks])
 
-    // Suche zurücksetzen
     const clearSearch = useCallback(() => {
-        setSearchQuery('')
-    }, [])
+        if (isControlled) return
+        setInternalSearchQuery('')
+    }, [isControlled])
 
-    // Filter für eine Spalte setzen
     const setColumnFilter = useCallback(
         (columnId: ColumnStatus, priorities: Priority[]) => {
             setColumnFilters((prev) => ({
@@ -117,39 +109,38 @@ export const useTaskFilter = ({
         []
     )
 
-    // Einzelnen Filter umschalten
     const toggleColumnFilter = useCallback(
         (columnId: ColumnStatus, priority: Priority) => {
             setColumnFilters((prev) => {
-                const currentFilters = prev[columnId] || []
-                const isActive = currentFilters.includes(priority)
+                const current = prev[columnId] || []
+                const isActive = current.includes(priority)
 
                 return {
                     ...prev,
                     [columnId]: isActive
-                        ? currentFilters.filter((p) => p !== priority)
-                        : [...currentFilters, priority],
+                        ? current.filter((item) => item !== priority)
+                        : [...current, priority],
                 }
             })
         },
         []
     )
 
-    // Filter für Spalte zurücksetzen
     const clearColumnFilter = useCallback((columnId: ColumnStatus) => {
         setColumnFilters((prev) => {
-            const { [columnId]: _, ...rest } = prev
-            return rest
+            const next = { ...prev }
+            delete next[columnId]
+            return next
         })
     }, [])
 
-    // Alle Filter zurücksetzen
     const clearAllFilters = useCallback(() => {
         setColumnFilters({})
-        setSearchQuery('')
-    }, [])
+        if (!isControlled) {
+            setInternalSearchQuery('')
+        }
+    }, [isControlled])
 
-    // Prüfen ob Filter aktiv
     const isFilterActive = useCallback(
         (columnId: ColumnStatus, priority: Priority) => {
             return columnFilters[columnId]?.includes(priority) ?? false
@@ -157,7 +148,6 @@ export const useTaskFilter = ({
         [columnFilters]
     )
 
-    // Prüfen ob Spalte gefiltert wird
     const hasActiveFilters = useCallback(
         (columnId: ColumnStatus) => {
             return (columnFilters[columnId]?.length ?? 0) > 0
@@ -165,12 +155,9 @@ export const useTaskFilter = ({
         [columnFilters]
     )
 
-    // Tasks für bestimmte Spalte abrufen
     const getFilteredTasksForColumn = useCallback(
-        (columnId: ColumnStatus) => {
-            return filteredTasks.filter((task) => task.status === columnId)
-        },
-        [filteredTasks]
+        (columnId: ColumnStatus) => resultsByStatus[columnId],
+        [resultsByStatus]
     )
 
     return {
