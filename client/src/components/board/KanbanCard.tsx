@@ -7,6 +7,7 @@ import {
     Link2,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { CardActionButton } from '../ui'
 import { PriorityBadge } from '../tasks'
 import type { Task } from '../../api/tasks'
 
@@ -77,38 +78,19 @@ export const KanbanCard = ({
                 {/* Action Buttons */}
                 <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     {onEditClick && (
-                        <button
+                        <CardActionButton
+                            icon={<Pencil className="size-3.5" />}
                             onClick={handleEditClick}
-                            className={cn(
-                                'flex h-7 w-7 items-center justify-center rounded-lg',
-                                'bg-neutral-100/90 dark:bg-neutral-700/90',
-                                'text-neutral-400 dark:text-neutral-500',
-                                'hover:bg-brand-100 hover:text-brand-600',
-                                'dark:hover:bg-brand-900/40 dark:hover:text-brand-400',
-                                'transition-all duration-200 backdrop-blur-sm',
-                                'active:scale-90'
-                            )}
                             title="Aufgabe bearbeiten"
-                        >
-                            <Pencil className="size-3.5" />
-                        </button>
+                        />
                     )}
                     {onDeleteClick && (
-                        <button
+                        <CardActionButton
+                            icon={<Trash2 className="size-3.5" />}
+                            variant="danger"
                             onClick={handleDeleteClick}
-                            className={cn(
-                                'flex h-7 w-7 items-center justify-center rounded-lg',
-                                'bg-neutral-100/90 dark:bg-neutral-700/90',
-                                'text-neutral-400 dark:text-neutral-500',
-                                'hover:bg-error-100 hover:text-error-600',
-                                'dark:hover:bg-error-900/40 dark:hover:text-error-400',
-                                'transition-all duration-200 backdrop-blur-sm',
-                                'active:scale-90'
-                            )}
                             title="Aufgabe löschen"
-                        >
-                            <Trash2 className="size-3.5" />
-                        </button>
+                        />
                     )}
                 </div>
 
