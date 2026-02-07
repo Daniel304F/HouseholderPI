@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { IconButton } from '../common/IconButton'
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut'
 import { ModalWidth, ModalHeight, ModalPosition } from './types'
 
@@ -84,16 +85,13 @@ export const BaseModal = ({
                     <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
                         {title}
                     </h2>
-                    <button
+                    <IconButton
+                        icon={<X className="size-5" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={onClose}
-                        className={cn(
-                            'rounded-lg p-2 transition-colors',
-                            'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                            'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
-                        )}
-                    >
-                        <X className="size-5" />
-                    </button>
+                        aria-label="Schließen"
+                    />
                 </div>
 
                 {/* Content */}

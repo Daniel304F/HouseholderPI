@@ -7,8 +7,6 @@ import {
     Pause,
     Trash2,
     Edit2,
-    ChevronDown,
-    ChevronUp,
     UserCircle,
     Loader2,
     Calendar,
@@ -19,7 +17,8 @@ import {
     ImageIcon,
 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
-import { Button } from '../../common'
+import { Button, IconButton } from '../../common'
+import { CollapsibleSection } from '../../ui'
 import { useToast } from '../../../contexts/ToastContext'
 import {
     recurringTasksApi,
@@ -155,134 +154,116 @@ export const RecurringTasksSection = ({
     if (!isAdmin) return null
 
     return (
-        <div className="mb-6">
-            <button
-                onClick={() => setExpanded(!expanded)}
-                className={cn(
-                    'flex w-full items-center justify-between rounded-xl p-3',
-                    'bg-neutral-50 dark:bg-neutral-800/50',
-                    'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                )}
-            >
-                <div className="flex items-center gap-2">
-                    <RefreshCw className="size-5 text-brand-500" />
-                    <span className="font-medium text-neutral-900 dark:text-white">
-                        Wiederkehrende Aufgaben
+        <CollapsibleSection
+            icon={<RefreshCw className="size-5 text-brand-500" />}
+            title="Wiederkehrende Aufgaben"
+            badge={
+                templates.length > 0 ? (
+                    <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
+                        {templates.length}
                     </span>
-                    {templates.length > 0 && (
-                        <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
-                            {templates.length}
-                        </span>
-                    )}
+                ) : undefined
+            }
+            expanded={expanded}
+            onExpandedChange={setExpanded}
+        >
+            {isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                    <Loader2 className="size-5 animate-spin text-neutral-400" />
                 </div>
-                {expanded ? (
-                    <ChevronUp className="size-5 text-neutral-500" />
-                ) : (
-                    <ChevronDown className="size-5 text-neutral-500" />
-                )}
-            </button>
-
-            {expanded && (
-                <div className="mt-3 space-y-3">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-4">
-                            <Loader2 className="size-5 animate-spin text-neutral-400" />
-                        </div>
-                    ) : templates.length === 0 && !showForm ? (
-                        <div className="rounded-lg border border-dashed border-neutral-200 p-4 text-center dark:border-neutral-700">
-                            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                Keine wiederkehrenden Aufgaben
-                            </p>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowForm(true)}
-                                icon={<Plus className="size-4" />}
-                                className="mt-2"
-                            >
-                                Vorlage erstellen
-                            </Button>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Templates list */}
-                            {templates.map((template) => (
-                                <TemplateCard
-                                    key={template.id}
-                                    groupId={groupId}
-                                    template={template}
-                                    getMemberName={getMemberName}
-                                    getDueDayLabel={getDueDayLabel}
-                                    onToggle={() =>
-                                        toggleMutation.mutate(template.id)
-                                    }
-                                    onDelete={() =>
-                                        deleteMutation.mutate(template.id)
-                                    }
-                                    onGenerate={(assignedTo) =>
-                                        generateMutation.mutate({
-                                            templateId: template.id,
-                                            assignedTo,
-                                        })
-                                    }
-                                    onEdit={() => setEditingTemplate(template)}
-                                    isGenerating={generateMutation.isPending}
-                                />
-                            ))}
-
-                            {/* Add button */}
-                            {!showForm && (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setShowForm(true)}
-                                    icon={<Plus className="size-4" />}
-                                    className="w-full"
-                                >
-                                    Neue Vorlage
-                                </Button>
-                            )}
-                        </>
-                    )}
-
-                    {/* Create form */}
-                    {showForm && (
-                        <RecurringTaskForm
-                            members={members}
-                            onSubmit={(data) => createMutation.mutate(data)}
-                            onCancel={() => setShowForm(false)}
-                            isSubmitting={createMutation.isPending}
-                        />
-                    )}
-
-                    {/* Edit form */}
-                    {editingTemplate && (
-                        <RecurringTaskForm
-                            members={members}
-                            template={editingTemplate}
-                            onSubmit={async (data) => {
-                                try {
-                                    await recurringTasksApi.updateTemplate(
-                                        groupId,
-                                        editingTemplate.id,
-                                        data
-                                    )
-                                    queryClient.invalidateQueries({
-                                        queryKey: ['recurring-tasks', groupId],
-                                    })
-                                    setEditingTemplate(null)
-                                    toast.success('Vorlage aktualisiert!')
-                                } catch {
-                                    toast.error('Vorlage konnte nicht aktualisiert werden')
-                                }
-                            }}
-                            onCancel={() => setEditingTemplate(null)}
-                            isSubmitting={false}
-                        />
-                    )}
+            ) : templates.length === 0 && !showForm ? (
+                <div className="rounded-lg border border-dashed border-neutral-200 p-4 text-center dark:border-neutral-700">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Keine wiederkehrenden Aufgaben
+                    </p>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowForm(true)}
+                        icon={<Plus className="size-4" />}
+                        className="mt-2"
+                    >
+                        Vorlage erstellen
+                    </Button>
                 </div>
+            ) : (
+                <>
+                    {/* Templates list */}
+                    {templates.map((template) => (
+                        <TemplateCard
+                            key={template.id}
+                            groupId={groupId}
+                            template={template}
+                            getMemberName={getMemberName}
+                            getDueDayLabel={getDueDayLabel}
+                            onToggle={() =>
+                                toggleMutation.mutate(template.id)
+                            }
+                            onDelete={() =>
+                                deleteMutation.mutate(template.id)
+                            }
+                            onGenerate={(assignedTo) =>
+                                generateMutation.mutate({
+                                    templateId: template.id,
+                                    assignedTo,
+                                })
+                            }
+                            onEdit={() => setEditingTemplate(template)}
+                            isGenerating={generateMutation.isPending}
+                        />
+                    ))}
+
+                    {/* Add button */}
+                    {!showForm && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowForm(true)}
+                            icon={<Plus className="size-4" />}
+                            className="w-full"
+                        >
+                            Neue Vorlage
+                        </Button>
+                    )}
+                </>
             )}
-        </div>
+
+            {/* Create form */}
+            {showForm && (
+                <RecurringTaskForm
+                    members={members}
+                    onSubmit={(data) => createMutation.mutate(data)}
+                    onCancel={() => setShowForm(false)}
+                    isSubmitting={createMutation.isPending}
+                />
+            )}
+
+            {/* Edit form */}
+            {editingTemplate && (
+                <RecurringTaskForm
+                    members={members}
+                    template={editingTemplate}
+                    onSubmit={async (data) => {
+                        try {
+                            await recurringTasksApi.updateTemplate(
+                                groupId,
+                                editingTemplate.id,
+                                data
+                            )
+                            queryClient.invalidateQueries({
+                                queryKey: ['recurring-tasks', groupId],
+                            })
+                            setEditingTemplate(null)
+                            toast.success('Vorlage aktualisiert!')
+                        } catch {
+                            toast.error('Vorlage konnte nicht aktualisiert werden')
+                        }
+                    }}
+                    onCancel={() => setEditingTemplate(null)}
+                    isSubmitting={false}
+                />
+            )}
+        </CollapsibleSection>
     )
 }
 
@@ -386,54 +367,35 @@ const TemplateCard = ({
                     </div>
                 </div>
                 <div className="flex gap-1">
-                    <button
+                    <IconButton
+                        icon={<Paperclip className="size-4" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setShowAttachments(!showAttachments)}
-                        className={cn(
-                            'rounded-lg p-1.5 transition-colors',
-                            'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                            attachments.length > 0 && 'text-brand-500'
-                        )}
-                        title="Anhänge"
-                    >
-                        <Paperclip className="size-4" />
-                        {attachments.length > 0 && (
-                            <span className="sr-only">{attachments.length} Anhänge</span>
-                        )}
-                    </button>
-                    <button
+                        className={cn(attachments.length > 0 && 'text-brand-500')}
+                        aria-label={`Anhänge${attachments.length > 0 ? ` (${attachments.length})` : ''}`}
+                    />
+                    <IconButton
+                        icon={template.isActive ? <Pause className="size-4" /> : <Play className="size-4 text-brand-500" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={onToggle}
-                        className={cn(
-                            'rounded-lg p-1.5 transition-colors',
-                            'hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                        )}
-                        title={template.isActive ? 'Deaktivieren' : 'Aktivieren'}
-                    >
-                        {template.isActive ? (
-                            <Pause className="size-4 text-neutral-500" />
-                        ) : (
-                            <Play className="size-4 text-brand-500" />
-                        )}
-                    </button>
-                    <button
+                        aria-label={template.isActive ? 'Deaktivieren' : 'Aktivieren'}
+                    />
+                    <IconButton
+                        icon={<Edit2 className="size-4" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={onEdit}
-                        className={cn(
-                            'rounded-lg p-1.5 transition-colors',
-                            'hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                        )}
-                        title="Bearbeiten"
-                    >
-                        <Edit2 className="size-4 text-neutral-500" />
-                    </button>
-                    <button
+                        aria-label="Bearbeiten"
+                    />
+                    <IconButton
+                        icon={<Trash2 className="size-4 text-error-500" />}
+                        variant="ghost"
+                        size="sm"
                         onClick={onDelete}
-                        className={cn(
-                            'rounded-lg p-1.5 transition-colors',
-                            'hover:bg-error-50 dark:hover:bg-error-900/20'
-                        )}
-                        title="Löschen"
-                    >
-                        <Trash2 className="size-4 text-error-500" />
-                    </button>
+                        aria-label="Löschen"
+                    />
                 </div>
             </div>
 

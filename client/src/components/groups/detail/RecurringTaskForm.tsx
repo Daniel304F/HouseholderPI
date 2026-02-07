@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
-import { Button, Input } from '../../common'
+import { Button, Input, IconButton } from '../../common'
+import { ToggleButton } from '../../ui'
 import type {
     RecurringTaskTemplate,
     CreateRecurringTaskInput,
@@ -135,13 +136,13 @@ export const RecurringTaskForm = ({
                 <h4 className="font-medium text-neutral-900 dark:text-white">
                     {template ? 'Vorlage bearbeiten' : 'Neue Vorlage'}
                 </h4>
-                <button
-                    type="button"
+                <IconButton
+                    icon={<X className="size-4" />}
+                    variant="ghost"
+                    size="sm"
                     onClick={onCancel}
-                    className="rounded p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                >
-                    <X className="size-4 text-neutral-500" />
-                </button>
+                    aria-label="Schließen"
+                />
             </div>
 
             <div className="space-y-4">
@@ -179,19 +180,14 @@ export const RecurringTaskForm = ({
                     </label>
                     <div className="flex gap-2">
                         {PRIORITIES.map((p) => (
-                            <button
+                            <ToggleButton
                                 key={p.value}
-                                type="button"
+                                selected={priority === p.value}
                                 onClick={() => setPriority(p.value)}
-                                className={cn(
-                                    'flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                                    priority === p.value
-                                        ? 'bg-brand-500 text-white'
-                                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300'
-                                )}
+                                className="flex-1"
                             >
                                 {p.label}
-                            </button>
+                            </ToggleButton>
                         ))}
                     </div>
                 </div>
@@ -247,20 +243,15 @@ export const RecurringTaskForm = ({
                         <div className="space-y-2">
                             <div className="flex flex-wrap gap-2">
                                 {WEEKDAYS.map((day) => (
-                                    <button
+                                    <ToggleButton
                                         key={day.value}
-                                        type="button"
+                                        selected={dueDays.includes(day.value)}
                                         onClick={() => toggleWeekday(day.value)}
                                         title={day.fullLabel}
-                                        className={cn(
-                                            'flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors',
-                                            dueDays.includes(day.value)
-                                                ? 'bg-brand-500 text-white'
-                                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
-                                        )}
+                                        className="flex size-10 items-center justify-center px-0"
                                     >
                                         {day.label}
-                                    </button>
+                                    </ToggleButton>
                                 ))}
                             </div>
                             {dueDays.length === 0 && (
@@ -283,30 +274,20 @@ export const RecurringTaskForm = ({
                         Zuweisung
                     </label>
                     <div className="flex gap-2">
-                        <button
-                            type="button"
+                        <ToggleButton
+                            selected={assignmentStrategy === 'rotation'}
                             onClick={() => setAssignmentStrategy('rotation')}
-                            className={cn(
-                                'flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                                assignmentStrategy === 'rotation'
-                                    ? 'bg-brand-500 text-white'
-                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300'
-                            )}
+                            className="flex-1"
                         >
                             Rotation
-                        </button>
-                        <button
-                            type="button"
+                        </ToggleButton>
+                        <ToggleButton
+                            selected={assignmentStrategy === 'fixed'}
                             onClick={() => setAssignmentStrategy('fixed')}
-                            className={cn(
-                                'flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                                assignmentStrategy === 'fixed'
-                                    ? 'bg-brand-500 text-white'
-                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300'
-                            )}
+                            className="flex-1"
                         >
                             Feste Person
-                        </button>
+                        </ToggleButton>
                     </div>
                 </div>
 
