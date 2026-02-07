@@ -9,11 +9,11 @@ import {
     Loader2,
     ChevronDown,
 } from 'lucide-react'
-import { cn } from '../../utils/cn'
 import { statisticsApi, type ActivityFilter } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
 import { ActivityLogItem } from './ActivityLogItem'
 import { Button } from '../common'
+import { ToggleButton } from '../ui'
 
 interface FilterOption {
     value: ActivityFilter
@@ -54,25 +54,19 @@ export const ActivityLog = () => {
             <div className="flex flex-wrap gap-2">
                 {ACTIVITY_FILTERS.map((option) => {
                     const Icon = option.icon
-                    const isActive = filter === option.value
-
                     return (
-                        <button
+                        <ToggleButton
                             key={option.value}
+                            selected={filter === option.value}
                             onClick={() => {
                                 setFilter(option.value)
                                 setLimit(PAGE_SIZE)
                             }}
-                            className={cn(
-                                'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
-                                isActive
-                                    ? 'bg-brand-500 text-white'
-                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
-                            )}
+                            className="flex items-center gap-1.5 rounded-full"
                         >
                             <Icon className="size-4" />
                             {option.label}
-                        </button>
+                        </ToggleButton>
                     )
                 })}
             </div>

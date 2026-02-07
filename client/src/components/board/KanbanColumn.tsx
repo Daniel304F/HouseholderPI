@@ -1,5 +1,6 @@
 import { MoreHorizontal, Plus } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { IconButton } from '../common/IconButton'
 import { KanbanCard } from './KanbanCard'
 import { PriorityFilterDropdown } from './PriorityFilterDropdown'
 import type { Task } from '../../api/tasks'
@@ -150,17 +151,12 @@ export const KanbanColumn = ({
                                     hasActiveFilters={hasActiveFilters}
                                 />
                             )}
-                            <button
-                                className={cn(
-                                    'rounded-lg p-1.5 transition-all duration-200',
-                                    'text-neutral-400 hover:text-neutral-600',
-                                    'dark:text-neutral-500 dark:hover:text-neutral-300',
-                                    'hover:bg-white/70 dark:hover:bg-neutral-800/70',
-                                    'active:scale-90'
-                                )}
-                            >
-                                <MoreHorizontal className="size-4" />
-                            </button>
+                            <IconButton
+                                icon={<MoreHorizontal className="size-4" />}
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Weitere Optionen"
+                            />
                         </div>
                     )}
                 </div>

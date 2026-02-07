@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { IconButton } from '../common/IconButton'
 import type { ColumnStatus } from './KanbanColumn'
 
 interface Column {
@@ -50,19 +51,14 @@ export const ColumnSelector = ({
         <div className="flex flex-col gap-2">
             {/* Column Navigation with Arrows */}
             <div className="flex items-center justify-between gap-2">
-                <button
+                <IconButton
+                    icon={<ChevronLeft className="size-5" />}
+                    variant="ghost"
+                    size="sm"
                     onClick={goToPrevious}
                     disabled={currentIndex === 0}
-                    className={cn(
-                        'rounded-lg p-2 transition-colors',
-                        'text-neutral-600 dark:text-neutral-400',
-                        'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                        'disabled:cursor-not-allowed disabled:opacity-30'
-                    )}
                     aria-label="Vorherige Spalte"
-                >
-                    <ChevronLeft className="size-5" />
-                </button>
+                />
 
                 {/* Current Column Info */}
                 <div
@@ -91,19 +87,14 @@ export const ColumnSelector = ({
                     </span>
                 </div>
 
-                <button
+                <IconButton
+                    icon={<ChevronRight className="size-5" />}
+                    variant="ghost"
+                    size="sm"
                     onClick={goToNext}
                     disabled={currentIndex === columns.length - 1}
-                    className={cn(
-                        'rounded-lg p-2 transition-colors',
-                        'text-neutral-600 dark:text-neutral-400',
-                        'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                        'disabled:cursor-not-allowed disabled:opacity-30'
-                    )}
                     aria-label="Nächste Spalte"
-                >
-                    <ChevronRight className="size-5" />
-                </button>
+                />
             </div>
 
             {/* Column Dots/Pills Indicator */}
