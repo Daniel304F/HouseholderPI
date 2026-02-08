@@ -7,7 +7,20 @@ interface ContributionGraphProps {
     className?: string
 }
 
-const MONTHS_DE = ['Jan', 'Feb', 'Maer', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+const MONTHS_DE = [
+    'Jan',
+    'Feb',
+    'Maer',
+    'Apr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Dez',
+]
 
 // GitHub-style color levels
 const LEVEL_COLORS = {
@@ -22,16 +35,23 @@ const LEVEL_COLORS = {
 const CELL_SIZE = 11
 const CELL_GAP = 3
 
-export const ContributionGraph = ({ data, className }: ContributionGraphProps) => {
+export const ContributionGraph = ({
+    data,
+    className,
+}: ContributionGraphProps) => {
     const [hoveredDay, setHoveredDay] = useState<DailyActivity | null>(null)
     const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
 
     const availableYears = useMemo(() => {
-        const years = Array.from(new Set(data.map((entry) => new Date(entry.date).getFullYear())))
+        const years = Array.from(
+            new Set(data.map((entry) => new Date(entry.date).getFullYear()))
+        )
         return years.sort((a, b) => b - a)
     }, [data])
 
-    const [selectedYear, setSelectedYear] = useState<number | null>(availableYears[0] ?? null)
+    const [selectedYear, setSelectedYear] = useState<number | null>(
+        availableYears[0] ?? null
+    )
 
     useEffect(() => {
         if (!availableYears.length) {
@@ -84,7 +104,11 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
 
             if (isInSelectedYear) {
                 const dateStr = current.toISOString().split('T')[0]
-                const dayData = dataMap.get(dateStr) || { date: dateStr, count: 0, level: 0 as const }
+                const dayData = dataMap.get(dateStr) || {
+                    date: dateStr,
+                    count: 0,
+                    level: 0 as const,
+                }
 
                 currentWeek.push(dayData)
                 total += dayData.count
@@ -117,7 +141,10 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
         return { weeks, monthLabels: monthPositions, totalCount: total }
     }, [data, selectedYear])
 
-    const handleMouseEnter = (day: DailyActivity, event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseEnter = (
+        day: DailyActivity,
+        event: React.MouseEvent<HTMLDivElement>
+    ) => {
         const rect = event.currentTarget.getBoundingClientRect()
         setHoveredDay(day)
         setTooltipPos({
@@ -144,7 +171,12 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
 
     if (!availableYears.length || selectedYear === null) {
         return (
-            <div className={cn('rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400', className)}>
+            <div
+                className={cn(
+                    'rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400',
+                    className
+                )}
+            >
                 Keine Aktivitaetsdaten verfuegbar.
             </div>
         )
@@ -153,7 +185,9 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
     return (
         <div className={cn('relative', className)}>
             <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Contribution Graph</span>
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Contribution Graph
+                </span>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                     {availableYears.map((year) => (
                         <button
@@ -178,13 +212,16 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
                     className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full"
                     style={{ left: tooltipPos.x, top: tooltipPos.y }}
                 >
-                    <div className="whitespace-nowrap rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs text-white shadow-lg dark:bg-neutral-950">
+                    <div className="rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg dark:bg-neutral-950">
                         <span className="font-semibold">
                             {hoveredDay.count === 0
-                                ? 'Keine Aktivitaeten'
+                                ? 'Keine Aktivitäten'
                                 : `${hoveredDay.count} Aktivitaet${hoveredDay.count !== 1 ? 'en' : ''}`}
                         </span>
-                        <span className="text-neutral-400"> am {formatDate(hoveredDay.date)}</span>
+                        <span className="text-neutral-400">
+                            {' '}
+                            am {formatDate(hoveredDay.date)}
+                        </span>
                     </div>
                     <div className="mx-auto h-2 w-2 -translate-y-[3px] rotate-45 bg-neutral-800 dark:bg-neutral-950" />
                 </div>
@@ -215,15 +252,24 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
                             style={{ gap: `${CELL_GAP}px` }}
                         >
                             <div style={{ height: CELL_SIZE }} />
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                            <div
+                                className="flex items-center"
+                                style={{ height: CELL_SIZE }}
+                            >
                                 Mo
                             </div>
                             <div style={{ height: CELL_SIZE }} />
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                            <div
+                                className="flex items-center"
+                                style={{ height: CELL_SIZE }}
+                            >
                                 Mi
                             </div>
                             <div style={{ height: CELL_SIZE }} />
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                            <div
+                                className="flex items-center"
+                                style={{ height: CELL_SIZE }}
+                            >
                                 Fr
                             </div>
                             <div style={{ height: CELL_SIZE }} />
@@ -231,13 +277,19 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
 
                         <div className="flex" style={{ gap: `${CELL_GAP}px` }}>
                             {weeks.map((week, weekIndex) => (
-                                <div key={weekIndex} className="flex flex-col" style={{ gap: `${CELL_GAP}px` }}>
+                                <div
+                                    key={weekIndex}
+                                    className="flex flex-col"
+                                    style={{ gap: `${CELL_GAP}px` }}
+                                >
                                     {week.map((day, dayIndex) => (
                                         <div
                                             key={`${weekIndex}-${dayIndex}`}
                                             className={cn(
                                                 'rounded-sm',
-                                                day ? LEVEL_COLORS[day.level] : 'bg-transparent',
+                                                day
+                                                    ? LEVEL_COLORS[day.level]
+                                                    : 'bg-transparent',
                                                 day &&
                                                     'cursor-pointer hover:ring-1 hover:ring-neutral-400 hover:ring-offset-1 dark:hover:ring-neutral-500'
                                             )}
@@ -245,8 +297,20 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
                                                 width: CELL_SIZE,
                                                 height: CELL_SIZE,
                                             }}
-                                            onMouseEnter={day ? (e) => handleMouseEnter(day, e) : undefined}
-                                            onMouseLeave={day ? handleMouseLeave : undefined}
+                                            onMouseEnter={
+                                                day
+                                                    ? (e) =>
+                                                          handleMouseEnter(
+                                                              day,
+                                                              e
+                                                          )
+                                                    : undefined
+                                            }
+                                            onMouseLeave={
+                                                day
+                                                    ? handleMouseLeave
+                                                    : undefined
+                                            }
                                         />
                                     ))}
                                 </div>
@@ -258,7 +322,8 @@ export const ContributionGraph = ({ data, className }: ContributionGraphProps) =
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600 dark:text-neutral-400">
                 <span>
-                    {totalCount.toLocaleString('de-DE')} Aktivitaeten in {selectedYear}
+                    {totalCount.toLocaleString('de-DE')} Aktivitäten in{' '}
+                    {selectedYear}
                 </span>
                 <div className="flex items-center gap-1">
                     <span className="mr-1">Weniger</span>

@@ -1,6 +1,6 @@
 /**
- * Zentralisierte Query Key Factory für React Query
- * Ermöglicht konsistente Cache-Invalidierung und -Zugriff
+ * Zentralisierte Query Key Factory fuer React Query
+ * Ermoeglicht konsistente Cache-Invalidierung und -Zugriff
  */
 export const queryKeys = {
     // Friends
@@ -27,8 +27,8 @@ export const queryKeys = {
         personal: ['personalStatistics'] as const,
         group: (groupId: string) => ['groupStatistics', groupId] as const,
         activityHeatmap: ['activityHeatmap'] as const,
-        activityLog: (filter: string, limit: number) =>
-            ['activityLog', filter, limit] as const,
+        activityLog: (filter: string, page: number, pageSize: number) =>
+            ['activityLog', filter, page, pageSize] as const,
     },
 
     // User

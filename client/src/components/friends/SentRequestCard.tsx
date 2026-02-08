@@ -2,7 +2,12 @@ import { Clock } from 'lucide-react'
 import type { SentRequest } from '../../api/friends'
 import { cn } from '../../utils/cn'
 import { Button } from '../common'
-import { formatDate, getInitials, requestAvatarStyles, requestCardStyles } from './friends.utils'
+import {
+    formatDate,
+    getInitials,
+    requestAvatarStyles,
+    requestCardStyles,
+} from './friends.utils'
 
 interface SentRequestCardProps {
     request: SentRequest
@@ -63,7 +68,7 @@ export const SentRequestCard = ({
                 disabled={isLoading}
                 className="text-neutral-500 hover:text-red-600 dark:hover:text-red-400"
             >
-                Zurueckziehen
+                Zurückziehen
             </Button>
         </div>
     )

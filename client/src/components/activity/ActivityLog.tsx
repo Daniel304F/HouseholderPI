@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
     Activity,
@@ -7,7 +7,8 @@ import {
     Pencil,
     CheckCircle2,
     Loader2,
-    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-react'
 import { statisticsApi, type ActivityFilter } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
@@ -33,24 +34,51 @@ const PAGE_SIZE = 10
 
 export const ActivityLog = () => {
     const [filter, setFilter] = useState<ActivityFilter>('all')
-    const [limit, setLimit] = useState(PAGE_SIZE)
+    const [page, setPage] = useState(1)
+
+    const offset = (page - 1) * PAGE_SIZE
 
     const { data, isLoading, isFetching } = useQuery({
-        queryKey: queryKeys.statistics.activityLog(filter, limit),
-        queryFn: () => statisticsApi.getActivityLog(filter, limit, 0),
+        queryKey: queryKeys.statistics.activityLog(filter, page, PAGE_SIZE),
+        queryFn: () => statisticsApi.getActivityLog(filter, PAGE_SIZE, offset),
     })
 
     const activities = data?.activities ?? []
     const total = data?.meta.total ?? 0
-    const hasMore = activities.length < total
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-    const handleLoadMore = () => {
-        setLimit((prev) => prev + PAGE_SIZE)
+    const canGoPrev = page > 1
+    const canGoNext = page < totalPages
+
+    const pageInfo = useMemo(() => {
+        if (!total) {
+            return '0 von 0'
+        }
+
+        const start = offset + 1
+        const end = Math.min(offset + activities.length, total)
+        return `${start}-${end} von ${total}`
+    }, [activities.length, offset, total])
+
+    const handleFilterChange = (nextFilter: ActivityFilter) => {
+        setFilter(nextFilter)
+        setPage(1)
+    }
+
+    const handlePrevPage = () => {
+        if (canGoPrev) {
+            setPage((prev) => prev - 1)
+        }
+    }
+
+    const handleNextPage = () => {
+        if (canGoNext) {
+            setPage((prev) => prev + 1)
+        }
     }
 
     return (
         <div className="space-y-4">
-            {/* Filter Pills */}
             <div className="flex flex-wrap gap-2">
                 {ACTIVITY_FILTERS.map((option) => {
                     const Icon = option.icon
@@ -58,10 +86,7 @@ export const ActivityLog = () => {
                         <ToggleButton
                             key={option.value}
                             selected={filter === option.value}
-                            onClick={() => {
-                                setFilter(option.value)
-                                setLimit(PAGE_SIZE)
-                            }}
+                            onClick={() => handleFilterChange(option.value)}
                             className="flex items-center gap-1.5 rounded-full"
                         >
                             <Icon className="size-4" />
@@ -71,7 +96,6 @@ export const ActivityLog = () => {
                 })}
             </div>
 
-            {/* Activity List */}
             <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
@@ -79,33 +103,45 @@ export const ActivityLog = () => {
                     </div>
                 ) : activities.length === 0 ? (
                     <div className="py-8 text-center text-neutral-500 dark:text-neutral-400">
-                        Noch keine Aktivitäten vorhanden
+                        Noch keine Aktivitaeten vorhanden
                     </div>
                 ) : (
                     activities.map((activity) => (
-                        <ActivityLogItem key={activity.id} activity={activity} />
+                        <ActivityLogItem
+                            key={activity.id}
+                            activity={activity}
+                        />
                     ))
                 )}
             </div>
 
-            {/* Load More */}
-            {hasMore && !isLoading && (
-                <div className="flex justify-center pt-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleLoadMore}
-                        disabled={isFetching}
-                        icon={
-                            isFetching ? (
-                                <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                                <ChevronDown className="size-4" />
-                            )
-                        }
-                    >
-                        {isFetching ? 'Laden...' : 'Mehr laden'}
-                    </Button>
+            {!isLoading && total > PAGE_SIZE && (
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Seite {page} von {totalPages} ({pageInfo})
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handlePrevPage}
+                            disabled={!canGoPrev || isFetching}
+                            icon={<ChevronLeft className="size-4" />}
+                        >
+                            Zurück
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleNextPage}
+                            disabled={!canGoNext || isFetching}
+                            icon={<ChevronRight className="size-4" />}
+                            iconPosition="right"
+                        >
+                            Weiter
+                        </Button>
+                    </div>
                 </div>
             )}
         </div>
