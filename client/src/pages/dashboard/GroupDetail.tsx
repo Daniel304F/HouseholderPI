@@ -1,41 +1,35 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-    LayoutGrid,
-    MessageSquare,
-    Calendar as CalendarIcon,
-    Archive,
-} from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { Archive, Calendar as CalendarIcon, LayoutGrid, MessageSquare } from 'lucide-react'
 import { groupsApi } from '../../api/groups'
-import { tasksApi, type Task } from '../../api/tasks'
 import { recurringTasksApi, type RecurringTaskTemplate } from '../../api/recurringTasks'
-import { cn } from '../../utils/cn'
+import { tasksApi, type Task } from '../../api/tasks'
+import type { ColumnStatus } from '../../components/board'
+import { Tabs, type Tab } from '../../components/display'
 import { GroupDetailModal } from '../../components/groups'
 import {
-    PageSkeleton,
     ErrorState,
     PageHeader,
+    PageSkeleton,
     Toolbar,
     type MemberInfo,
 } from '../../components/groups/detail'
-import { Tabs, type Tab } from '../../components/display'
-import { KanbanBoard, ArchivedTasksList, type ColumnStatus } from '../../components/board'
-import { TaskCalendar, RecurringTaskModal } from '../../components/calendar'
-import { GroupChat } from '../../components/chat'
-import { useAuth } from '../../contexts/AuthContext'
-import { useToast } from '../../contexts/ToastContext'
-import { useViewport } from '../../hooks/useViewport'
 import {
     CreateTaskModal,
     EditTaskModal,
     TaskDetailView,
     type CreateTaskData,
 } from '../../components/tasks'
-import { useTaskMutations } from '../../hooks/useTaskMutations'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { useTaskModal } from '../../hooks/useTaskModal'
-
-type TabId = 'board' | 'calendar' | 'messages' | 'archive'
+import { useTaskMutations } from '../../hooks/useTaskMutations'
+import { useViewport } from '../../hooks/useViewport'
+import {
+    GroupDetailContent,
+    type GroupDetailTabId,
+} from './GroupDetailContent'
 
 const getTabs = (isDesktop: boolean): Tab[] => [
     { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
@@ -68,14 +62,12 @@ export const GroupDetail = () => {
     const queryClient = useQueryClient()
     const { isDesktop } = useViewport()
 
-    // State
-    const [activeTab, setActiveTab] = useState<TabId>('board')
+    const [activeTab, setActiveTab] = useState<GroupDetailTabId>('board')
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedMembers, setSelectedMembers] = useState<string[]>([])
     const [selectedPriorities, setSelectedPriorities] = useState<string[]>([])
     const [selectedRecurring, setSelectedRecurring] = useState<RecurringTaskTemplate | null>(null)
 
-    // Modal state
     const {
         selectedTask,
         taskToEdit,
@@ -93,7 +85,6 @@ export const GroupDetail = () => {
         editFromDetail,
     } = useTaskModal<Task>()
 
-    // Queries
     const {
         data: group,
         isLoading,
@@ -123,7 +114,6 @@ export const GroupDetail = () => {
         enabled: !!groupId && activeTab === 'archive',
     })
 
-    // Mutations
     const { createTask, updateTask, deleteTask } = useTaskMutations({
         groupId,
         onCreateSuccess: () => {
@@ -136,13 +126,13 @@ export const GroupDetail = () => {
         },
         onDeleteSuccess: () => {
             closeEditModal()
-            toast.success('Aufgabe erfolgreich gelöscht')
+            toast.success('Aufgabe erfolgreich geloescht')
         },
         onError: (_error, action) => {
             const messages = {
                 create: 'Aufgabe konnte nicht erstellt werden',
                 update: 'Aufgabe konnte nicht aktualisiert werden',
-                delete: 'Aufgabe konnte nicht gelöscht werden',
+                delete: 'Aufgabe konnte nicht geloescht werden',
             }
             toast.error(messages[action])
         },
@@ -160,15 +150,14 @@ export const GroupDetail = () => {
         },
     })
 
-    // Derived state
     const tabs = useMemo(() => getTabs(isDesktop), [isDesktop])
 
     const members: MemberInfo[] = useMemo(
         () =>
-            group?.members.map((m) => ({
-                userId: m.userId,
-                name: m.userName || m.userId,
-                avatar: m.userAvatar,
+            group?.members.map((member) => ({
+                userId: member.userId,
+                name: member.userName || member.userId,
+                avatar: member.userAvatar,
             })) || [],
         [group?.members]
     )
@@ -193,14 +182,8 @@ export const GroupDetail = () => {
         [tasks, selectedMembers, selectedPriorities]
     )
 
-    const currentMember = group?.members.find((m) => m.userId === user?.id)
-    const isAdmin =
-        currentMember?.role === 'owner' || currentMember?.role === 'admin'
-
-    // Handlers
-    const handleTaskClick = (task: Task) => openTaskDetail(task)
-    const handleRecurringClick = (template: RecurringTaskTemplate) => setSelectedRecurring(template)
-    const handleAddTask = (status: ColumnStatus) => openCreateModal(status)
+    const currentMember = group?.members.find((member) => member.userId === user?.id)
+    const isAdmin = currentMember?.role === 'owner' || currentMember?.role === 'admin'
 
     const handleCreateTask = async (data: CreateTaskData) => {
         await createTask.mutateAsync(data)
@@ -218,18 +201,16 @@ export const GroupDetail = () => {
         await updateTask.mutateAsync({ taskId, data: { status: newStatus } })
     }
 
-    const handleArchiveCompleted = () => archiveCompleted.mutate()
-
     const toggleMember = (id: string) => {
         setSelectedMembers((prev) =>
-            prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+            prev.includes(id) ? prev.filter((memberId) => memberId !== id) : [...prev, id]
         )
     }
 
     const togglePriority = (priority: string) => {
         setSelectedPriorities((prev) =>
             prev.includes(priority)
-                ? prev.filter((p) => p !== priority)
+                ? prev.filter((item) => item !== priority)
                 : [...prev, priority]
         )
     }
@@ -239,19 +220,14 @@ export const GroupDetail = () => {
         setSelectedPriorities([])
     }
 
-    // Loading state
     if (isLoading) return <PageSkeleton />
 
-    // Error state
     if (isError || !group) {
-        return (
-            <ErrorState onBack={() => navigate(-1)} onRetry={() => refetch()} />
-        )
+        return <ErrorState onBack={() => navigate(-1)} onRetry={() => refetch()} />
     }
 
     return (
         <div className="flex h-full flex-col gap-6">
-            {/* Header */}
             <PageHeader
                 group={group}
                 groupId={groupId!}
@@ -260,19 +236,17 @@ export const GroupDetail = () => {
                 onSettings={openSettingsModal}
             />
 
-            {/* Tabs */}
             <Tabs
                 tabs={tabs}
                 activeTab={activeTab}
-                onTabChange={(id) => setActiveTab(id as TabId)}
+                onTabChange={(id) => setActiveTab(id as GroupDetailTabId)}
             />
 
-            {/* Toolbar - nur im Board-Tab */}
             {activeTab === 'board' && (
                 <Toolbar
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
-                    onAddTask={() => handleAddTask('pending')}
+                    onAddTask={() => openCreateModal('pending')}
                     members={members}
                     selectedMembers={selectedMembers}
                     onMemberToggle={toggleMember}
@@ -282,8 +256,7 @@ export const GroupDetail = () => {
                 />
             )}
 
-            {/* Content */}
-            <ContentArea
+            <GroupDetailContent
                 activeTab={activeTab}
                 isDesktop={isDesktop}
                 groupId={groupId}
@@ -291,16 +264,17 @@ export const GroupDetail = () => {
                 recurringTasks={recurringTasks}
                 searchQuery={searchQuery}
                 members={members}
-                onTaskClick={handleTaskClick}
-                onRecurringClick={handleRecurringClick}
-                onAddTask={handleAddTask}
+                selectedRecurring={selectedRecurring}
+                onTaskClick={openTaskDetail}
+                onRecurringClick={setSelectedRecurring}
+                onRecurringClose={() => setSelectedRecurring(null)}
+                onAddTask={openCreateModal}
                 onTaskMove={handleTaskMove}
-                onArchiveCompleted={handleArchiveCompleted}
+                onArchiveCompleted={() => archiveCompleted.mutate()}
                 archivedTasks={archivedTasks}
                 isLoadingArchived={isLoadingArchived}
             />
 
-            {/* Modals */}
             <GroupDetailModal
                 group={showSettingsModal ? group : null}
                 onClose={closeSettingsModal}
@@ -335,109 +309,6 @@ export const GroupDetail = () => {
                 onDelete={handleDeleteTask}
                 members={group.members}
             />
-
-            {/* Recurring Task Detail Modal */}
-            {selectedRecurring && (
-                <RecurringTaskModal
-                    template={selectedRecurring}
-                    members={group.members}
-                    onClose={() => setSelectedRecurring(null)}
-                />
-            )}
         </div>
     )
 }
-
-interface ContentAreaProps {
-    activeTab: TabId
-    isDesktop: boolean
-    groupId: string | undefined
-    filteredTasks: Task[]
-    recurringTasks: RecurringTaskTemplate[]
-    searchQuery: string
-    members: MemberInfo[]
-    onTaskClick: (task: Task) => void
-    onRecurringClick: (template: RecurringTaskTemplate) => void
-    onAddTask: (status: ColumnStatus) => void
-    onTaskMove: (taskId: string, newStatus: ColumnStatus) => Promise<void>
-    onArchiveCompleted: () => void
-    archivedTasks: Task[]
-    isLoadingArchived: boolean
-}
-
-const ContentArea = ({
-    activeTab,
-    isDesktop,
-    groupId,
-    filteredTasks,
-    recurringTasks,
-    searchQuery,
-    members,
-    onTaskClick,
-    onRecurringClick,
-    onAddTask,
-    onTaskMove,
-    onArchiveCompleted,
-    archivedTasks,
-    isLoadingArchived,
-}: ContentAreaProps) => (
-    <main className="min-h-0 flex-1">
-        {activeTab === 'board' && (
-            <div
-                className={cn('h-full', isDesktop && 'grid grid-cols-3 gap-6')}
-            >
-                {/* Kanban Board - 2/3 */}
-                <div className={cn(isDesktop ? 'col-span-2' : 'h-full')}>
-                    <KanbanBoard
-                        tasks={filteredTasks}
-                        onTaskClick={onTaskClick}
-                        onAddTask={onAddTask}
-                        onTaskMove={onTaskMove}
-                        searchQuery={searchQuery}
-                        members={members}
-                        onArchiveCompleted={onArchiveCompleted}
-                    />
-                </div>
-
-                {/* Calendar Sidebar - 1/3 (nur Desktop) */}
-                {isDesktop && (
-                    <aside className="h-full overflow-auto rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900">
-                        <TaskCalendar
-                            tasks={filteredTasks}
-                            recurringTasks={recurringTasks}
-                            onTaskClick={onTaskClick}
-                            onRecurringClick={onRecurringClick}
-                        />
-                    </aside>
-                )}
-            </div>
-        )}
-
-        {activeTab === 'calendar' && !isDesktop && (
-            <TaskCalendar
-                tasks={filteredTasks}
-                recurringTasks={recurringTasks}
-                onTaskClick={onTaskClick}
-                onRecurringClick={onRecurringClick}
-                className="rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900"
-            />
-        )}
-
-        {activeTab === 'archive' && (
-            <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-neutral-900 sm:p-6">
-                <ArchivedTasksList
-                    tasks={archivedTasks}
-                    onTaskClick={onTaskClick}
-                    isLoading={isLoadingArchived}
-                />
-            </div>
-        )}
-
-        {activeTab === 'messages' && groupId && (
-            <div className="h-full rounded-xl bg-white shadow-sm dark:bg-neutral-900">
-                <GroupChat groupId={groupId} />
-            </div>
-        )}
-    </main>
-)
-

@@ -1,20 +1,57 @@
+import { lazy, Suspense, type ComponentType } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { Navigate } from 'react-router-dom'
+import { ScreenLoader } from './components/ui'
 import { AppLayout } from './layouts/AppLayout'
 import { DashboardLayout } from './layouts/DashboardLayout'
-import { Homepage } from './pages/Homepage'
-import { Login } from './pages/Login'
-import { Register } from './pages/Register'
-import { ProtectedRoute } from './pages/ProtectedRoute'
 import { GuestRoute } from './pages/GuestRoute'
-import { Groups } from './pages/dashboard/Groups'
-import { GroupDetail } from './pages/dashboard/GroupDetail'
-import { Friends } from './pages/dashboard/Friends'
-import { MyTasks } from './pages/dashboard/MyTasks'
-import { PersonalStats } from './pages/dashboard/PersonalStats'
-import { GroupStats } from './pages/dashboard/GroupStats'
-import { Settings } from './pages/dashboard/Settings'
-import { TaskHistory } from './pages/dashboard/TaskHistory'
+import { ProtectedRoute } from './pages/ProtectedRoute'
+
+const Homepage = lazy(() =>
+    import('./pages/Homepage').then((module) => ({ default: module.Homepage }))
+)
+const Login = lazy(() =>
+    import('./pages/Login').then((module) => ({ default: module.Login }))
+)
+const Register = lazy(() =>
+    import('./pages/Register').then((module) => ({ default: module.Register }))
+)
+const Groups = lazy(() =>
+    import('./pages/dashboard/Groups').then((module) => ({ default: module.Groups }))
+)
+const GroupDetail = lazy(() =>
+    import('./pages/dashboard/GroupDetail').then((module) => ({
+        default: module.GroupDetail,
+    }))
+)
+const Friends = lazy(() =>
+    import('./pages/dashboard/Friends').then((module) => ({ default: module.Friends }))
+)
+const MyTasks = lazy(() =>
+    import('./pages/dashboard/MyTasks').then((module) => ({ default: module.MyTasks }))
+)
+const PersonalStats = lazy(() =>
+    import('./pages/dashboard/PersonalStats').then((module) => ({
+        default: module.PersonalStats,
+    }))
+)
+const GroupStats = lazy(() =>
+    import('./pages/dashboard/GroupStats').then((module) => ({ default: module.GroupStats }))
+)
+const Settings = lazy(() =>
+    import('./pages/dashboard/Settings').then((module) => ({ default: module.Settings }))
+)
+const TaskHistory = lazy(() =>
+    import('./pages/dashboard/TaskHistory').then((module) => ({
+        default: module.TaskHistory,
+    }))
+)
+
+const renderLazyRoute = (Component: ComponentType) => (
+    <Suspense fallback={<ScreenLoader />}>
+        <Component />
+    </Suspense>
+)
 
 export const routes: RouteObject[] = [
     {
@@ -22,23 +59,15 @@ export const routes: RouteObject[] = [
         children: [
             {
                 path: '/',
-                element: <Homepage />,
+                element: renderLazyRoute(Homepage),
             },
             {
                 path: '/login',
-                element: (
-                    <GuestRoute>
-                        <Login />
-                    </GuestRoute>
-                ),
+                element: <GuestRoute>{renderLazyRoute(Login)}</GuestRoute>,
             },
             {
                 path: '/register',
-                element: (
-                    <GuestRoute>
-                        <Register />
-                    </GuestRoute>
-                ),
+                element: <GuestRoute>{renderLazyRoute(Register)}</GuestRoute>,
             },
             {
                 path: '/dashboard',
@@ -54,35 +83,35 @@ export const routes: RouteObject[] = [
                     },
                     {
                         path: 'tasks',
-                        element: <MyTasks />,
+                        element: renderLazyRoute(MyTasks),
                     },
                     {
                         path: 'groups',
-                        element: <Groups />,
+                        element: renderLazyRoute(Groups),
                     },
                     {
                         path: 'groups/:groupId',
-                        element: <GroupDetail />,
+                        element: renderLazyRoute(GroupDetail),
                     },
                     {
                         path: 'groups/:groupId/stats',
-                        element: <GroupStats />,
+                        element: renderLazyRoute(GroupStats),
                     },
                     {
                         path: 'friends',
-                        element: <Friends />,
+                        element: renderLazyRoute(Friends),
                     },
                     {
                         path: 'stats',
-                        element: <PersonalStats />,
+                        element: renderLazyRoute(PersonalStats),
                     },
                     {
                         path: 'settings',
-                        element: <Settings />,
+                        element: renderLazyRoute(Settings),
                     },
                     {
                         path: 'history',
-                        element: <TaskHistory />,
+                        element: renderLazyRoute(TaskHistory),
                     },
                 ],
             },
