@@ -1,7 +1,10 @@
 import { ChevronDown, Filter } from 'lucide-react'
 import { Button, SearchBar } from '../common'
 import { cn } from '../../utils/cn'
-import type { SortOption, StatusFilter } from '../../constants/myTasks.constants'
+import type {
+    SortOption,
+    StatusFilter,
+} from '../../constants/myTasks.constants'
 import { SORT_OPTIONS, STATUS_FILTERS } from './constants'
 
 interface FilterSectionProps {
@@ -37,13 +40,15 @@ export const FilterSection = ({
                             key={filter.value}
                             type="button"
                             onClick={() =>
-                                onStatusFilterChange(isActive ? null : filter.value)
+                                onStatusFilterChange(
+                                    isActive ? null : filter.value
+                                )
                             }
                             className={cn(
                                 'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all duration-200',
                                 isActive
-                                    ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm shadow-brand-500/15 dark:bg-brand-900/30 dark:text-brand-400'
-                                    : 'border-neutral-200 bg-white text-neutral-600 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-brand-600'
+                                    ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-brand-500/15 dark:bg-brand-900/30 dark:text-brand-400 shadow-sm'
+                                    : 'hover:border-brand-300 dark:hover:border-brand-600 border-neutral-200 bg-white text-neutral-600 hover:-translate-y-0.5 hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
                             )}
                         >
                             <Icon className="size-4" />
@@ -71,7 +76,7 @@ export const FilterSection = ({
                             'h-10 w-full min-w-44 appearance-none rounded-lg border py-2 pr-10 pl-4 shadow-sm transition-all sm:w-auto',
                             'border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white',
                             'hover:border-brand-300 dark:hover:border-brand-600',
-                            'focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20'
+                            'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2'
                         )}
                     >
                         {SORT_OPTIONS.map((option) => (
@@ -95,14 +100,6 @@ export const FilterSection = ({
                     Mehr Filter
                 </Button>
             </div>
-
-            {showFilters && (
-                <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Weitere Filter werden in Kuerze verfuegbar sein.
-                    </p>
-                </div>
-            )}
         </section>
     )
 }

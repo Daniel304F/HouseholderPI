@@ -1,5 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { TrendingUp, CheckCircle2, Clock, Target, Flame, Users } from 'lucide-react'
+import {
+    TrendingUp,
+    CheckCircle2,
+    Clock,
+    Target,
+    Flame,
+    Users,
+} from 'lucide-react'
 import {
     StatCard,
     BarChart,
@@ -25,7 +32,11 @@ import {
 } from '../../utils/stats.utils'
 
 export const PersonalStats = () => {
-    const { data: stats, isLoading, isError } = useQuery({
+    const {
+        data: stats,
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: queryKeys.statistics.personal,
         queryFn: () => statisticsApi.getPersonalStatistics(),
     })
@@ -64,7 +75,7 @@ export const PersonalStats = () => {
         <div className="space-y-6">
             <PageHeader
                 title="Meine Statistiken"
-                subtitle="Dein persoenlicher Fortschritt auf einen Blick"
+                subtitle="Dein persönlicher Fortschritt auf einen Blick"
                 badge={streakBadge}
             />
 

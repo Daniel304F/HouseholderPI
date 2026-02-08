@@ -4,9 +4,11 @@ import { PageIntro } from '../ui'
 export const PageHeader = () => {
     return (
         <PageIntro
-            title="Aufgaben-Historie"
-            description="Alle erledigten Aufgaben im Ueberblick"
-            icon={<History className="size-5 text-brand-600 dark:text-brand-400" />}
+            title="Deine Historie"
+            description="Alle erledigten Aufgaben im Überblick"
+            icon={
+                <History className="text-brand-600 dark:text-brand-400 size-5" />
+            }
         />
     )
 }

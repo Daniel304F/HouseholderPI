@@ -1,5 +1,8 @@
 import { Circle, Clock } from 'lucide-react'
-import type { SortOption, StatusFilter } from '../../constants/myTasks.constants'
+import type {
+    SortOption,
+    StatusFilter,
+} from '../../constants/myTasks.constants'
 
 export const STATUS_FILTERS: {
     value: StatusFilter
@@ -11,8 +14,8 @@ export const STATUS_FILTERS: {
 ]
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: 'dueDate', label: 'Faelligkeit' },
-    { value: 'priority', label: 'Prioritaet' },
+    { value: 'dueDate', label: 'Fälligkeit' },
+    { value: 'priority', label: 'Priorität' },
     { value: 'status', label: 'Status' },
     { value: 'groupName', label: 'Gruppe' },
 ]
