@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Calendar as CalendarIcon, LayoutGrid, MessageSquare } from 'lucide-react'
@@ -7,7 +7,6 @@ import { recurringTasksApi, type RecurringTaskTemplate } from '../../api/recurri
 import { tasksApi, type Task } from '../../api/tasks'
 import type { ColumnStatus } from '../../components/board'
 import { Tabs, type Tab } from '../../components/display'
-import { GroupDetailModal } from '../../components/groups'
 import {
     ErrorState,
     PageHeader,
@@ -15,12 +14,7 @@ import {
     Toolbar,
     type MemberInfo,
 } from '../../components/groups/detail'
-import {
-    CreateTaskModal,
-    EditTaskModal,
-    TaskDetailView,
-    type CreateTaskData,
-} from '../../components/tasks'
+import { type CreateTaskData } from '../../components/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useTaskModal } from '../../hooks/useTaskModal'
@@ -30,6 +24,31 @@ import {
     GroupDetailContent,
     type GroupDetailTabId,
 } from './GroupDetailContent'
+import { Skeleton } from '../../components/feedback'
+
+const GroupDetailModal = lazy(() =>
+    import('../../components/groups').then((module) => ({
+        default: module.GroupDetailModal,
+    }))
+)
+
+const CreateTaskModal = lazy(() =>
+    import('../../components/tasks').then((module) => ({
+        default: module.CreateTaskModal,
+    }))
+)
+
+const EditTaskModal = lazy(() =>
+    import('../../components/tasks').then((module) => ({
+        default: module.EditTaskModal,
+    }))
+)
+
+const TaskDetailView = lazy(() =>
+    import('../../components/tasks').then((module) => ({
+        default: module.TaskDetailView,
+    }))
+)
 
 const getTabs = (isDesktop: boolean): Tab[] => [
     { id: 'board', label: 'Board', icon: <LayoutGrid className="size-4" /> },
@@ -275,40 +294,48 @@ export const GroupDetail = () => {
                 isLoadingArchived={isLoadingArchived}
             />
 
-            <GroupDetailModal
-                group={showSettingsModal ? group : null}
-                onClose={closeSettingsModal}
-                onUpdated={() => {
-                    refetch()
-                    closeSettingsModal()
-                }}
-                currentUserId={user?.id || ''}
-            />
+            <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                <GroupDetailModal
+                    group={showSettingsModal ? group : null}
+                    onClose={closeSettingsModal}
+                    onUpdated={() => {
+                        refetch()
+                        closeSettingsModal()
+                    }}
+                    currentUserId={user?.id || ''}
+                />
+            </Suspense>
 
-            <CreateTaskModal
-                isOpen={showCreateModal}
-                onClose={closeCreateModal}
-                onSubmit={handleCreateTask}
-                initialStatus={initialStatus}
-                members={group.members}
-            />
+            <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                <CreateTaskModal
+                    isOpen={showCreateModal}
+                    onClose={closeCreateModal}
+                    onSubmit={handleCreateTask}
+                    initialStatus={initialStatus}
+                    members={group.members}
+                />
+            </Suspense>
 
             {showTaskDetail && selectedTask && groupId && (
-                <TaskDetailView
-                    groupId={groupId}
-                    taskId={selectedTask.id}
-                    onClose={closeTaskDetail}
-                    onEditClick={editFromDetail}
-                />
+                <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                    <TaskDetailView
+                        groupId={groupId}
+                        taskId={selectedTask.id}
+                        onClose={closeTaskDetail}
+                        onEditClick={editFromDetail}
+                    />
+                </Suspense>
             )}
 
-            <EditTaskModal
-                task={taskToEdit}
-                onClose={closeEditModal}
-                onSubmit={handleUpdateTask}
-                onDelete={handleDeleteTask}
-                members={group.members}
-            />
+            <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                <EditTaskModal
+                    task={taskToEdit}
+                    onClose={closeEditModal}
+                    onSubmit={handleUpdateTask}
+                    onDelete={handleDeleteTask}
+                    members={group.members}
+                />
+            </Suspense>
         </div>
     )
 }

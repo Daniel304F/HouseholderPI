@@ -1,4 +1,4 @@
-import { EditTaskModal, TaskDetailView } from '../../components/tasks'
+import { lazy, Suspense } from 'react'
 import {
     EmptyState,
     ErrorState,
@@ -10,6 +10,19 @@ import {
     TaskStatsGrid,
 } from '../../components/page-my-tasks'
 import { useMyTasksPage } from '../../hooks'
+import { Skeleton } from '../../components/feedback'
+
+const EditTaskModal = lazy(() =>
+    import('../../components/tasks').then((module) => ({
+        default: module.EditTaskModal,
+    }))
+)
+
+const TaskDetailView = lazy(() =>
+    import('../../components/tasks').then((module) => ({
+        default: module.TaskDetailView,
+    }))
+)
 
 export const MyTasks = () => {
     const {
@@ -48,57 +61,67 @@ export const MyTasks = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="ui-page-enter space-y-6">
             <PageHeader />
 
-            <TaskStatsGrid stats={stats} />
+            <section className="ui-panel ui-panel-hover p-4 sm:p-5">
+                <TaskStatsGrid stats={stats} />
+            </section>
 
-            <FilterSection
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                statusFilter={statusFilter}
-                onStatusFilterChange={setStatusFilter}
-                showFilters={showFilters}
-                onToggleFilters={toggleFilters}
-            />
+            <section className="ui-panel ui-focus-ring p-4 sm:p-5">
+                <FilterSection
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    statusFilter={statusFilter}
+                    onStatusFilterChange={setStatusFilter}
+                    showFilters={showFilters}
+                    onToggleFilters={toggleFilters}
+                />
+            </section>
 
-            {filteredTasks.length === 0 ? (
-                <EmptyState hasFilters={!!searchQuery || statusFilter !== null} />
-            ) : sortBy === 'groupName' ? (
-                <GroupedTaskList
-                    tasksByGroup={tasksByGroup}
-                    onTaskClick={handleTaskClick}
-                    onEditClick={handleEditClick}
-                    onComplete={handleCompleteTask}
-                />
-            ) : (
-                <FlatTaskList
-                    tasks={filteredTasks}
-                    onTaskClick={handleTaskClick}
-                    onEditClick={handleEditClick}
-                    onComplete={handleCompleteTask}
-                />
-            )}
+            <section className="ui-panel ui-panel-hover p-4 sm:p-5">
+                {filteredTasks.length === 0 ? (
+                    <EmptyState hasFilters={!!searchQuery || statusFilter !== null} />
+                ) : sortBy === 'groupName' ? (
+                    <GroupedTaskList
+                        tasksByGroup={tasksByGroup}
+                        onTaskClick={handleTaskClick}
+                        onEditClick={handleEditClick}
+                        onComplete={handleCompleteTask}
+                    />
+                ) : (
+                    <FlatTaskList
+                        tasks={filteredTasks}
+                        onTaskClick={handleTaskClick}
+                        onEditClick={handleEditClick}
+                        onComplete={handleCompleteTask}
+                    />
+                )}
+            </section>
 
             {selectedTask && (
-                <TaskDetailView
-                    groupId={selectedTask.groupId}
-                    taskId={selectedTask.id}
-                    onClose={closeTaskDetail}
-                    onEditClick={() => handleEditClick(selectedTask)}
-                />
+                <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                    <TaskDetailView
+                        groupId={selectedTask.groupId}
+                        taskId={selectedTask.id}
+                        onClose={closeTaskDetail}
+                        onEditClick={() => handleEditClick(selectedTask)}
+                    />
+                </Suspense>
             )}
 
             {taskToEdit && (
-                <EditTaskModal
-                    task={taskToEdit}
-                    onClose={closeEditModal}
-                    onSubmit={handleUpdateTask}
-                    onDelete={handleDeleteTask}
-                    members={groupMembers}
-                />
+                <Suspense fallback={<Skeleton height={320} className="rounded-xl" />}>
+                    <EditTaskModal
+                        task={taskToEdit}
+                        onClose={closeEditModal}
+                        onSubmit={handleUpdateTask}
+                        onDelete={handleDeleteTask}
+                        members={groupMembers}
+                    />
+                </Suspense>
             )}
         </div>
     )

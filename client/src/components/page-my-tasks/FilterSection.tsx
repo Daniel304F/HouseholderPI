@@ -40,10 +40,10 @@ export const FilterSection = ({
                                 onStatusFilterChange(isActive ? null : filter.value)
                             }
                             className={cn(
-                                'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all',
+                                'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all duration-200',
                                 isActive
-                                    ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
-                                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600'
+                                    ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm shadow-brand-500/15 dark:bg-brand-900/30 dark:text-brand-400'
+                                    : 'border-neutral-200 bg-white text-neutral-600 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-brand-600'
                             )}
                         >
                             <Icon className="size-4" />
@@ -68,8 +68,9 @@ export const FilterSection = ({
                             onSortChange(event.target.value as SortOption)
                         }
                         className={cn(
-                            'h-10 w-full min-w-44 appearance-none rounded-lg border py-2 pr-10 pl-4 sm:w-auto',
+                            'h-10 w-full min-w-44 appearance-none rounded-lg border py-2 pr-10 pl-4 shadow-sm transition-all sm:w-auto',
                             'border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white',
+                            'hover:border-brand-300 dark:hover:border-brand-600',
                             'focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20'
                         )}
                     >
@@ -85,7 +86,10 @@ export const FilterSection = ({
                 <Button
                     variant="secondary"
                     onClick={onToggleFilters}
-                    className={cn(showFilters && 'bg-brand-100 dark:bg-brand-900/30')}
+                    className={cn(
+                        'hover:-translate-y-0.5 hover:shadow-sm',
+                        showFilters && 'bg-brand-100 dark:bg-brand-900/30'
+                    )}
                 >
                     <Filter className="mr-2 size-4" />
                     Mehr Filter

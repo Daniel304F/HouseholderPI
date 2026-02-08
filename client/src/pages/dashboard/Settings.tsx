@@ -1,16 +1,37 @@
+import { lazy, Suspense } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../../components/common'
-import {
-    ProfileSection,
-    SecuritySection,
-    EmailSection,
-    DangerZoneSection,
-    NotificationsSection,
-} from '../../components/settings'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { userApi, type UpdateProfileRequest } from '../../api/user'
+import { Skeleton } from '../../components/feedback'
+
+const ProfileSection = lazy(() =>
+    import('../../components/settings').then((module) => ({
+        default: module.ProfileSection,
+    }))
+)
+const SecuritySection = lazy(() =>
+    import('../../components/settings').then((module) => ({
+        default: module.SecuritySection,
+    }))
+)
+const EmailSection = lazy(() =>
+    import('../../components/settings').then((module) => ({
+        default: module.EmailSection,
+    }))
+)
+const DangerZoneSection = lazy(() =>
+    import('../../components/settings').then((module) => ({
+        default: module.DangerZoneSection,
+    }))
+)
+const NotificationsSection = lazy(() =>
+    import('../../components/settings').then((module) => ({
+        default: module.NotificationsSection,
+    }))
+)
 
 export const Settings = () => {
     const navigate = useNavigate()
@@ -97,7 +118,7 @@ export const Settings = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="ui-page-enter space-y-6">
             <PageHeader
                 title="Einstellungen"
                 subtitle="Verwalte dein Profil und Kontoeinstellungen"
@@ -106,33 +127,43 @@ export const Settings = () => {
             {/* 2-Column Grid Layout */}
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* Left Column - Profile & Email */}
-                <div className="space-y-6">
-                    <ProfileSection
-                        user={user}
-                        onUpdateProfile={handleUpdateProfile}
-                        isUpdating={updateMutation.isPending}
-                    />
+                <div className="ui-panel ui-panel-hover space-y-6 p-4 sm:p-5">
+                    <Suspense fallback={<Skeleton height={280} className="rounded-xl" />}>
+                        <ProfileSection
+                            user={user}
+                            onUpdateProfile={handleUpdateProfile}
+                            isUpdating={updateMutation.isPending}
+                        />
+                    </Suspense>
 
-                    <EmailSection
-                        currentEmail={user.email}
-                        onChangeEmail={handleChangeEmail}
-                        isUpdating={changeEmailMutation.isPending}
-                    />
+                    <Suspense fallback={<Skeleton height={220} className="rounded-xl" />}>
+                        <EmailSection
+                            currentEmail={user.email}
+                            onChangeEmail={handleChangeEmail}
+                            isUpdating={changeEmailMutation.isPending}
+                        />
+                    </Suspense>
                 </div>
 
                 {/* Right Column - Security & Danger Zone */}
-                <div className="space-y-6">
-                    <SecuritySection
-                        onChangePassword={handleChangePassword}
-                        isUpdating={changePasswordMutation.isPending}
-                    />
+                <div className="ui-panel ui-panel-hover space-y-6 p-4 sm:p-5">
+                    <Suspense fallback={<Skeleton height={220} className="rounded-xl" />}>
+                        <SecuritySection
+                            onChangePassword={handleChangePassword}
+                            isUpdating={changePasswordMutation.isPending}
+                        />
+                    </Suspense>
 
-                    <NotificationsSection />
+                    <Suspense fallback={<Skeleton height={170} className="rounded-xl" />}>
+                        <NotificationsSection />
+                    </Suspense>
 
-                    <DangerZoneSection
-                        onDeleteAccount={handleDeleteAccount}
-                        isDeleting={deleteAccountMutation.isPending}
-                    />
+                    <Suspense fallback={<Skeleton height={220} className="rounded-xl" />}>
+                        <DangerZoneSection
+                            onDeleteAccount={handleDeleteAccount}
+                            isDeleting={deleteAccountMutation.isPending}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@ export const MetricCard = ({
     return (
         <article
             className={cn(
-                'rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800',
+                'ui-panel ui-panel-hover animate-card p-4',
                 className
             )}
         >
