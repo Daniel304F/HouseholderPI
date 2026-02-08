@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { cn } from '../../utils/cn'
 import type { DailyActivity } from '../../api/statistics'
 
@@ -7,10 +7,7 @@ interface ContributionGraphProps {
     className?: string
 }
 
-const MONTHS_DE = [
-    'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
-]
+const MONTHS_DE = ['Jan', 'Feb', 'Maer', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
 
 // GitHub-style color levels
 const LEVEL_COLORS = {
@@ -25,31 +22,53 @@ const LEVEL_COLORS = {
 const CELL_SIZE = 11
 const CELL_GAP = 3
 
-export const ContributionGraph = ({
-    data,
-    className,
-}: ContributionGraphProps) => {
+export const ContributionGraph = ({ data, className }: ContributionGraphProps) => {
     const [hoveredDay, setHoveredDay] = useState<DailyActivity | null>(null)
     const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
 
+    const availableYears = useMemo(() => {
+        const years = Array.from(new Set(data.map((entry) => new Date(entry.date).getFullYear())))
+        return years.sort((a, b) => b - a)
+    }, [data])
+
+    const [selectedYear, setSelectedYear] = useState<number | null>(availableYears[0] ?? null)
+
+    useEffect(() => {
+        if (!availableYears.length) {
+            setSelectedYear(null)
+            return
+        }
+
+        if (selectedYear === null || !availableYears.includes(selectedYear)) {
+            setSelectedYear(availableYears[0])
+        }
+    }, [availableYears, selectedYear])
+
     const { weeks, monthLabels, totalCount } = useMemo(() => {
-        // Create a map for quick lookup
+        if (!selectedYear) {
+            return {
+                weeks: [] as (DailyActivity | null)[][],
+                monthLabels: [] as { month: number; weekIndex: number }[],
+                totalCount: 0,
+            }
+        }
+
         const dataMap = new Map<string, DailyActivity>()
         data.forEach((d) => dataMap.set(d.date, d))
 
-        // Get date range (last 365 days)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const oneYearAgo = new Date(today)
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-        oneYearAgo.setDate(oneYearAgo.getDate() + 1)
+        const startOfYear = new Date(selectedYear, 0, 1)
+        startOfYear.setHours(0, 0, 0, 0)
 
-        // Find the Sunday before oneYearAgo (GitHub starts weeks on Sunday)
-        const startDate = new Date(oneYearAgo)
-        const dayOfWeek = startDate.getDay()
-        startDate.setDate(startDate.getDate() - dayOfWeek)
+        const endOfYear = new Date(selectedYear, 11, 31)
+        endOfYear.setHours(0, 0, 0, 0)
 
-        // Build weeks array (53 weeks to cover a full year)
+        // GitHub weeks start on Sunday and end on Saturday.
+        const startDate = new Date(startOfYear)
+        startDate.setDate(startDate.getDate() - startDate.getDay())
+
+        const endDate = new Date(endOfYear)
+        endDate.setDate(endDate.getDate() + (6 - endDate.getDay()))
+
         const weeks: (DailyActivity | null)[][] = []
         let currentWeek: (DailyActivity | null)[] = []
         let total = 0
@@ -57,44 +76,38 @@ export const ContributionGraph = ({
         let lastMonth = -1
 
         const current = new Date(startDate)
-        while (current <= today || currentWeek.length > 0) {
-            const dateStr = current.toISOString().split('T')[0]
-            const isInRange = current >= oneYearAgo && current <= today
+        while (current <= endDate) {
+            const isInSelectedYear =
+                current.getFullYear() === selectedYear &&
+                current >= startOfYear &&
+                current <= endOfYear
 
-            if (isInRange) {
+            if (isInSelectedYear) {
+                const dateStr = current.toISOString().split('T')[0]
                 const dayData = dataMap.get(dateStr) || { date: dateStr, count: 0, level: 0 as const }
+
                 currentWeek.push(dayData)
                 total += dayData.count
 
-                // Track month changes (only for first day of each month shown)
                 const month = current.getMonth()
                 const dayOfMonth = current.getDate()
                 if (month !== lastMonth && dayOfMonth <= 7) {
-                    monthPositions.push({
-                        month,
-                        weekIndex: weeks.length,
-                    })
+                    monthPositions.push({ month, weekIndex: weeks.length })
                     lastMonth = month
                 }
-            } else if (current < oneYearAgo) {
-                currentWeek.push(null) // Empty cell before range
+            } else {
+                currentWeek.push(null)
             }
 
-            // New week on Saturday (end of week)
             if (current.getDay() === 6) {
-                if (currentWeek.length > 0) {
-                    weeks.push(currentWeek)
-                }
+                weeks.push(currentWeek)
                 currentWeek = []
-                if (current > today) break
             }
 
             current.setDate(current.getDate() + 1)
         }
 
-        // Push remaining days
         if (currentWeek.length > 0) {
-            // Pad the last week if needed
             while (currentWeek.length < 7) {
                 currentWeek.push(null)
             }
@@ -102,12 +115,9 @@ export const ContributionGraph = ({
         }
 
         return { weeks, monthLabels: monthPositions, totalCount: total }
-    }, [data])
+    }, [data, selectedYear])
 
-    const handleMouseEnter = (
-        day: DailyActivity,
-        event: React.MouseEvent<HTMLDivElement>
-    ) => {
+    const handleMouseEnter = (day: DailyActivity, event: React.MouseEvent<HTMLDivElement>) => {
         const rect = event.currentTarget.getBoundingClientRect()
         setHoveredDay(day)
         setTooltipPos({
@@ -130,12 +140,39 @@ export const ContributionGraph = ({
         })
     }
 
-    // Calculate total width
     const totalWidth = weeks.length * (CELL_SIZE + CELL_GAP)
+
+    if (!availableYears.length || selectedYear === null) {
+        return (
+            <div className={cn('rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400', className)}>
+                Keine Aktivitaetsdaten verfuegbar.
+            </div>
+        )
+    }
 
     return (
         <div className={cn('relative', className)}>
-            {/* Tooltip */}
+            <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Contribution Graph</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                    {availableYears.map((year) => (
+                        <button
+                            key={year}
+                            type="button"
+                            onClick={() => setSelectedYear(year)}
+                            className={cn(
+                                'rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
+                                selectedYear === year
+                                    ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/25 dark:text-brand-200'
+                                    : 'border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                            )}
+                        >
+                            {year}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {hoveredDay && (
                 <div
                     className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full"
@@ -144,8 +181,8 @@ export const ContributionGraph = ({
                     <div className="whitespace-nowrap rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs text-white shadow-lg dark:bg-neutral-950">
                         <span className="font-semibold">
                             {hoveredDay.count === 0
-                                ? 'Keine Aktivitäten'
-                                : `${hoveredDay.count} Aktivität${hoveredDay.count !== 1 ? 'en' : ''}`}
+                                ? 'Keine Aktivitaeten'
+                                : `${hoveredDay.count} Aktivitaet${hoveredDay.count !== 1 ? 'en' : ''}`}
                         </span>
                         <span className="text-neutral-400"> am {formatDate(hoveredDay.date)}</span>
                     </div>
@@ -153,10 +190,8 @@ export const ContributionGraph = ({
                 </div>
             )}
 
-            {/* Graph Container - Scrollable */}
             <div className="overflow-x-auto">
                 <div style={{ minWidth: `${totalWidth + 32}px` }}>
-                    {/* Month Labels */}
                     <div
                         className="relative mb-1 ml-8 text-xs text-neutral-600 dark:text-neutral-400"
                         style={{ height: '16px' }}
@@ -174,37 +209,37 @@ export const ContributionGraph = ({
                         ))}
                     </div>
 
-                    {/* Grid with weekday labels */}
                     <div className="flex">
-                        {/* Weekday labels - Sun, Mon, Tue... only show Mon, Wed, Fri */}
                         <div
                             className="mr-1 flex w-7 flex-col text-[10px] text-neutral-600 dark:text-neutral-400"
                             style={{ gap: `${CELL_GAP}px` }}
                         >
-                            <div style={{ height: CELL_SIZE }} /> {/* Sun - empty */}
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Mo</div>
-                            <div style={{ height: CELL_SIZE }} /> {/* Tue - empty */}
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Mi</div>
-                            <div style={{ height: CELL_SIZE }} /> {/* Thu - empty */}
-                            <div className="flex items-center" style={{ height: CELL_SIZE }}>Fr</div>
-                            <div style={{ height: CELL_SIZE }} /> {/* Sat - empty */}
+                            <div style={{ height: CELL_SIZE }} />
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                                Mo
+                            </div>
+                            <div style={{ height: CELL_SIZE }} />
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                                Mi
+                            </div>
+                            <div style={{ height: CELL_SIZE }} />
+                            <div className="flex items-center" style={{ height: CELL_SIZE }}>
+                                Fr
+                            </div>
+                            <div style={{ height: CELL_SIZE }} />
                         </div>
 
-                        {/* Contribution cells */}
                         <div className="flex" style={{ gap: `${CELL_GAP}px` }}>
                             {weeks.map((week, weekIndex) => (
-                                <div
-                                    key={weekIndex}
-                                    className="flex flex-col"
-                                    style={{ gap: `${CELL_GAP}px` }}
-                                >
+                                <div key={weekIndex} className="flex flex-col" style={{ gap: `${CELL_GAP}px` }}>
                                     {week.map((day, dayIndex) => (
                                         <div
                                             key={`${weekIndex}-${dayIndex}`}
                                             className={cn(
                                                 'rounded-sm',
                                                 day ? LEVEL_COLORS[day.level] : 'bg-transparent',
-                                                day && 'cursor-pointer hover:ring-1 hover:ring-neutral-400 hover:ring-offset-1 dark:hover:ring-neutral-500'
+                                                day &&
+                                                    'cursor-pointer hover:ring-1 hover:ring-neutral-400 hover:ring-offset-1 dark:hover:ring-neutral-500'
                                             )}
                                             style={{
                                                 width: CELL_SIZE,
@@ -221,10 +256,9 @@ export const ContributionGraph = ({
                 </div>
             </div>
 
-            {/* Legend */}
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600 dark:text-neutral-400">
                 <span>
-                    {totalCount.toLocaleString('de-DE')} Aktivitäten im letzten Jahr
+                    {totalCount.toLocaleString('de-DE')} Aktivitaeten in {selectedYear}
                 </span>
                 <div className="flex items-center gap-1">
                     <span className="mr-1">Weniger</span>

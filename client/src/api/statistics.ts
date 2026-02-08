@@ -113,7 +113,7 @@ export const statisticsApi = {
         return response.data.data
     },
 
-    // Activity heatmap data (365 days)
+    // Activity heatmap data (full available range)
     getActivityHeatmap: async (): Promise<DailyActivity[]> => {
         const response = await apiClient.get<ApiResponse<DailyActivity[]>>(
             '/statistics/personal/activity'

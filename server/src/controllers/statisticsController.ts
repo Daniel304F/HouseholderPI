@@ -84,7 +84,7 @@ export const getPersonalStatistics = async (
 };
 
 /**
- * Get activity heatmap data (365 days)
+ * Get activity heatmap data (full available range)
  * GET /api/statistics/personal/activity
  */
 export const getActivityHeatmap = async (

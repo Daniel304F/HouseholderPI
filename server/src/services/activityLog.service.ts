@@ -43,10 +43,20 @@ export class ActivityLogService {
       userId,
     } as Partial<ActivityLog>);
 
-    // Calculate date range (365 days)
+    if (activities.length === 0) {
+      return [];
+    }
+
     const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 364);
+    endDate.setHours(23, 59, 59, 999);
+
+    const earliestActivity = activities.reduce((earliest, activity) => {
+      const activityDate = new Date(activity.createdAt);
+      return activityDate < earliest ? activityDate : earliest;
+    }, new Date(activities[0]!.createdAt));
+
+    const startDate = new Date(earliestActivity);
+    startDate.setHours(0, 0, 0, 0);
 
     // Group activities by date
     const activityCountByDate = new Map<string, number>();
@@ -57,7 +67,7 @@ export class ActivityLogService {
         const dateStr = this.formatDate(date);
         activityCountByDate.set(
           dateStr,
-          (activityCountByDate.get(dateStr) || 0) + 1
+          (activityCountByDate.get(dateStr) || 0) + 1,
         );
       }
     }
@@ -65,7 +75,7 @@ export class ActivityLogService {
     // Find max count for level calculation
     const maxCount = Math.max(...Array.from(activityCountByDate.values()), 1);
 
-    // Generate all dates in range
+    // Generate all dates in range (from first activity to today)
     const result: DailyActivity[] = [];
     const currentDate = new Date(startDate);
 
@@ -88,7 +98,7 @@ export class ActivityLogService {
 
   async getActivityLog(
     userId: string,
-    options: ActivityLogQueryOptions = {}
+    options: ActivityLogQueryOptions = {},
   ): Promise<{ activities: ActivityLogResponse[]; total: number }> {
     const { type = "all", limit = 20, offset = 0 } = options;
 
@@ -106,7 +116,7 @@ export class ActivityLogService {
     // Sort by createdAt descending
     activities.sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     // Paginate

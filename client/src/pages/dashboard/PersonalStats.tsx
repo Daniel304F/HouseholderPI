@@ -178,22 +178,19 @@ export const PersonalStats = () => {
             <ChartCard title="Erledigte Aufgaben pro Monat">
                 <BarChart data={monthlyChartData} height={200} />
             </ChartCard>
+            <ChartCard title="Aktivitäten im Jahresverlauf">
+                {heatmapData.length > 0 ? (
+                    <ContributionGraph data={heatmapData} />
+                ) : (
+                    <p className="py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                        Keine Aktivitäten
+                    </p>
+                )}
+            </ChartCard>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                <ChartCard title="Aktivitaet im Jahresverlauf">
-                    {heatmapData.length > 0 ? (
-                        <ContributionGraph data={heatmapData} />
-                    ) : (
-                        <p className="py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                            Keine Aktivitaetsdaten vorhanden.
-                        </p>
-                    )}
-                </ChartCard>
-
-                <ChartCard title="Aktivitaetsprotokoll">
-                    <ActivityLog />
-                </ChartCard>
-            </div>
+            <ChartCard title="Aktivitaetsprotokoll">
+                <ActivityLog />
+            </ChartCard>
         </div>
     )
 }
