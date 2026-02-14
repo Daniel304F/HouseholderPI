@@ -7,11 +7,7 @@ import { Group } from "../models/group.js";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { toISOString } from "../helpers/index.js";
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from "./errors.js";
+import { BadRequestError, ForbiddenError, NotFoundError } from "./errors.js";
 import {
   CreateRecurringTaskInput,
   UpdateRecurringTaskInput,
@@ -31,12 +27,12 @@ export class RecurringTaskService {
     private recurringTaskDAO: GenericDAO<RecurringTaskTemplate>,
     private taskDAO: GenericDAO<Task>,
     private groupDAO: GenericDAO<Group>,
-    _userDAO: GenericDAO<User>
+    _userDAO: GenericDAO<User>,
   ) {}
 
   private async validateGroupAccess(
     groupId: string,
-    userId: string
+    userId: string,
   ): Promise<Group> {
     const group = await this.groupDAO.findOne({
       id: groupId,
@@ -55,13 +51,13 @@ export class RecurringTaskService {
 
   private async validateAdminAccess(
     groupId: string,
-    userId: string
+    userId: string,
   ): Promise<Group> {
     const group = await this.validateGroupAccess(groupId, userId);
 
     if (!isAdminOfGroup(group, userId)) {
       throw new ForbiddenError(
-        "Nur Admins können wiederkehrende Aufgaben verwalten"
+        "Nur Admins können wiederkehrende Aufgaben verwalten",
       );
     }
 
@@ -70,7 +66,7 @@ export class RecurringTaskService {
 
   async getTemplates(
     groupId: string,
-    userId: string
+    userId: string,
   ): Promise<RecurringTaskTemplateResponse[]> {
     await this.validateGroupAccess(groupId, userId);
 
@@ -84,7 +80,7 @@ export class RecurringTaskService {
   async getTemplate(
     groupId: string,
     templateId: string,
-    userId: string
+    userId: string,
   ): Promise<RecurringTaskTemplateResponse> {
     await this.validateGroupAccess(groupId, userId);
 
@@ -103,14 +99,16 @@ export class RecurringTaskService {
   async createTemplate(
     groupId: string,
     userId: string,
-    input: CreateRecurringTaskInput
+    input: CreateRecurringTaskInput,
   ): Promise<RecurringTaskTemplateResponse> {
     const group = await this.validateAdminAccess(groupId, userId);
 
     // Validate assignee if fixed strategy
     if (input.assignmentStrategy === "fixed" && input.fixedAssignee) {
       if (!isMemberOfGroup(group, input.fixedAssignee)) {
-        throw new BadRequestError("Zugewiesene Person ist kein Gruppenmitglied");
+        throw new BadRequestError(
+          "Zugewiesene Person ist kein Gruppenmitglied",
+        );
       }
     }
 
@@ -124,7 +122,7 @@ export class RecurringTaskService {
         for (const memberId of input.rotationOrder) {
           if (!isMemberOfGroup(group, memberId)) {
             throw new BadRequestError(
-              "Alle Personen in der Rotation müssen Gruppenmitglieder sein"
+              "Alle Personen in der Rotation müssen Gruppenmitglieder sein",
             );
           }
         }
@@ -154,7 +152,7 @@ export class RecurringTaskService {
     groupId: string,
     templateId: string,
     userId: string,
-    input: UpdateRecurringTaskInput
+    input: UpdateRecurringTaskInput,
   ): Promise<RecurringTaskTemplateResponse> {
     const group = await this.validateAdminAccess(groupId, userId);
 
@@ -169,11 +167,14 @@ export class RecurringTaskService {
 
     // Validate assignee if changing to fixed strategy
     if (
-      (input.assignmentStrategy === "fixed" || template.assignmentStrategy === "fixed") &&
+      (input.assignmentStrategy === "fixed" ||
+        template.assignmentStrategy === "fixed") &&
       input.fixedAssignee
     ) {
       if (!isMemberOfGroup(group, input.fixedAssignee)) {
-        throw new BadRequestError("Zugewiesene Person ist kein Gruppenmitglied");
+        throw new BadRequestError(
+          "Zugewiesene Person ist kein Gruppenmitglied",
+        );
       }
     }
 
@@ -182,7 +183,7 @@ export class RecurringTaskService {
       for (const memberId of input.rotationOrder) {
         if (!isMemberOfGroup(group, memberId)) {
           throw new BadRequestError(
-            "Alle Personen in der Rotation müssen Gruppenmitglieder sein"
+            "Alle Personen in der Rotation müssen Gruppenmitglieder sein",
           );
         }
       }
@@ -220,7 +221,7 @@ export class RecurringTaskService {
   async deleteTemplate(
     groupId: string,
     templateId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     await this.validateAdminAccess(groupId, userId);
 
@@ -239,7 +240,7 @@ export class RecurringTaskService {
   async toggleTemplate(
     groupId: string,
     templateId: string,
-    userId: string
+    userId: string,
   ): Promise<RecurringTaskTemplateResponse> {
     await this.validateAdminAccess(groupId, userId);
 
@@ -268,7 +269,7 @@ export class RecurringTaskService {
     groupId: string,
     templateId: string,
     userId: string,
-    overrideAssignee?: string
+    overrideAssignee?: string,
   ): Promise<Task> {
     const group = await this.validateGroupAccess(groupId, userId);
 
@@ -290,7 +291,9 @@ export class RecurringTaskService {
 
     if (overrideAssignee) {
       if (!isMemberOfGroup(group, overrideAssignee)) {
-        throw new BadRequestError("Zugewiesene Person ist kein Gruppenmitglied");
+        throw new BadRequestError(
+          "Zugewiesene Person ist kein Gruppenmitglied",
+        );
       }
       assignedTo = overrideAssignee;
     } else if (template.assignmentStrategy === "fixed") {
@@ -300,7 +303,8 @@ export class RecurringTaskService {
       template.rotationOrder &&
       template.rotationOrder.length > 0
     ) {
-      assignedTo = template.rotationOrder[template.currentRotationIndex] ?? null;
+      assignedTo =
+        template.rotationOrder[template.currentRotationIndex] ?? null;
     }
 
     // Calculate due date (use first due day for manual generation)
@@ -401,7 +405,7 @@ export class RecurringTaskService {
       // For biweekly, check if it's the right week
       if (template.frequency === "biweekly" && lastGenerated) {
         const daysSinceLastGeneration = Math.floor(
-          (today.getTime() - lastGenerated.getTime()) / (1000 * 60 * 60 * 24)
+          (today.getTime() - lastGenerated.getTime()) / (1000 * 60 * 60 * 24),
         );
         if (daysSinceLastGeneration < 14) {
           continue;
@@ -410,17 +414,13 @@ export class RecurringTaskService {
 
       // Generate the task
       try {
-        const task = await this.generateTaskForDay(
-          template,
-          userId,
-          template.frequency === "monthly" ? currentDayOfMonth : currentDayOfWeek
-        );
+        const task = await this.generateTaskForDay(template, userId);
         generatedTasks.push(task);
       } catch (error) {
         // Log error but continue with other templates
         console.error(
           `Failed to generate task for template ${template.id}:`,
-          error
+          error,
         );
       }
     }
@@ -434,7 +434,6 @@ export class RecurringTaskService {
   private async generateTaskForDay(
     template: RecurringTaskTemplate,
     userId: string,
-    targetDay: number
   ): Promise<Task> {
     // Determine assignee
     let assignedTo: string | null = null;
@@ -498,7 +497,7 @@ export class RecurringTaskService {
 
   private calculateNextDueDate(
     template: RecurringTaskTemplate,
-    targetDay?: number
+    targetDay?: number,
   ): Date {
     const now = new Date();
     const dueDate = new Date();
@@ -530,8 +529,12 @@ export class RecurringTaskService {
         dueDate.setDate(
           Math.min(
             dueDay,
-            new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate()
-          )
+            new Date(
+              dueDate.getFullYear(),
+              dueDate.getMonth() + 1,
+              0,
+            ).getDate(),
+          ),
         );
         break;
     }
@@ -541,7 +544,7 @@ export class RecurringTaskService {
   }
 
   private async toResponse(
-    template: RecurringTaskTemplate
+    template: RecurringTaskTemplate,
   ): Promise<RecurringTaskTemplateResponse> {
     // Calculate next suggested assignee
     let nextSuggestedAssignee: string | undefined;

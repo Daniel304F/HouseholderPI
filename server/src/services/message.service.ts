@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import {
   Message,
   MessageWithUser,
@@ -19,6 +18,13 @@ export class MessageService {
     private groupDAO: GenericDAO<Group>,
     private userDAO: GenericDAO<User>
   ) {}
+
+  private toDate(value: unknown): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+    return new Date(value as string | number);
+  }
 
   private async verifyGroupMembership(
     groupId: string,
@@ -45,9 +51,9 @@ export class MessageService {
       userName: message.userName,
       userAvatar: message.userAvatar,
       content: message.content,
-      createdAt: message.createdAt.toISOString(),
-      updatedAt: message.updatedAt.toISOString(),
-      editedAt: message.editedAt ? message.editedAt.toISOString() : null,
+      createdAt: this.toDate(message.createdAt).toISOString(),
+      updatedAt: this.toDate(message.updatedAt).toISOString(),
+      editedAt: message.editedAt ? this.toDate(message.editedAt).toISOString() : null,
     };
   }
 
@@ -63,18 +69,12 @@ export class MessageService {
       throw new NotFoundError("Benutzer nicht gefunden");
     }
 
-    const now = new Date();
-    const message: Message = {
-      id: uuidv4(),
+    const message = await this.messageDAO.create({
       groupId,
       userId,
       content,
       editedAt: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await this.messageDAO.create(message);
+    } as Omit<Message, "id" | "createdAt" | "updatedAt">);
 
     const messageWithUser: MessageWithUser = {
       ...message,
@@ -98,7 +98,10 @@ export class MessageService {
     } as Partial<Message>);
 
     // Sort by createdAt descending (newest first)
-    messages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    messages.sort(
+      (a, b) =>
+        this.toDate(b.createdAt).getTime() - this.toDate(a.createdAt).getTime(),
+    );
 
     // If before is provided, filter messages before that ID
     if (before) {

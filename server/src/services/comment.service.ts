@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import {
   Comment,
   CommentWithUser,
@@ -93,19 +92,13 @@ export class CommentService {
       throw new NotFoundError("Benutzer nicht gefunden");
     }
 
-    const now = new Date();
-    const comment: Comment = {
-      id: uuidv4(),
+    const comment = await this.commentDAO.create({
       taskId,
       groupId,
       userId,
       content,
       editedAt: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await this.commentDAO.create(comment);
+    } as Omit<Comment, "id" | "createdAt" | "updatedAt">);
 
     const commentWithUser: CommentWithUser = {
       ...comment,
