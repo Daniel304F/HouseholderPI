@@ -5,6 +5,7 @@ dotenv.config();
 interface Config {
   port: number;
   nodeEnv: string;
+  clientUrl: string;
   jwt: {
     accessSecret: string;
     refreshSecret: string;
@@ -32,16 +33,28 @@ interface Config {
   };
 }
 
+const nodeEnv = process.env["NODE_ENV"] || "development";
+const isProduction = nodeEnv === "production";
+const accessSecret =
+  process.env["JWT_ACCESS_SECRET"] || "dev-access-secret-change-in-production";
+const refreshSecret =
+  process.env["JWT_REFRESH_SECRET"] || "dev-refresh-secret-change-in-production";
+
+if (
+  isProduction &&
+  (accessSecret === "dev-access-secret-change-in-production" ||
+    refreshSecret === "dev-refresh-secret-change-in-production")
+) {
+  throw new Error("JWT secrets must be set in production.");
+}
+
 const config: Config = {
   port: Number(process.env["PORT"]) || 3000,
-  nodeEnv: process.env["NODE_ENV"] || "development",
+  nodeEnv,
+  clientUrl: process.env["FRONTEND_URL"] || "http://localhost:5173",
   jwt: {
-    accessSecret:
-      process.env["JWT_ACCESS_SECRET"] ||
-      "dev-access-secret-change-in-production",
-    refreshSecret:
-      process.env["JWT_REFRESH_SECRET"] ||
-      "dev-refresh-secret-change-in-production",
+    accessSecret,
+    refreshSecret,
     accessExpiresIn: Number(process.env["JWT_ACCESS_EXPIRES_IN"]) || 3600,
     refreshExpiresIn: Number(process.env["JWT_REFRESH_EXPIRES_IN"]) || 604800,
   },

@@ -12,12 +12,13 @@ import * as taskController from "./controllers/taskController.js";
 import * as statisticsController from "./controllers/statisticsController.js";
 import cookieParser from "cookie-parser";
 import { UPLOAD_PATH } from "./config/upload.config.js";
+import config from "./config/config.js";
 
 const app = express();
 app.use(loggerMiddleware);
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: config.clientUrl,
     credentials: true,
   }),
 );

@@ -12,7 +12,7 @@ startDB(app)
     // Setup Socket.io
     const io = new Server(httpServer, {
       cors: {
-        origin: "http://localhost:5173",
+        origin: config.clientUrl,
         credentials: true,
       },
     });
