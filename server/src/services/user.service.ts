@@ -27,9 +27,7 @@ export class UserService {
     userId: string,
     data: UpdateProfileInput
   ): Promise<UserReponse> {
-    console.log("updateProfile service - searching for userId:", userId);
     const user = await this.userDAO.findOne({ id: userId });
-    console.log("updateProfile service - found user:", user ? "yes" : "no");
     if (!user) {
       throw new NotFoundError("User nicht gefunden");
     }

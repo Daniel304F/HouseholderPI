@@ -6,7 +6,7 @@ const priorityEnum = z.enum(["low", "medium", "high"]);
 
 export const createRecurringTaskSchema = z.object({
   params: z.object({
-    groupId: z.string().uuid("UngÃ¼ltige Gruppen-ID"),
+    groupId: z.string().uuid("Ungültige Gruppen-ID"),
   }),
   body: z.object({
     title: z.string().min(1).max(200),
@@ -14,16 +14,16 @@ export const createRecurringTaskSchema = z.object({
     priority: priorityEnum.default("medium"),
     frequency: frequencyEnum,
     assignmentStrategy: assignmentStrategyEnum,
-    fixedAssignee: z.string().uuid("UngÃ¼ltige User-ID").optional(),
-    rotationOrder: z.array(z.string().uuid("UngÃ¼ltige User-ID")).optional(),
+    fixedAssignee: z.string().uuid("Ungültige User-ID").optional(),
+    rotationOrder: z.array(z.string().uuid("Ungültige User-ID")).optional(),
     dueDays: z.array(z.number().int().min(0).max(31)).min(1),
   }),
 });
 
 export const updateRecurringTaskSchema = z.object({
   params: z.object({
-    groupId: z.string().uuid("UngÃ¼ltige Gruppen-ID"),
-    id: z.string().uuid("UngÃ¼ltige Vorlage-ID"),
+    groupId: z.string().uuid("Ungültige Gruppen-ID"),
+    id: z.string().uuid("Ungültige Vorlage-ID"),
   }),
   body: z.object({
     title: z.string().min(1).max(200).optional(),
@@ -31,26 +31,26 @@ export const updateRecurringTaskSchema = z.object({
     priority: priorityEnum.optional(),
     frequency: frequencyEnum.optional(),
     assignmentStrategy: assignmentStrategyEnum.optional(),
-    fixedAssignee: z.string().uuid("UngÃ¼ltige User-ID").nullable().optional(),
-    rotationOrder: z.array(z.string().uuid("UngÃ¼ltige User-ID")).optional(),
+    fixedAssignee: z.string().uuid("Ungültige User-ID").nullable().optional(),
+    rotationOrder: z.array(z.string().uuid("Ungültige User-ID")).optional(),
     dueDays: z.array(z.number().int().min(0).max(31)).min(1).optional(),
   }),
 });
 
 export const recurringTaskIdSchema = z.object({
   params: z.object({
-    groupId: z.string().uuid("UngÃ¼ltige Gruppen-ID"),
-    id: z.string().uuid("UngÃ¼ltige Vorlage-ID"),
+    groupId: z.string().uuid("Ungültige Gruppen-ID"),
+    id: z.string().uuid("Ungültige Vorlage-ID"),
   }),
 });
 
 export const generateTaskSchema = z.object({
   params: z.object({
-    groupId: z.string().uuid("UngÃ¼ltige Gruppen-ID"),
-    id: z.string().uuid("UngÃ¼ltige Vorlage-ID"),
+    groupId: z.string().uuid("Ungültige Gruppen-ID"),
+    id: z.string().uuid("Ungültige Vorlage-ID"),
   }),
   body: z.object({
-    assignedTo: z.string().uuid("UngÃ¼ltige User-ID").optional(), // Override suggested assignee
+    assignedTo: z.string().uuid("Ungültige User-ID").optional(), // Override suggested assignee
   }),
 });
 

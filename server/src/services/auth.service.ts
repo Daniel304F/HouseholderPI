@@ -24,7 +24,7 @@ export class AuthService {
     name: string,
     avatar?: string,
   ): Promise<AuthResult> {
-    const existingUser = await this.userDAO.findOne({ email } as any);
+    const existingUser = await this.userDAO.findOne({ email } as Partial<User>);
     if (existingUser) {
       throw new ConflictError("Email already exists");
     }
@@ -39,7 +39,7 @@ export class AuthService {
       name,
       password: hashedPassword,
       avatar,
-    } as any);
+    } as Omit<User, "id" | "createdAt" | "updatedAt">);
 
     const { accessToken, refreshToken } = jwtService.generateTokens(
       newUser.id,
@@ -56,12 +56,12 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<AuthResult> {
-    const user = await this.userDAO.findOne({ email } as any);
+    const user = await this.userDAO.findOne({ email } as Partial<User>);
     if (!user) {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    const isValid = await bcrypt.compare(password, (user as any).password);
+    const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       throw new UnauthorizedError("Invalid email or password");
     }
@@ -90,7 +90,7 @@ export class AuthService {
       throw new UnauthorizedError("Invalid refresh token");
     }
 
-    const user = await this.userDAO.findOne({ id: decoded.userId } as any);
+    const user = await this.userDAO.findOne({ id: decoded.userId } as Partial<User>);
     if (!user) {
       throw new NotFoundError("User not found");
     }
@@ -106,7 +106,7 @@ export class AuthService {
       throw new NotFoundError("User nicht gefunden");
     }
 
-    const { password, ...userWithoutPassword } = user as any;
+    const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 }
