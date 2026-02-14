@@ -53,7 +53,12 @@ apiClient.interceptors.response.use(
                     { withCredentials: true }
                 )
 
-                const { accessToken } = response.data
+                const accessToken = response.data?.data?.accessToken as
+                    | string
+                    | undefined
+                if (!accessToken) {
+                    throw new Error('Refresh endpoint returned no access token')
+                }
 
                 localStorage.setItem('accessToken', accessToken)
 
@@ -64,7 +69,6 @@ apiClient.interceptors.response.use(
                 return apiClient(originalRequest)
             } catch (refreshError) {
                 localStorage.removeItem('accessToken')
-                localStorage.removeItem('refreshToken')
                 window.location.href = '/login'
                 return Promise.reject(refreshError)
             }

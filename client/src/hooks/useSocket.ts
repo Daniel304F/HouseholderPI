@@ -15,6 +15,12 @@ interface UseSocketOptions {
     onTypingChange?: (data: TypingUser) => void
 }
 
+const WS_URL =
+    import.meta.env.VITE_WS_URL ||
+    (import.meta.env.VITE_API_URL
+        ? String(import.meta.env.VITE_API_URL).replace(/\/api$/, '')
+        : 'http://localhost:3000')
+
 export const useSocket = ({
     groupId,
     onNewMessage,
@@ -34,7 +40,7 @@ export const useSocket = ({
             return
         }
 
-        const socket = io('http://localhost:3000', {
+        const socket = io(WS_URL, {
             auth: {
                 token: accessToken,
             },

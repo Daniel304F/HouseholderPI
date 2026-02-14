@@ -63,7 +63,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             } catch {
                 // Token ungültig - aufräumen
                 localStorage.removeItem('accessToken')
-                localStorage.removeItem('refreshToken')
             } finally {
                 setIsLoading(false)
             }

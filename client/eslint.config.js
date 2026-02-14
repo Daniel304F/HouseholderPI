@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
-import erasable from 'eslint-plugin-erasable'
+import erasable from 'eslint-plugin-erasable-syntax-only'
 
 export default tseslint.config([
   globalIgnores(['dist']),
