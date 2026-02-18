@@ -31,7 +31,7 @@ export const MemberList = ({
                     <div
                         key={member.userId}
                         className={cn(
-                            'flex items-center justify-between rounded-xl p-3',
+                            'flex flex-col gap-3 rounded-xl p-3 sm:flex-row sm:items-center sm:justify-between',
                             'bg-neutral-50 dark:bg-neutral-700/50',
                             'transition-colors duration-200',
                             'hover:bg-neutral-100 dark:hover:bg-neutral-700'
@@ -60,7 +60,7 @@ export const MemberList = ({
                         {isAdmin &&
                             member.userId !== currentUserId &&
                             member.role !== 'owner' && (
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 self-end sm:self-auto">
                                     {isOwner && (
                                         <Button
                                             variant="ghost"

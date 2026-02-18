@@ -25,6 +25,19 @@ interface KanbanCardProps {
     assigneeInfo?: AssigneeInfo
 }
 
+const priorityTopLine: Record<Task['priority'], string> = {
+    high: 'bg-gradient-to-r from-error-400/70 via-error-300/55 to-error-200/40',
+    medium:
+        'bg-gradient-to-r from-warning-400/70 via-warning-300/55 to-warning-200/40',
+    low: 'bg-gradient-to-r from-success-400/70 via-success-300/55 to-success-200/40',
+}
+
+const priorityGlow: Record<Task['priority'], string> = {
+    high: 'bg-error-300/45 dark:bg-error-700/35',
+    medium: 'bg-warning-300/45 dark:bg-warning-700/35',
+    low: 'bg-success-300/45 dark:bg-success-700/35',
+}
+
 export const KanbanCard = ({
     task,
     onClick,
@@ -66,7 +79,7 @@ export const KanbanCard = ({
             aria-label={`Aufgabe ${task.title}`}
             className={cn(
                 'group relative w-full flex-shrink-0 overflow-hidden rounded-xl border text-left',
-                'bg-white/95 dark:bg-neutral-800/95',
+                'bg-white/92 dark:bg-neutral-800/92',
                 'border-neutral-200/85 dark:border-neutral-700/85',
                 'shadow-[var(--shadow-sm)]',
                 'transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out',
@@ -80,7 +93,22 @@ export const KanbanCard = ({
             )}
             {...dragProps}
         >
-            <div className="p-4">
+            <span
+                aria-hidden
+                className={cn(
+                    'pointer-events-none absolute inset-x-0 top-0 h-px',
+                    priorityTopLine[task.priority]
+                )}
+            />
+            <span
+                aria-hidden
+                className={cn(
+                    'pointer-events-none absolute -right-10 -top-10 size-24 rounded-full blur-2xl',
+                    priorityGlow[task.priority]
+                )}
+            />
+
+            <div className="relative z-10 p-4">
                 <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
                     {onEditClick && (
                         <CardActionButton
@@ -118,7 +146,7 @@ export const KanbanCard = ({
                     </p>
                 )}
 
-                <footer className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-2 dark:border-neutral-700/50">
+                <footer className="mt-3 flex items-center justify-between border-t border-neutral-100/90 pt-2 dark:border-neutral-700/55">
                     <div className="flex -space-x-1.5">
                         {task.assignedTo ? (
                             assigneeInfo?.avatar ? (
@@ -162,15 +190,15 @@ export const KanbanCard = ({
                     </div>
 
                     {hasMeta && (
-                        <ul className="flex items-center gap-2.5 text-[11px] font-medium">
+                        <ul className="flex items-center gap-1.5 text-[11px] font-medium">
                             {subtaskCount > 0 && (
-                                <li className="text-info-500 dark:text-info-400 flex items-center gap-1">
+                                <li className="text-info-700 dark:text-info-200 flex items-center gap-1 rounded-full bg-info-100/80 px-1.5 py-0.5 dark:bg-info-900/35">
                                     <ListTree className="size-3.5" />
                                     <span>{subtaskCount}</span>
                                 </li>
                             )}
                             {linkedCount > 0 && (
-                                <li className="text-brand-500 dark:text-brand-400 flex items-center gap-1">
+                                <li className="text-brand-700 dark:text-brand-200 flex items-center gap-1 rounded-full bg-brand-100/80 px-1.5 py-0.5 dark:bg-brand-900/35">
                                     <Link2 className="size-3.5" />
                                     <span>{linkedCount}</span>
                                 </li>

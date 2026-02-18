@@ -131,7 +131,7 @@ export const KanbanBoard = ({
         return (
             <div
                 className={cn(
-                    'flex h-full gap-3 overflow-x-auto pb-2',
+                    'flex h-full snap-x snap-mandatory gap-3 overflow-x-auto pb-2',
                     '-mx-4 px-4',
                     className,
                     isUpdating && 'pointer-events-none opacity-70'
@@ -165,7 +165,7 @@ export const KanbanBoard = ({
     return (
         <div
             className={cn(
-                'flex h-full gap-4 overflow-x-auto',
+                'flex h-full snap-x snap-mandatory gap-4 overflow-x-auto',
                 '-mx-4 px-4 sm:-mx-6 sm:px-6',
                 className,
                 isUpdating && 'pointer-events-none opacity-70'

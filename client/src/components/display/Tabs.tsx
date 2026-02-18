@@ -39,11 +39,12 @@ export const Tabs = ({
 const DefaultTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps, 'variant'>) => (
     <div
         className={cn(
-            'flex gap-1.5 rounded-2xl p-1.5',
+            'hide-scrollbar flex gap-1.5 overflow-x-auto rounded-2xl p-1.5',
             'bg-neutral-50 dark:bg-neutral-900',
             'border border-neutral-200 dark:border-neutral-700',
             className
         )}
+        role="tablist"
     >
         {tabs.map((tab) => (
             <button
@@ -51,7 +52,7 @@ const DefaultTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps
                 onClick={() => !tab.disabled && onTabChange(tab.id)}
                 disabled={tab.disabled}
                 className={cn(
-                    'flex items-center gap-2 rounded-xl px-5 py-2.5',
+                    'flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 sm:px-5',
                     'text-sm font-semibold transition-all duration-200',
                     'border',
                     activeTab === tab.id
@@ -64,9 +65,11 @@ const DefaultTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps
                               'border-transparent text-neutral-500 dark:text-neutral-400',
                               'hover:text-brand-600 dark:hover:text-brand-300',
                               'hover:bg-white dark:hover:bg-neutral-800'
-                          ),
+                    ),
                     tab.disabled && 'cursor-not-allowed opacity-50'
                 )}
+                role="tab"
+                aria-selected={activeTab === tab.id}
             >
                 {tab.icon && <span>{tab.icon}</span>}
                 <span>{tab.label}</span>
@@ -76,14 +79,14 @@ const DefaultTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps
 )
 
 const PillTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps, 'variant'>) => (
-    <div className={cn('flex gap-2', className)}>
+    <div className={cn('hide-scrollbar flex gap-2 overflow-x-auto', className)} role="tablist">
         {tabs.map((tab) => (
             <button
                 key={tab.id}
                 onClick={() => !tab.disabled && onTabChange(tab.id)}
                 disabled={tab.disabled}
                 className={cn(
-                    'flex items-center gap-2 rounded-full px-4 py-2',
+                    'flex shrink-0 items-center gap-2 rounded-full px-4 py-2',
                     'text-sm font-medium transition-all duration-200 border',
                     activeTab === tab.id
                         ? 'bg-brand-500 border-brand-500 text-white'
@@ -91,9 +94,11 @@ const PillTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps, '
                               'bg-neutral-100 border-transparent text-neutral-600',
                               'hover:bg-neutral-200',
                               'dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
-                          ),
+                    ),
                     tab.disabled && 'cursor-not-allowed opacity-50'
                 )}
+                role="tab"
+                aria-selected={activeTab === tab.id}
             >
                 {tab.icon && <span>{tab.icon}</span>}
                 <span>{tab.label}</span>
@@ -103,14 +108,20 @@ const PillTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps, '
 )
 
 const UnderlineTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsProps, 'variant'>) => (
-    <div className={cn('flex border-b border-neutral-200 dark:border-neutral-700', className)}>
+    <div
+        className={cn(
+            'hide-scrollbar flex overflow-x-auto border-b border-neutral-200 dark:border-neutral-700',
+            className
+        )}
+        role="tablist"
+    >
         {tabs.map((tab) => (
             <button
                 key={tab.id}
                 onClick={() => !tab.disabled && onTabChange(tab.id)}
                 disabled={tab.disabled}
                 className={cn(
-                    'flex items-center gap-2 px-4 py-3 -mb-px',
+                    'flex shrink-0 items-center gap-2 px-4 py-3 -mb-px',
                     'text-sm font-medium transition-all duration-200',
                     'border-b-2',
                     activeTab === tab.id
@@ -119,9 +130,11 @@ const UnderlineTabs = ({ tabs, activeTab, onTabChange, className }: Omit<TabsPro
                               'border-transparent text-neutral-500',
                               'hover:text-neutral-700 hover:border-neutral-300',
                               'dark:text-neutral-400 dark:hover:text-neutral-300'
-                          ),
+                    ),
                     tab.disabled && 'cursor-not-allowed opacity-50'
                 )}
+                role="tab"
+                aria-selected={activeTab === tab.id}
             >
                 {tab.icon && <span>{tab.icon}</span>}
                 <span>{tab.label}</span>

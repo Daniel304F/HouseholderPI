@@ -78,8 +78,8 @@ export const PriorityFilterDropdown = ({
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40',
                     'active:scale-95',
                     hasActiveFilters
-                        ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
-                        : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
+                        ? 'bg-brand-100/90 text-brand-700 shadow-[var(--shadow-sm)] dark:bg-brand-900/40 dark:text-brand-300'
+                        : 'text-neutral-400 hover:bg-white/75 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800/75 dark:hover:text-neutral-300'
                 )}
                 title="Nach Prioritaet filtern"
                 aria-expanded={isOpen}
@@ -97,10 +97,10 @@ export const PriorityFilterDropdown = ({
                 <div
                     id={menuId}
                     className={cn(
-                        'absolute top-full right-0 z-50 mt-1 w-40',
-                        'rounded-lg border shadow-lg',
-                        'bg-white dark:bg-neutral-800',
-                        'border-neutral-200 dark:border-neutral-700'
+                        'absolute top-full right-0 z-50 mt-1.5 w-44',
+                        'rounded-xl border shadow-[var(--shadow-lg)] backdrop-blur-sm',
+                        'bg-white/96 dark:bg-neutral-800/96',
+                        'border-neutral-200/85 dark:border-neutral-700/85'
                     )}
                     role="menu"
                     aria-label="Prioritaetsfilter"
@@ -137,7 +137,7 @@ export const PriorityFilterDropdown = ({
                                         'transition-all duration-150',
                                         'active:scale-[0.99]',
                                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40',
-                                        'hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                                        'hover:bg-neutral-100/80 dark:hover:bg-neutral-700/85'
                                     )}
                                     role="menuitemcheckbox"
                                     aria-checked={isActive}

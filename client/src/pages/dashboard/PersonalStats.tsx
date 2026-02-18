@@ -65,9 +65,9 @@ export const PersonalStats = () => {
 
     const streakBadge =
         stats.streak > 0 ? (
-            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-white">
+            <div className="flex max-w-full items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2 text-white sm:px-4">
                 <Flame className="size-5" />
-                <span className="font-bold">{stats.streak} Tage Streak!</span>
+                <span className="truncate font-bold">{stats.streak} Tage Streak!</span>
             </div>
         ) : null
 
@@ -118,14 +118,14 @@ export const PersonalStats = () => {
 
             <div className="grid gap-6 lg:grid-cols-2">
                 <ChartCard title="Abschlussfortschritt" centerContent>
-                    <div className="flex items-center gap-8">
+                    <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
                         <ProgressRing
                             value={stats.completionRate}
                             size={140}
                             color={CHART_COLORS.completed}
                             label="Abschlussrate"
                         />
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-center sm:text-left">
                             <div className="flex items-center gap-3">
                                 <div className="size-3 rounded-full bg-emerald-500" />
                                 <span className="text-sm text-neutral-600 dark:text-neutral-400">

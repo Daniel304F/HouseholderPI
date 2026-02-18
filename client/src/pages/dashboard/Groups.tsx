@@ -56,10 +56,9 @@ export const Groups = () => {
 
     return (
         <section className="space-y-6">
-            {/* Header */}
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                    <h1 className="break-words text-2xl font-bold text-neutral-900 dark:text-white">
                         Meine Gruppen
                     </h1>
                     <p className="text-neutral-500 dark:text-neutral-400">
@@ -67,20 +66,26 @@ export const Groups = () => {
                     </p>
                 </div>
                 {groups.length > 0 && (
-                    <div className="flex gap-2">
-                        <Button
-                            variant="secondary"
-                            onClick={() => setShowJoinModal(true)}
-                            icon={<UserPlus className="size-5" />}
-                        >
-                            <span className="hidden sm:inline">Beitreten</span>
-                        </Button>
-                        <Button
-                            onClick={() => setShowCreateModal(true)}
-                            icon={<Plus className="size-5" />}
-                        >
-                            <span className="hidden sm:inline">Erstellen</span>
-                        </Button>
+                    <div className="hide-scrollbar overflow-x-auto pb-1 sm:pb-0">
+                        <div className="flex gap-2">
+                            <Button
+                                variant="secondary"
+                                onClick={() => setShowJoinModal(true)}
+                                icon={<UserPlus className="size-5" />}
+                                className="shrink-0 whitespace-nowrap"
+                            >
+                                <span className="hidden sm:inline">Beitreten</span>
+                                <span className="sm:hidden">Join</span>
+                            </Button>
+                            <Button
+                                onClick={() => setShowCreateModal(true)}
+                                icon={<Plus className="size-5" />}
+                                className="shrink-0 whitespace-nowrap"
+                            >
+                                <span className="hidden sm:inline">Erstellen</span>
+                                <span className="sm:hidden">Neu</span>
+                            </Button>
+                        </div>
                     </div>
                 )}
             </header>

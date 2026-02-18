@@ -35,7 +35,7 @@ export const ArchivedTasksList = ({
                 {Array.from({ length: 3 }).map((_, index) => (
                     <li
                         key={`archive-skeleton-${index}`}
-                        className="h-20 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800"
+                        className="shimmer h-20 rounded-xl"
                     />
                 ))}
             </ul>
@@ -58,7 +58,7 @@ export const ArchivedTasksList = ({
 
     return (
         <section className="space-y-2" aria-label="Archivierte Aufgaben">
-            <header className="flex items-center gap-2 pb-2">
+            <header className="flex items-center gap-2 rounded-xl border border-neutral-200/70 bg-white/55 px-3 py-2 backdrop-blur-sm dark:border-neutral-700/70 dark:bg-neutral-900/30">
                 <Archive className="size-5 text-neutral-500 dark:text-neutral-400" />
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
                     Archiv
@@ -99,7 +99,7 @@ export const ArchivedTasksList = ({
                             </span>
 
                             <time
-                                className="flex shrink-0 items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500"
+                                className="flex shrink-0 items-center gap-1.5 rounded-full bg-neutral-100/80 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-700/70 dark:text-neutral-300"
                                 dateTime={task.completedAt ?? undefined}
                             >
                                 <Calendar className="size-3.5" />

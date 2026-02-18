@@ -66,7 +66,7 @@ export const SentRequestCard = ({
                 size="sm"
                 onClick={() => onCancel(request.id)}
                 disabled={isLoading}
-                className="text-neutral-500 hover:text-red-600 dark:hover:text-red-400"
+                className="ml-auto shrink-0 text-neutral-500 hover:text-red-600 dark:hover:text-red-400"
             >
                 Zurückziehen
             </Button>

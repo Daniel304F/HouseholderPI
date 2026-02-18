@@ -58,18 +58,23 @@ export const PageHeader = ({
     className,
 }: PageHeaderProps) => {
     return (
-        <div className={cn('flex items-center justify-between', className)}>
-            <div>
-                <div className="flex items-center gap-3">
+        <div
+            className={cn(
+                'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between',
+                className
+            )}
+        >
+            <div className="min-w-0">
+                <div className="flex items-start gap-3">
                     {backButton}
-                    <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+                    <h1 className="break-words text-xl font-bold text-neutral-900 sm:text-2xl dark:text-white">
                         {title}
                     </h1>
                 </div>
                 {subtitle && (
                     <p
                         className={cn(
-                            'mt-1 text-neutral-500 dark:text-neutral-400',
+                            'mt-1 max-w-[70ch] text-sm text-neutral-500 sm:text-base dark:text-neutral-400',
                             backButton && 'ml-11'
                         )}
                     >
@@ -77,7 +82,9 @@ export const PageHeader = ({
                     </p>
                 )}
             </div>
-            {badge && <div className="hidden md:block">{badge}</div>}
+            {badge && (
+                <div className="w-full sm:w-auto sm:shrink-0 [&>*]:max-w-full">{badge}</div>
+            )}
         </div>
     )
 }

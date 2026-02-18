@@ -89,9 +89,9 @@ export const GroupStats = () => {
 
     const topPerformerBadge =
         topPerformer && topPerformer.completedTasks > 0 ? (
-            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-2 text-white">
+            <div className="flex max-w-full items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-2 text-white sm:px-4">
                 <Trophy className="size-5" />
-                <span className="font-bold">Top: {topPerformer.userName}</span>
+                <span className="truncate font-bold">Top: {topPerformer.userName}</span>
             </div>
         ) : null
 

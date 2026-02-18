@@ -30,7 +30,7 @@ export const FilterSection = ({
 }: FilterSectionProps) => {
     return (
         <section className="space-y-4">
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="hide-scrollbar flex gap-2 overflow-x-auto pb-1">
                 {STATUS_FILTERS.map((filter) => {
                     const Icon = filter.icon
                     const isActive = statusFilter === filter.value
@@ -73,7 +73,7 @@ export const FilterSection = ({
                             onSortChange(event.target.value as SortOption)
                         }
                         className={cn(
-                            'h-10 w-full min-w-44 appearance-none rounded-lg border py-2 pr-10 pl-4 shadow-sm transition-all sm:w-auto',
+                            'h-10 w-full appearance-none rounded-lg border py-2 pr-10 pl-4 shadow-sm transition-all sm:min-w-44 sm:w-auto',
                             'border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white',
                             'hover:border-brand-300 dark:hover:border-brand-600',
                             'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2'
@@ -92,6 +92,7 @@ export const FilterSection = ({
                     variant="secondary"
                     onClick={onToggleFilters}
                     className={cn(
+                        'w-full justify-center sm:w-auto',
                         'hover:-translate-y-0.5 hover:shadow-sm',
                         showFilters && 'bg-brand-100 dark:bg-brand-900/30'
                     )}

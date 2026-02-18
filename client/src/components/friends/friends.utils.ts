@@ -14,7 +14,7 @@ export const friendAvatarStyles = cn(
 )
 
 export const requestCardStyles = cn(
-    'flex w-full items-center gap-4 rounded-xl p-4',
+    'flex w-full flex-wrap items-center gap-3 rounded-xl p-4 sm:flex-nowrap sm:gap-4',
     'border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
 )
 

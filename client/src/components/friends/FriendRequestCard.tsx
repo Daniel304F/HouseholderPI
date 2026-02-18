@@ -37,18 +37,18 @@ export const FriendRequestCard = ({
                 </p>
             </div>
 
-            <span className="hidden text-xs text-neutral-400 sm:block">
+            <span className="hidden shrink-0 text-xs text-neutral-400 sm:block">
                 {formatDate(request.createdAt)}
             </span>
 
-            <div className="flex gap-2">
+            <div className="ml-auto flex w-full justify-end gap-2 sm:w-auto">
                 <Button
                     variant="primary"
                     size="sm"
                     onClick={() => onAccept(request.id)}
                     disabled={isLoading}
                     icon={<Check className="size-4" />}
-                    className="!px-3"
+                    className="shrink-0 !px-3"
                 >
                     <span className="sr-only sm:not-sr-only">Annehmen</span>
                 </Button>
@@ -58,7 +58,7 @@ export const FriendRequestCard = ({
                     onClick={() => onReject(request.id)}
                     disabled={isLoading}
                     icon={<X className="size-4" />}
-                    className="!px-3"
+                    className="shrink-0 !px-3"
                 >
                     <span className="sr-only sm:not-sr-only">Ablehnen</span>
                 </Button>

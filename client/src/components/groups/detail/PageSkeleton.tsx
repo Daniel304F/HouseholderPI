@@ -7,12 +7,12 @@ export const PageSkeleton = () => (
                 <div className="h-5 w-64 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
             </div>
         </div>
-        <div className="h-12 w-80 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700" />
-        <div className="flex gap-4">
+        <div className="h-12 w-full max-w-sm animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
                 <div
                     key={i}
-                    className="h-96 w-72 animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-700"
+                    className="h-72 w-full animate-pulse rounded-xl bg-neutral-200 sm:h-96 dark:bg-neutral-700"
                 />
             ))}
         </div>

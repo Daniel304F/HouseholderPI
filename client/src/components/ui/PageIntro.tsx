@@ -30,17 +30,21 @@ export const PageIntro = ({
                     </span>
                 )}
                 <div className="min-w-0">
-                    <h1 className="truncate text-2xl font-bold text-neutral-900 dark:text-white">
+                    <h1 className="break-words text-xl font-bold text-neutral-900 sm:text-2xl dark:text-white">
                         {title}
                     </h1>
                     {description && (
-                        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 sm:text-base">
+                        <p className="mt-1 max-w-[70ch] text-sm text-neutral-500 sm:text-base dark:text-neutral-400">
                             {description}
                         </p>
                     )}
                 </div>
             </div>
-            {action && <div className="shrink-0">{action}</div>}
+            {action && (
+                <div className="hide-scrollbar overflow-x-auto pb-1 sm:pb-0">
+                    <div className="w-max">{action}</div>
+                </div>
+            )}
         </header>
     )
 }
