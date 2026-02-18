@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useViewport } from '../../hooks/useViewport'
 import { useTaskFilter } from '../../hooks/useTaskFilter'
@@ -27,11 +27,13 @@ interface KanbanBoardProps {
     onArchiveCompleted?: () => void
 }
 
-const columns: { id: ColumnStatus; title: string }[] = [
+const COLUMN_DEFINITIONS: { id: ColumnStatus; title: string }[] = [
     { id: 'pending', title: 'To Do' },
     { id: 'in-progress', title: 'In Progress' },
     { id: 'completed', title: 'Completed' },
 ]
+
+const NOOP_TASK_MOVE = async () => {}
 
 export const KanbanBoard = ({
     tasks,
@@ -46,7 +48,6 @@ export const KanbanBoard = ({
     const { isMobile, isTablet } = useViewport()
     const [activeColumn, setActiveColumn] = useState<ColumnStatus>('pending')
 
-    // Task Filter Hook für Prioritätsfilter und Suche
     const {
         getFilteredTasksForColumn,
         toggleColumnFilter,
@@ -55,50 +56,56 @@ export const KanbanBoard = ({
         columnFilters,
     } = useTaskFilter({ tasks, searchQuery })
 
-    // Drag and Drop Hook
-    const {
-        dragState,
-        getDragProps,
-        getDropZoneProps,
-        isDropTarget,
-        isUpdating,
-    } = useKanbanDragDrop({
-        onTaskMove: onTaskMove || (async () => {}),
-    })
+    const { dragState, getDragProps, getDropZoneProps, isDropTarget, isUpdating } =
+        useKanbanDragDrop({
+            onTaskMove: onTaskMove ?? NOOP_TASK_MOVE,
+        })
 
-    // Group tasks by status with filters applied
-    const getColumnData = (columnId: ColumnStatus): KanbanColumnData => {
-        const columnTasks = getFilteredTasksForColumn(columnId)
+    const columnDataById = useMemo<Record<ColumnStatus, KanbanColumnData>>(
+        () => ({
+            pending: {
+                id: 'pending',
+                title: 'To Do',
+                color: '',
+                tasks: getFilteredTasksForColumn('pending'),
+            },
+            'in-progress': {
+                id: 'in-progress',
+                title: 'In Progress',
+                color: '',
+                tasks: getFilteredTasksForColumn('in-progress'),
+            },
+            completed: {
+                id: 'completed',
+                title: 'Completed',
+                color: '',
+                tasks: getFilteredTasksForColumn('completed'),
+            },
+        }),
+        [getFilteredTasksForColumn]
+    )
 
-        return {
-            id: columnId,
-            title: columns.find((c) => c.id === columnId)?.title || '',
-            color: '',
-            tasks: columnTasks,
-        }
-    }
+    const columnsWithCounts = useMemo(
+        () =>
+            COLUMN_DEFINITIONS.map((column) => ({
+                ...column,
+                taskCount: columnDataById[column.id].tasks.length,
+            })),
+        [columnDataById]
+    )
 
-    // Get task counts for column selector
-    const columnsWithCounts = columns.map((col) => ({
-        ...col,
-        taskCount: getColumnData(col.id).tasks.length,
-    }))
-
-    // Mobile View: Single column with selector
     if (isMobile) {
         return (
             <div className={cn('flex flex-col gap-4', className)}>
-                {/* Column Selector */}
                 <ColumnSelector
                     columns={columnsWithCounts}
                     activeColumn={activeColumn}
                     onColumnChange={setActiveColumn}
                 />
 
-                {/* Single Column Display */}
                 <div className="min-h-0 flex-1">
                     <KanbanColumn
-                        column={getColumnData(activeColumn)}
+                        column={columnDataById[activeColumn]}
                         onTaskClick={onTaskClick}
                         onAddTask={onAddTask}
                         isMobile
@@ -120,7 +127,6 @@ export const KanbanBoard = ({
         )
     }
 
-    // Tablet View: Horizontal scroll with compact columns
     if (isTablet) {
         return (
             <div
@@ -131,10 +137,10 @@ export const KanbanBoard = ({
                     isUpdating && 'pointer-events-none opacity-70'
                 )}
             >
-                {columns.map((column) => (
+                {COLUMN_DEFINITIONS.map((column) => (
                     <KanbanColumn
                         key={column.id}
-                        column={getColumnData(column.id)}
+                        column={columnDataById[column.id]}
                         onTaskClick={onTaskClick}
                         onAddTask={onAddTask}
                         isCompact
@@ -156,7 +162,6 @@ export const KanbanBoard = ({
         )
     }
 
-    // Desktop View: All columns horizontal with fixed height
     return (
         <div
             className={cn(
@@ -166,10 +171,10 @@ export const KanbanBoard = ({
                 isUpdating && 'pointer-events-none opacity-70'
             )}
         >
-            {columns.map((column) => (
+            {COLUMN_DEFINITIONS.map((column) => (
                 <KanbanColumn
                     key={column.id}
-                    column={getColumnData(column.id)}
+                    column={columnDataById[column.id]}
                     onTaskClick={onTaskClick}
                     onAddTask={onAddTask}
                     activeFilters={columnFilters[column.id] || []}

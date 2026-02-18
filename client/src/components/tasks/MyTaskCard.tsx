@@ -1,13 +1,18 @@
-import { useState, useMemo } from 'react'
 import {
-    Clock,
+    useMemo,
+    useState,
+    type KeyboardEvent,
+    type MouseEvent,
+} from 'react'
+import {
     CheckCircle2,
     Circle,
+    Clock,
     Pencil,
     Sparkles,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { CardActionButton, OverdueBadge, GroupBadge } from '../ui'
+import { CardActionButton, GroupBadge, OverdueBadge } from '../ui'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { TaskWithDetails } from '../../api/tasks'
@@ -21,6 +26,9 @@ interface MyTaskCardProps {
     groupName?: string
     subtaskCount?: number
 }
+
+const completionDelayMs = 600
+const celebrationDurationMs = 1500
 
 export const MyTaskCard = ({
     task,
@@ -36,142 +44,155 @@ export const MyTaskCard = ({
 
     const isCompleted = task.status === 'completed'
 
-    // Check if task is overdue
     const isOverdue = useMemo(() => {
         if (isCompleted) return false
+
         const dueDate = new Date(task.dueDate)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         dueDate.setHours(0, 0, 0, 0)
+
         return dueDate < today
     }, [task.dueDate, isCompleted])
 
-    const handleEditClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const celebrationParticles = useMemo(
+        () =>
+            Array.from({ length: 12 }, (_, index) => ({
+                id: `particle-${index}`,
+                left: `${8 + ((index * 7) % 84)}%`,
+                top: `${12 + ((index * 13) % 72)}%`,
+                delay: `${index * 0.06}s`,
+                colorClass:
+                    index % 3 === 0
+                        ? 'text-warning-400'
+                        : index % 3 === 1
+                          ? 'text-success-400'
+                          : 'text-info-400',
+            })),
+        []
+    )
+
+    const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        onClick()
+    }
+
+    const handleEditClick = (event: MouseEvent) => {
+        event.stopPropagation()
         onEditClick?.()
     }
 
-    const handleCheckboxClick = async (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const handleCheckboxClick = async (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation()
         if (isCompleted || isCompleting || !onComplete) return
 
         setIsCompleting(true)
         setShowCelebration(true)
 
-        // Delay for animation
-        await new Promise((resolve) => setTimeout(resolve, 600))
-
+        await new Promise((resolve) => setTimeout(resolve, completionDelayMs))
         onComplete()
 
-        // Hide celebration after animation
         setTimeout(() => {
             setShowCelebration(false)
             setIsCompleting(false)
-        }, 1500)
+        }, celebrationDurationMs)
     }
 
     return (
-        <div
+        <article
             onClick={onClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-label={`Aufgabe ${task.title}`}
             className={cn(
-                'group relative flex w-full cursor-pointer flex-col text-left',
-                'overflow-hidden rounded-xl border',
-                'bg-white dark:bg-neutral-800',
-                'transition-all duration-300 ease-out',
-                'hover:shadow-lg',
-                'hover:-translate-y-0.5',
-                'active:translate-y-0 active:shadow-md',
-                isCompleted &&
-                    'border-neutral-200 opacity-60 dark:border-neutral-700',
+                'group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border text-left',
+                'bg-white/95 dark:bg-neutral-800/95',
+                'border-neutral-200/85 dark:border-neutral-700/85',
+                'shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out',
+                'hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
+                'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
+                isCompleted && 'opacity-60',
                 isOverdue &&
                     !isCompleted &&
-                    'border-error-300 bg-error-50/30 dark:border-error-700 dark:bg-error-900/10 hover:border-error-400',
+                    'border-error-300 bg-error-50/35 dark:border-error-700 dark:bg-error-900/12 hover:border-error-400',
                 !isOverdue &&
                     !isCompleted &&
-                    'hover:border-brand-300 dark:hover:border-brand-600 hover:shadow-brand-500/10 border-neutral-200 dark:border-neutral-700',
+                    'hover:border-brand-300 dark:hover:border-brand-600/60',
                 isCompleting &&
-                    'border-success-400 bg-success-50/50 dark:bg-success-900/20'
+                    'border-success-400 bg-success-50/60 dark:bg-success-900/20'
             )}
         >
-            <div className="flex items-start gap-4 p-4">
-                {/* Celebration Animation */}
+            <div className="relative flex items-start gap-4 p-4">
                 {showCelebration && (
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-                        {/* Confetti particles */}
-                        {[...Array(12)].map((_, i) => (
-                            <div
-                                key={i}
+                        {celebrationParticles.map((particle) => (
+                            <span
+                                key={particle.id}
                                 className="absolute animate-bounce"
                                 style={{
-                                    left: `${Math.random() * 100}%`,
-                                    top: `${Math.random() * 100}%`,
-                                    animationDelay: `${i * 0.1}s`,
+                                    left: particle.left,
+                                    top: particle.top,
+                                    animationDelay: particle.delay,
                                     animationDuration: '0.6s',
                                 }}
                             >
                                 <Sparkles
-                                    className={cn(
-                                        'size-4',
-                                        i % 3 === 0
-                                            ? 'text-yellow-400'
-                                            : i % 3 === 1
-                                              ? 'text-green-400'
-                                              : 'text-blue-400'
-                                    )}
+                                    className={cn('size-4', particle.colorClass)}
                                 />
-                            </div>
+                            </span>
                         ))}
-                        {/* Success glow */}
-                        <div className="bg-success-400/30 absolute inset-0 animate-pulse rounded-xl" />
+                        <div className="absolute inset-0 rounded-xl bg-success-400/25 animate-pulse" />
                     </div>
                 )}
 
-                {/* Edit Button */}
                 {onEditClick && (
                     <CardActionButton
                         icon={<Pencil className="size-3.5" />}
                         onClick={handleEditClick}
                         title="Aufgabe bearbeiten"
-                        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100"
+                        className="absolute right-2 top-2 z-10 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100"
                     />
                 )}
 
-                {/* Checkbox / Status Icon */}
                 <button
+                    type="button"
                     onClick={handleCheckboxClick}
                     disabled={isCompleted || isCompleting}
                     className={cn(
-                        'mt-0.5 shrink-0 transition-all duration-300',
+                        'mt-0.5 shrink-0 transition-all duration-200',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
                         !isCompleted &&
                             !isCompleting &&
-                            'cursor-pointer hover:scale-125',
-                        isCompleting && 'scale-125'
+                            'cursor-pointer hover:scale-110 active:scale-105',
+                        isCompleting && 'scale-110'
                     )}
                     title={
-                        isCompleted
-                            ? 'Bereits erledigt'
-                            : 'Als erledigt markieren'
+                        isCompleted ? 'Bereits erledigt' : 'Als erledigt markieren'
+                    }
+                    aria-label={
+                        isCompleted ? 'Bereits erledigt' : 'Als erledigt markieren'
                     }
                 >
                     {isCompleted ? (
-                        <CheckCircle2 className="text-success-500 dark:text-success-400 size-5" />
+                        <CheckCircle2 className="size-5 text-success-500 dark:text-success-400" />
                     ) : isCompleting ? (
-                        <div className="relative">
-                            <CheckCircle2 className="text-success-500 size-5 animate-pulse" />
-                            <div className="bg-success-500 absolute inset-0 animate-ping rounded-full opacity-75" />
-                        </div>
+                        <span className="relative block">
+                            <CheckCircle2 className="size-5 animate-pulse text-success-500" />
+                            <span className="absolute inset-0 rounded-full bg-success-500 opacity-75 animate-ping" />
+                        </span>
                     ) : task.status === 'in-progress' ? (
-                        <Clock className="text-info-500 dark:text-info-400 size-5" />
+                        <Clock className="size-5 text-info-500 dark:text-info-400" />
                     ) : (
-                        <Circle className="hover:text-success-500 dark:hover:text-success-400 size-5 text-neutral-400 transition-colors dark:text-neutral-500" />
+                        <Circle className="size-5 text-neutral-400 transition-colors hover:text-success-500 dark:text-neutral-500 dark:hover:text-success-400" />
                     )}
                 </button>
 
-                {/* Content */}
-                <div className="min-w-0 flex-1 pr-6">
-                    <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1 pr-10">
+                    <header className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                            {/* Badges */}
                             <div className="mb-1 flex flex-wrap items-center gap-1">
                                 {showGroupBadge && groupName && (
                                     <GroupBadge name={groupName} />
@@ -180,29 +201,25 @@ export const MyTaskCard = ({
                             </div>
                             <h3
                                 className={cn(
-                                    'font-medium text-neutral-900 dark:text-white',
-                                    'transition-all duration-300',
-                                    'group-hover:text-brand-600 dark:group-hover:text-brand-400',
-                                    (isCompleted || isCompleting) &&
-                                        'line-through',
-                                    isCompleting && 'text-success-600'
+                                    'font-medium text-neutral-900 transition-colors duration-200 dark:text-white',
+                                    'group-hover:text-brand-700 dark:group-hover:text-brand-300',
+                                    (isCompleted || isCompleting) && 'line-through',
+                                    isCompleting && 'text-success-600 dark:text-success-400'
                                 )}
                             >
                                 {task.title}
                             </h3>
                         </div>
 
-                        {/* Priority Badge */}
                         <PriorityBadge priority={task.priority} />
-                    </div>
+                    </header>
 
                     {task.description && (
-                        <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
+                        <p className="mt-1 max-w-[44ch] line-clamp-2 text-sm leading-5 text-neutral-500 dark:text-neutral-400">
                             {task.description}
                         </p>
                     )}
 
-                    {/* Meta Info */}
                     <div className="mt-2">
                         <TaskMetadata
                             assignedTo={task.assignedTo}
@@ -215,6 +232,6 @@ export const MyTaskCard = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </article>
     )
 }

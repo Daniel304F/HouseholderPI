@@ -103,7 +103,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const logout = useCallback(async () => {
         try {
             await authApi.logout()
-        } catch {
+        } catch (error) {
+            // The local session is cleared in finally even if the API call fails.
+            void error
         } finally {
             localStorage.removeItem('accessToken')
             setUser(null)
@@ -132,6 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext)
 

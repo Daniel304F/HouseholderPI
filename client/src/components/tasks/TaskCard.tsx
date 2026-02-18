@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { STATUS_ICONS, STATUS_STYLES } from '../../constants/task.constants'
-import { CardActionButton, OverdueBadge, GroupBadge } from '../ui'
+import { CardActionButton, GroupBadge, OverdueBadge } from '../ui'
 import { PriorityBadge } from './PriorityBadge'
 import { TaskMetadata } from './TaskMetadata'
 import type { Task } from '../../api/tasks'
@@ -28,46 +28,57 @@ export const TaskCard = ({
 }: TaskCardProps) => {
     const StatusIcon = STATUS_ICONS[task.status]
 
-    // Check if task is overdue
     const isOverdue = useMemo(() => {
         if (task.status === 'completed') return false
+
         const dueDate = new Date(task.dueDate)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         dueDate.setHours(0, 0, 0, 0)
+
         return dueDate < today
     }, [task.dueDate, task.status])
 
-    const handleEditClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        onClick()
+    }
+
+    const handleEditClick = (event: MouseEvent) => {
+        event.stopPropagation()
         onEditClick?.()
     }
 
-    const handleDeleteClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const handleDeleteClick = (event: MouseEvent) => {
+        event.stopPropagation()
         onDeleteClick?.()
     }
 
     return (
-        <div
+        <article
             onClick={onClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-label={`Aufgabe ${task.title}`}
             className={cn(
-                'group relative flex w-full cursor-pointer flex-col text-left',
-                'rounded-xl border overflow-hidden',
-                'bg-white dark:bg-neutral-800',
-                'border-neutral-200 dark:border-neutral-700',
-                'transition-all duration-300 ease-out',
-                'hover:border-brand-300 dark:hover:border-brand-600',
-                'hover:shadow-brand-500/10 hover:shadow-lg',
-                'hover:-translate-y-0.5',
-                'active:translate-y-0 active:shadow-md',
+                'group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border text-left',
+                'bg-white/95 dark:bg-neutral-800/95',
+                'border-neutral-200/85 dark:border-neutral-700/85',
+                'shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out',
+                'hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-[var(--shadow-md)]',
+                'dark:hover:border-brand-600/60',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
+                'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
                 task.status === 'completed' && 'opacity-60',
-                isOverdue && task.status !== 'completed' && 'border-error-300 bg-error-50/30 dark:border-error-700 dark:bg-error-900/10 hover:border-error-400'
+                isOverdue &&
+                    task.status !== 'completed' &&
+                    'border-error-300 bg-error-50/35 dark:border-error-700 dark:bg-error-900/12 hover:border-error-400'
             )}
         >
-            <div className="flex items-start gap-4 p-4">
-                {/* Action Buttons */}
-                <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="relative flex items-start gap-4 p-4">
+                <div className="absolute right-2 top-2 z-10 flex gap-1 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
                     {onEditClick && (
                         <CardActionButton
                             icon={<Pencil className="size-3.5" />}
@@ -80,66 +91,59 @@ export const TaskCard = ({
                             icon={<Trash2 className="size-3.5" />}
                             variant="danger"
                             onClick={handleDeleteClick}
-                            title="Aufgabe löschen"
+                            title="Aufgabe loeschen"
                         />
                     )}
                 </div>
 
-            {/* Status Icon */}
-            <div
-                className={cn(
-                    'mt-0.5 transition-transform duration-300 group-hover:scale-110',
-                    STATUS_STYLES[task.status]
-                )}
-            >
-                <StatusIcon className="size-5" />
-            </div>
+                <span
+                    className={cn(
+                        'mt-0.5 shrink-0 text-neutral-400 transition-transform duration-200 group-hover:scale-105 dark:text-neutral-500',
+                        STATUS_STYLES[task.status]
+                    )}
+                    aria-hidden
+                >
+                    <StatusIcon className="size-5" />
+                </span>
 
-            {/* Content */}
-            <div className="min-w-0 flex-1 pr-6">
-                <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                        {/* Group Badge */}
-                        {showGroupBadge && groupName && (
-                            <GroupBadge name={groupName} />
-                        )}
-                        <h3
-                            className={cn(
-                                'font-medium text-neutral-900 dark:text-white',
-                                'transition-colors duration-300',
-                                'group-hover:text-brand-600 dark:group-hover:text-brand-400',
-                                task.status === 'completed' && 'line-through'
-                            )}
-                        >
-                            {task.title}
-                        </h3>
-                    </div>
+                <div className="min-w-0 flex-1 pr-10">
+                    <header className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            {showGroupBadge && groupName && <GroupBadge name={groupName} />}
+                            <h3
+                                className={cn(
+                                    'font-medium text-neutral-900 transition-colors duration-200 dark:text-white',
+                                    'group-hover:text-brand-700 dark:group-hover:text-brand-300',
+                                    task.status === 'completed' && 'line-through'
+                                )}
+                            >
+                                {task.title}
+                            </h3>
+                        </div>
 
-                    {/* Priority Badge */}
-                    <div className="flex items-center gap-1.5">
-                        {isOverdue && <OverdueBadge />}
-                        <PriorityBadge priority={task.priority} />
+                        <div className="flex items-center gap-1.5">
+                            {isOverdue && <OverdueBadge />}
+                            <PriorityBadge priority={task.priority} />
+                        </div>
+                    </header>
+
+                    {task.description && (
+                        <p className="mt-1 max-w-[44ch] line-clamp-2 text-sm leading-5 text-neutral-500 dark:text-neutral-400">
+                            {task.description}
+                        </p>
+                    )}
+
+                    <div className="mt-2">
+                        <TaskMetadata
+                            assignedTo={task.assignedTo}
+                            dueDate={task.dueDate}
+                            status={task.status}
+                            subtaskCount={subtaskCount}
+                            linkedTasks={task.linkedTasks}
+                        />
                     </div>
                 </div>
-
-                {task.description && (
-                    <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
-                        {task.description}
-                    </p>
-                )}
-
-                {/* Meta Info */}
-                <div className="mt-2">
-                    <TaskMetadata
-                        assignedTo={task.assignedTo}
-                        dueDate={task.dueDate}
-                        status={task.status}
-                        subtaskCount={subtaskCount}
-                        linkedTasks={task.linkedTasks}
-                    />
-                </div>
             </div>
-            </div>
-        </div>
+        </article>
     )
 }

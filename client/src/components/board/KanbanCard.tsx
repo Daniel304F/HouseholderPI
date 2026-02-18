@@ -1,11 +1,4 @@
-import {
-    MessageSquare,
-    User,
-    Pencil,
-    Trash2,
-    ListTree,
-    Link2,
-} from 'lucide-react'
+import { Link2, ListTree, Pencil, Trash2, User } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { CardActionButton } from '../ui'
 import { PriorityBadge } from '../tasks'
@@ -42,41 +35,53 @@ export const KanbanCard = ({
     subtaskCount = 0,
     assigneeInfo,
 }: KanbanCardProps) => {
-    const comments = 0
-    const linkedCount = task.linkedTasks?.length || 0
+    const linkedCount = task.linkedTasks?.length ?? 0
+    const hasMeta = subtaskCount > 0 || linkedCount > 0
 
-    const handleEditClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const assigneeLabel = assigneeInfo?.name || task.assignedTo || 'Nicht zugewiesen'
+    const assigneeInitial = assigneeLabel.charAt(0).toUpperCase()
+
+    const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        onClick()
+    }
+
+    const handleEditClick = (event: React.MouseEvent) => {
+        event.stopPropagation()
         onEditClick?.()
     }
 
-    const handleDeleteClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    const handleDeleteClick = (event: React.MouseEvent) => {
+        event.stopPropagation()
         onDeleteClick?.()
     }
 
     return (
-        <div
+        <article
             onClick={onClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-label={`Aufgabe ${task.title}`}
             className={cn(
-                'group relative w-full flex-shrink-0 cursor-pointer rounded-xl text-left overflow-hidden',
-                'bg-white dark:bg-neutral-800/90',
-                'border border-neutral-200/80 dark:border-neutral-700/80',
-                'shadow-sm',
-                'transition-all duration-200 ease-out',
-                'hover:shadow-brand-500/5 hover:-translate-y-1 hover:shadow-lg',
-                'hover:border-brand-300/80 dark:hover:border-brand-600/60',
-                'hover:to-brand-50/30 hover:bg-gradient-to-br hover:from-white',
-                'dark:hover:to-brand-950/20 dark:hover:from-neutral-800',
+                'group relative w-full flex-shrink-0 overflow-hidden rounded-xl border text-left',
+                'bg-white/95 dark:bg-neutral-800/95',
+                'border-neutral-200/85 dark:border-neutral-700/85',
+                'shadow-[var(--shadow-sm)]',
+                'transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out',
+                'hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] hover:border-brand-300/80',
+                'dark:hover:border-brand-600/60',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900',
+                'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
                 isDragging &&
-                    'ring-brand-500 scale-[0.97] opacity-60 shadow-xl ring-2',
+                    'scale-[0.98] opacity-70 ring-2 ring-brand-500 shadow-[var(--shadow-lg)]',
                 dragProps?.draggable && 'cursor-grab active:cursor-grabbing'
             )}
             {...dragProps}
         >
             <div className="p-4">
-                {/* Action Buttons */}
-                <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
                     {onEditClick && (
                         <CardActionButton
                             icon={<Pencil className="size-3.5" />}
@@ -89,99 +94,91 @@ export const KanbanCard = ({
                             icon={<Trash2 className="size-3.5" />}
                             variant="danger"
                             onClick={handleDeleteClick}
-                            title="Aufgabe löschen"
+                            title="Aufgabe loeschen"
                         />
                     )}
                 </div>
 
-            {/* Header: Priority Badge + Title */}
-            <div className="flex items-start gap-2.5 pr-8">
-                <PriorityBadge priority={task.priority} size="sm" />
-                <h4
-                    className={cn(
-                        'flex-1 text-sm font-semibold text-neutral-800 dark:text-neutral-100',
-                        'line-clamp-2 transition-colors duration-200',
-                        'group-hover:text-brand-600 dark:group-hover:text-brand-400'
-                    )}
-                >
-                    {task.title}
-                </h4>
-            </div>
+                <header className="flex items-start gap-2.5 pr-12">
+                    <PriorityBadge priority={task.priority} size="sm" />
+                    <h4
+                        className={cn(
+                            'flex-1 text-sm font-semibold leading-5 text-neutral-900 dark:text-neutral-100',
+                            'line-clamp-2 transition-colors duration-200',
+                            'group-hover:text-brand-700 dark:group-hover:text-brand-300'
+                        )}
+                    >
+                        {task.title}
+                    </h4>
+                </header>
 
-            {/* Description */}
-            {task.description && (
-                <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                    {task.description}
-                </p>
-            )}
+                {task.description && (
+                    <p className="mt-2 max-w-[34ch] line-clamp-2 text-xs leading-5 text-neutral-500 dark:text-neutral-400">
+                        {task.description}
+                    </p>
+                )}
 
-            {/* Footer */}
-            <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-2 dark:border-neutral-700/50">
-                {/* Assignee Avatar */}
-                <div className="flex -space-x-1.5">
-                    {task.assignedTo ? (
-                        assigneeInfo?.avatar ? (
-                            <img
-                                src={assigneeInfo.avatar}
-                                alt={assigneeInfo.name || task.assignedTo}
-                                title={assigneeInfo.name || task.assignedTo}
-                                className={cn(
-                                    'size-6 rounded-full object-cover',
-                                    'border-2 border-white dark:border-neutral-800',
-                                    'shadow-sm'
-                                )}
-                            />
+                <footer className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-2 dark:border-neutral-700/50">
+                    <div className="flex -space-x-1.5">
+                        {task.assignedTo ? (
+                            assigneeInfo?.avatar ? (
+                                <img
+                                    src={assigneeInfo.avatar}
+                                    alt={assigneeLabel}
+                                    title={assigneeLabel}
+                                    className={cn(
+                                        'size-6 rounded-full object-cover',
+                                        'border-2 border-white dark:border-neutral-800',
+                                        'shadow-[var(--shadow-sm)]'
+                                    )}
+                                />
+                            ) : (
+                                <span
+                                    className={cn(
+                                        'flex size-6 items-center justify-center rounded-full',
+                                        'bg-gradient-to-br from-brand-100 to-brand-200',
+                                        'dark:from-brand-900/50 dark:to-brand-800/50',
+                                        'border-2 border-white dark:border-neutral-800',
+                                        'text-[11px] font-bold text-brand-700 dark:text-brand-300',
+                                        'shadow-[var(--shadow-sm)]'
+                                    )}
+                                    title={assigneeLabel}
+                                >
+                                    {assigneeInitial}
+                                </span>
+                            )
                         ) : (
-                            <div
+                            <span
                                 className={cn(
                                     'flex size-6 items-center justify-center rounded-full',
-                                    'from-brand-100 to-brand-200 bg-gradient-to-br',
-                                    'dark:from-brand-900/50 dark:to-brand-800/50',
-                                    'border-2 border-white dark:border-neutral-800',
-                                    'text-brand-700 dark:text-brand-300 text-[11px] font-bold',
-                                    'shadow-sm'
+                                    'bg-neutral-100 dark:bg-neutral-700',
+                                    'border-2 border-white dark:border-neutral-800'
                                 )}
-                                title={assigneeInfo?.name || task.assignedTo}
+                                title="Nicht zugewiesen"
                             >
-                                {(assigneeInfo?.name || task.assignedTo).charAt(0).toUpperCase()}
-                            </div>
-                        )
-                    ) : (
-                        <div
-                            className={cn(
-                                'flex size-6 items-center justify-center rounded-full',
-                                'bg-neutral-100 dark:bg-neutral-700',
-                                'border-2 border-white dark:border-neutral-800'
-                            )}
-                        >
-                            <User className="size-3.5 text-neutral-400" />
-                        </div>
-                    )}
-                </div>
-
-                {/* Meta Icons */}
-                <div className="flex items-center gap-2.5 text-neutral-400 dark:text-neutral-500">
-                    {/* Subtasks */}
-                    {subtaskCount > 0 && (
-                        <div className="text-info-500 dark:text-info-400 flex items-center gap-1 text-[11px] font-medium">
-                            <ListTree className="size-3.5" />
-                            <span>{subtaskCount}</span>
-                        </div>
-                    )}
-                    {/* Links */}
-                    {linkedCount > 0 && (
-                        <div className="text-brand-500 dark:text-brand-400 flex items-center gap-1 text-[11px] font-medium">
-                            <Link2 className="size-3.5" />
-                            <span>{linkedCount}</span>
-                        </div>
-                    )}
-                    <div className="flex items-center gap-1 text-[11px]">
-                        <MessageSquare className="size-3.5" />
-                        <span>{comments}</span>
+                                <User className="size-3.5 text-neutral-400" />
+                            </span>
+                        )}
                     </div>
-                </div>
+
+                    {hasMeta && (
+                        <ul className="flex items-center gap-2.5 text-[11px] font-medium">
+                            {subtaskCount > 0 && (
+                                <li className="text-info-500 dark:text-info-400 flex items-center gap-1">
+                                    <ListTree className="size-3.5" />
+                                    <span>{subtaskCount}</span>
+                                </li>
+                            )}
+                            {linkedCount > 0 && (
+                                <li className="text-brand-500 dark:text-brand-400 flex items-center gap-1">
+                                    <Link2 className="size-3.5" />
+                                    <span>{linkedCount}</span>
+                                </li>
+                            )}
+                        </ul>
+                    )}
+                </footer>
             </div>
-            </div>
-        </div>
+        </article>
     )
 }

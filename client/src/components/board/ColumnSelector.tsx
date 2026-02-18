@@ -15,16 +15,25 @@ interface ColumnSelectorProps {
     onColumnChange: (columnId: ColumnStatus) => void
 }
 
-const columnColors: Record<ColumnStatus, string> = {
+const columnDotColors: Record<ColumnStatus, string> = {
     pending: 'bg-amber-400',
     'in-progress': 'bg-blue-400',
     completed: 'bg-green-400',
 }
 
 const columnActiveColors: Record<ColumnStatus, string> = {
-    pending: 'bg-amber-100 dark:bg-amber-900/30',
-    'in-progress': 'bg-blue-100 dark:bg-blue-900/30',
-    completed: 'bg-green-100 dark:bg-green-900/30',
+    pending: 'bg-amber-100 dark:bg-amber-950/35',
+    'in-progress': 'bg-blue-100 dark:bg-blue-950/35',
+    completed: 'bg-green-100 dark:bg-green-950/35',
+}
+
+const columnCountColors: Record<ColumnStatus, string> = {
+    pending:
+        'bg-amber-200/80 text-amber-800 dark:bg-amber-900/45 dark:text-amber-200',
+    'in-progress':
+        'bg-blue-200/80 text-blue-800 dark:bg-blue-900/45 dark:text-blue-200',
+    completed:
+        'bg-green-200/80 text-green-800 dark:bg-green-900/45 dark:text-green-200',
 }
 
 export const ColumnSelector = ({
@@ -32,87 +41,96 @@ export const ColumnSelector = ({
     activeColumn,
     onColumnChange,
 }: ColumnSelectorProps) => {
-    const currentIndex = columns.findIndex((c) => c.id === activeColumn)
+    if (columns.length === 0) {
+        return null
+    }
+
+    const activeIndex = columns.findIndex((column) => column.id === activeColumn)
+    const currentIndex = activeIndex >= 0 ? activeIndex : 0
     const currentColumn = columns[currentIndex]
+    const canGoBack = currentIndex > 0
+    const canGoForward = currentIndex < columns.length - 1
 
     const goToPrevious = () => {
-        if (currentIndex > 0) {
-            onColumnChange(columns[currentIndex - 1].id)
-        }
+        if (!canGoBack) return
+        onColumnChange(columns[currentIndex - 1].id)
     }
 
     const goToNext = () => {
-        if (currentIndex < columns.length - 1) {
-            onColumnChange(columns[currentIndex + 1].id)
-        }
+        if (!canGoForward) return
+        onColumnChange(columns[currentIndex + 1].id)
     }
 
     return (
-        <div className="flex flex-col gap-2">
-            {/* Column Navigation with Arrows */}
+        <nav className="flex flex-col gap-2.5" aria-label="Spaltennavigation">
             <div className="flex items-center justify-between gap-2">
                 <IconButton
                     icon={<ChevronLeft className="size-5" />}
                     variant="ghost"
                     size="sm"
                     onClick={goToPrevious}
-                    disabled={currentIndex === 0}
+                    disabled={!canGoBack}
                     aria-label="Vorherige Spalte"
                 />
 
-                {/* Current Column Info */}
-                <div
+                <p
                     className={cn(
                         'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2',
-                        columnActiveColors[activeColumn]
+                        'transition-colors duration-200',
+                        columnActiveColors[currentColumn.id]
                     )}
                 >
-                    <div
+                    <span
                         className={cn(
-                            'size-2 rounded-full',
-                            columnColors[activeColumn]
+                            'size-2 rounded-full shadow-[var(--shadow-sm)]',
+                            columnDotColors[currentColumn.id]
                         )}
+                        aria-hidden
                     />
                     <span className="font-semibold text-neutral-900 dark:text-white">
-                        {currentColumn?.title}
+                        {currentColumn.title}
                     </span>
                     <span
                         className={cn(
-                            'flex size-5 items-center justify-center rounded-full text-xs font-medium',
-                            'bg-white/60 dark:bg-neutral-800/60',
-                            'text-neutral-600 dark:text-neutral-400'
+                            'flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold',
+                            columnCountColors[currentColumn.id]
                         )}
                     >
-                        {currentColumn?.taskCount}
+                        {currentColumn.taskCount}
                     </span>
-                </div>
+                </p>
 
                 <IconButton
                     icon={<ChevronRight className="size-5" />}
                     variant="ghost"
                     size="sm"
                     onClick={goToNext}
-                    disabled={currentIndex === columns.length - 1}
-                    aria-label="Nächste Spalte"
+                    disabled={!canGoForward}
+                    aria-label="Naechste Spalte"
                 />
             </div>
 
-            {/* Column Dots/Pills Indicator */}
-            <div className="flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-1.5" role="tablist">
                 {columns.map((column) => (
                     <button
                         key={column.id}
+                        type="button"
                         onClick={() => onColumnChange(column.id)}
                         className={cn(
-                            'h-1.5 rounded-full transition-all duration-200',
-                            column.id === activeColumn
-                                ? cn('w-6', columnColors[column.id])
-                                : 'w-1.5 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500'
+                            'rounded-full transition-all duration-200',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
+                            'active:scale-95',
+                            column.id === currentColumn.id
+                                ? cn('h-2 w-7', columnDotColors[column.id])
+                                : 'h-2 w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500'
                         )}
                         aria-label={column.title}
+                        aria-selected={column.id === currentColumn.id}
+                        aria-current={column.id === currentColumn.id ? 'true' : undefined}
+                        role="tab"
                     />
                 ))}
             </div>
-        </div>
+        </nav>
     )
 }

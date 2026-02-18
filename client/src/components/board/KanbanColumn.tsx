@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Archive, MoreHorizontal, Plus } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { IconButton } from '../common/IconButton'
@@ -27,12 +28,10 @@ interface KanbanColumnProps {
     onAddTask: (columnId: ColumnStatus) => void
     isMobile?: boolean
     isCompact?: boolean
-    // Filter props
     activeFilters?: Priority[]
     onToggleFilter?: (priority: Priority) => void
     onClearFilters?: () => void
     hasActiveFilters?: boolean
-    // Drag and Drop props
     getDragProps?: (task: Task) => {
         draggable: boolean
         onDragStart: (e: React.DragEvent) => void
@@ -81,46 +80,47 @@ export const KanbanColumn = ({
     members = [],
     onArchiveCompleted,
 }: KanbanColumnProps) => {
-    // Helper to get member info for assignee
-    const getMemberInfo = (userId: string | null) => {
-        if (!userId) return undefined
-        return members.find((m) => m.userId === userId)
-    }
     const dropZoneProps = getDropZoneProps?.(column.id)
 
+    const memberInfoById = useMemo(() => {
+        const lookup = new Map<string, MemberInfo>()
+        for (const member of members) {
+            lookup.set(member.userId, member)
+        }
+        return lookup
+    }, [members])
+
     return (
-        <div
+        <section
             className={cn(
-                'flex flex-col rounded-2xl transition-all duration-300',
-                'border border-neutral-200/50 dark:border-neutral-700/50',
-                'shadow-sm',
+                'flex flex-col rounded-2xl border border-neutral-200/50 shadow-[var(--shadow-sm)] transition-all duration-300',
+                'dark:border-neutral-700/50',
                 columnBgColors[column.id],
-                // Desktop: fixed width with max height, Mobile: full width, Compact: tablet optimized
                 isMobile
                     ? 'max-h-[70vh] w-full'
                     : isCompact
                       ? 'max-h-[60vh] min-h-64 min-w-56 max-w-64 flex-shrink-0'
                       : 'max-h-[65vh] max-w-72 min-w-72',
-                // Drop target styling
                 isDropTarget &&
-                    'ring-brand-500 bg-brand-50 dark:bg-brand-950/30 scale-[1.02] shadow-lg ring-2 ring-inset'
+                    'scale-[1.01] bg-brand-50 ring-2 ring-inset ring-brand-500 shadow-[var(--shadow-lg)] dark:bg-brand-950/30'
             )}
+            aria-label={column.title}
             {...dropZoneProps}
         >
-            {/* Column Header - Hidden on mobile (selector shows it) */}
             {!isMobile && (
-                <div
+                <header
                     className={cn(
                         'flex items-center justify-between',
                         isCompact ? 'p-3' : 'p-4'
                     )}
                 >
                     <div className="flex items-center gap-2.5">
-                        <div
+                        <span
                             className={cn(
-                                'size-2.5 rounded-full shadow-sm',
+                                'size-2.5 rounded-full shadow-[var(--shadow-sm)]',
                                 columnColors[column.id]
                             )}
+                            aria-hidden
                         />
                         <h3
                             className={cn(
@@ -133,18 +133,17 @@ export const KanbanColumn = ({
                         <span
                             className={cn(
                                 'flex items-center justify-center rounded-full text-xs font-bold',
-                                'bg-white/80 dark:bg-neutral-800/80',
-                                'text-neutral-600 dark:text-neutral-300',
-                                'border border-neutral-200/50 shadow-sm dark:border-neutral-700/50',
+                                'border border-neutral-200/50 bg-white/80 text-neutral-600 shadow-[var(--shadow-sm)]',
+                                'dark:border-neutral-700/50 dark:bg-neutral-800/80 dark:text-neutral-300',
                                 isCompact ? 'size-5' : 'size-6'
                             )}
                         >
                             {column.tasks.length}
                         </span>
                     </div>
+
                     {!isCompact && (
                         <div className="flex items-center gap-1.5">
-                            {/* Priority Filter */}
                             {onToggleFilter && onClearFilters && (
                                 <PriorityFilterDropdown
                                     activeFilters={activeFilters}
@@ -153,16 +152,18 @@ export const KanbanColumn = ({
                                     hasActiveFilters={hasActiveFilters}
                                 />
                             )}
-                            {column.id === 'completed' && column.tasks.length > 0 && onArchiveCompleted && (
-                                <IconButton
-                                    icon={<Archive className="size-4" />}
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={onArchiveCompleted}
-                                    aria-label="Alle erledigten Aufgaben archivieren"
-                                    title="Alle archivieren"
-                                />
-                            )}
+                            {column.id === 'completed' &&
+                                column.tasks.length > 0 &&
+                                onArchiveCompleted && (
+                                    <IconButton
+                                        icon={<Archive className="size-4" />}
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={onArchiveCompleted}
+                                        aria-label="Alle erledigten Aufgaben archivieren"
+                                        title="Alle archivieren"
+                                    />
+                                )}
                             <IconButton
                                 icon={<MoreHorizontal className="size-4" />}
                                 variant="ghost"
@@ -171,10 +172,9 @@ export const KanbanColumn = ({
                             />
                         </div>
                     )}
-                </div>
+                </header>
             )}
 
-            {/* Tasks Container */}
             <div
                 className={cn(
                     'kanban-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2',
@@ -184,18 +184,16 @@ export const KanbanColumn = ({
                 {column.tasks.length === 0 ? (
                     <div
                         className={cn(
-                            'flex flex-col items-center justify-center px-4 py-10',
-                            'text-sm text-neutral-400 dark:text-neutral-500',
-                            'rounded-xl',
+                            'flex flex-col items-center justify-center rounded-xl px-4 py-10 text-sm text-neutral-400 dark:text-neutral-500',
                             isDropTarget
-                                ? 'border-brand-400 bg-brand-50/50 dark:bg-brand-950/20 border-2 border-dashed'
+                                ? 'border-2 border-dashed border-brand-400 bg-brand-50/50 dark:bg-brand-950/20'
                                 : 'border border-dashed border-neutral-300 dark:border-neutral-600'
                         )}
                     >
                         <p className="font-medium">
                             {isDropTarget
-                                ? '✨ Hier ablegen'
-                                : 'Keine Aufgaben'}
+                                ? 'Hier ablegen'
+                                : 'Keine Aufgaben in dieser Spalte'}
                         </p>
                     </div>
                 ) : (
@@ -206,34 +204,35 @@ export const KanbanColumn = ({
                             onClick={() => onTaskClick(task)}
                             dragProps={getDragProps?.(task)}
                             isDragging={draggedTaskId === task.id}
-                            assigneeInfo={getMemberInfo(task.assignedTo)}
+                            assigneeInfo={
+                                task.assignedTo
+                                    ? memberInfoById.get(task.assignedTo)
+                                    : undefined
+                            }
                         />
                     ))
                 )}
 
-                {/* Add Task Button */}
                 <button
+                    type="button"
                     onClick={() => onAddTask(column.id)}
                     className={cn(
-                        'flex items-center justify-center gap-2 rounded-xl',
-                        'border-2 border-dashed',
-                        'border-neutral-300/80 dark:border-neutral-600/80',
-                        'text-sm font-medium text-neutral-500 dark:text-neutral-400',
-                        'transition-all duration-200',
-                        'hover:border-brand-400 hover:text-brand-600',
-                        'dark:hover:border-brand-500 dark:hover:text-brand-400',
-                        'hover:bg-brand-50/50 dark:hover:bg-brand-950/30',
-                        'hover:scale-[1.02]',
-                        'active:scale-[0.98]',
+                        'flex items-center justify-center gap-2 rounded-xl border-2 border-dashed',
+                        'border-neutral-300/80 text-sm font-medium text-neutral-500',
+                        'transition-all duration-200 ease-out dark:border-neutral-600/80 dark:text-neutral-400',
+                        'hover:border-brand-400 hover:bg-brand-50/50 hover:text-brand-600',
+                        'dark:hover:border-brand-500 dark:hover:bg-brand-950/30 dark:hover:text-brand-400',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
+                        'active:scale-[0.99] active:border-brand-400 active:bg-brand-50/60 active:text-brand-600',
                         isCompact ? 'p-2.5' : 'p-3.5'
                     )}
                 >
                     <Plus className="size-4" />
                     <span className={cn(isCompact && 'sr-only')}>
-                        Aufgabe hinzufügen
+                        Aufgabe hinzufuegen
                     </span>
                 </button>
             </div>
-        </div>
+        </section>
     )
 }

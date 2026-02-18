@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
+import {
+    useId,
+    useRef,
+    useState,
+    type FocusEvent,
+    type KeyboardEvent,
+} from 'react'
 import { Filter, Check, X } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import type { Priority } from '../../hooks/useTaskFilter'
@@ -36,36 +42,48 @@ export const PriorityFilterDropdown = ({
 }: PriorityFilterDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const triggerRef = useRef<HTMLButtonElement>(null)
+    const menuId = useId()
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setIsOpen(false)
-            }
+    const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
+        const nextFocusedElement = event.relatedTarget as Node | null
+        if (
+            !nextFocusedElement ||
+            !dropdownRef.current?.contains(nextFocusedElement)
+        ) {
+            setIsOpen(false)
         }
+    }
 
-        document.addEventListener('mousedown', handleClickOutside)
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
+    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== 'Escape') return
+        setIsOpen(false)
+        triggerRef.current?.focus()
+    }
 
     return (
-        <div className="relative" ref={dropdownRef}>
-            {/* Filter Button */}
+        <div
+            className="relative"
+            ref={dropdownRef}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+        >
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                ref={triggerRef}
+                type="button"
+                onClick={() => setIsOpen((previousValue) => !previousValue)}
                 className={cn(
                     'flex items-center justify-center rounded-lg p-1.5',
-                    'transition-all duration-200',
+                    'transition-all duration-200 ease-out',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40',
+                    'active:scale-95',
                     hasActiveFilters
                         ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
                         : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
                 )}
-                title="Nach Priorität filtern"
+                title="Nach Prioritaet filtern"
+                aria-expanded={isOpen}
+                aria-controls={menuId}
             >
                 <Filter className="size-3.5" />
                 {hasActiveFilters && (
@@ -75,52 +93,58 @@ export const PriorityFilterDropdown = ({
                 )}
             </button>
 
-            {/* Dropdown Menu */}
             {isOpen && (
                 <div
+                    id={menuId}
                     className={cn(
                         'absolute top-full right-0 z-50 mt-1 w-40',
                         'rounded-lg border shadow-lg',
                         'bg-white dark:bg-neutral-800',
                         'border-neutral-200 dark:border-neutral-700'
                     )}
+                    role="menu"
+                    aria-label="Prioritaetsfilter"
                 >
-                    {/* Header */}
                     <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2 dark:border-neutral-700">
                         <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                            Priorität
+                            Prioritaet
                         </span>
                         {hasActiveFilters && (
                             <button
+                                type="button"
                                 onClick={() => {
                                     onClearFilters()
                                     setIsOpen(false)
                                 }}
-                                className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                                className="rounded p-0.5 text-xs text-neutral-400 transition-colors duration-150 hover:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:hover:text-neutral-300"
+                                aria-label="Filter zuruecksetzen"
                             >
                                 <X className="size-3" />
                             </button>
                         )}
                     </div>
 
-                    {/* Options */}
                     <div className="p-1">
                         {priorities.map((priority) => {
                             const isActive = activeFilters.includes(priority.id)
                             return (
                                 <button
                                     key={priority.id}
+                                    type="button"
                                     onClick={() => onToggleFilter(priority.id)}
                                     className={cn(
                                         'flex w-full items-center gap-2 rounded-md px-2 py-1.5',
-                                        'transition-colors duration-150',
+                                        'transition-all duration-150',
+                                        'active:scale-[0.99]',
+                                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40',
                                         'hover:bg-neutral-100 dark:hover:bg-neutral-700'
                                     )}
+                                    role="menuitemcheckbox"
+                                    aria-checked={isActive}
                                 >
-                                    <div
+                                    <span
                                         className={cn(
-                                            'flex size-4 items-center justify-center rounded',
-                                            'border',
+                                            'flex size-4 items-center justify-center rounded border',
                                             isActive
                                                 ? 'border-brand-500 bg-brand-500'
                                                 : 'border-neutral-300 dark:border-neutral-600'
@@ -129,7 +153,7 @@ export const PriorityFilterDropdown = ({
                                         {isActive && (
                                             <Check className="size-3 text-white" />
                                         )}
-                                    </div>
+                                    </span>
                                     <span
                                         className={cn(
                                             'rounded px-1.5 py-0.5 text-xs font-medium',
