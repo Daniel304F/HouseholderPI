@@ -1,11 +1,13 @@
-import { Archive, Calendar } from 'lucide-react'
+import { Archive, Calendar, RotateCcw } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { PriorityBadge } from '../tasks'
 import type { Task } from '../../api/tasks'
+import { Button } from '../common'
 
 interface ArchivedTasksListProps {
     tasks: Task[]
     onTaskClick: (task: Task) => void
+    onRestoreTask: (taskId: string) => void
     isLoading?: boolean
 }
 
@@ -27,6 +29,7 @@ const formatDate = (dateString: string | null | undefined) => {
 export const ArchivedTasksList = ({
     tasks,
     onTaskClick,
+    onRestoreTask,
     isLoading = false,
 }: ArchivedTasksListProps) => {
     if (isLoading) {
@@ -71,41 +74,56 @@ export const ArchivedTasksList = ({
             <ul className="space-y-2" role="list">
                 {tasks.map((task) => (
                     <li key={task.id}>
-                        <button
-                            type="button"
-                            onClick={() => onTaskClick(task)}
+                        <div
                             className={cn(
-                                'flex w-full items-center gap-4 rounded-xl p-4 text-left',
+                                'flex items-center gap-4 rounded-xl p-4',
                                 'bg-white/95 dark:bg-neutral-800/90',
                                 'border border-neutral-200/80 dark:border-neutral-700/80',
                                 'shadow-[var(--shadow-sm)] transition-all duration-200 ease-out',
-                                'hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] hover:border-brand-300/70',
-                                'dark:hover:border-brand-600/60',
-                                'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
-                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45'
+                                'hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]'
                             )}
                         >
-                            <PriorityBadge priority={task.priority} size="sm" />
-
-                            <span className="min-w-0 flex-1">
-                                <span className="block truncate font-medium text-neutral-900 dark:text-white">
-                                    {task.title}
-                                </span>
-                                {task.description && (
-                                    <span className="mt-0.5 block max-w-[40ch] truncate text-xs leading-5 text-neutral-500 dark:text-neutral-400">
-                                        {task.description}
-                                    </span>
+                            <button
+                                type="button"
+                                onClick={() => onTaskClick(task)}
+                                className={cn(
+                                    'flex min-w-0 flex-1 items-center gap-4 text-left',
+                                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45'
                                 )}
-                            </span>
-
-                            <time
-                                className="flex shrink-0 items-center gap-1.5 rounded-full bg-neutral-100/80 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-700/70 dark:text-neutral-300"
-                                dateTime={task.completedAt ?? undefined}
                             >
-                                <Calendar className="size-3.5" />
-                                <span>{formatDate(task.completedAt)}</span>
-                            </time>
-                        </button>
+                                <PriorityBadge priority={task.priority} size="sm" />
+
+                                <span className="min-w-0 flex-1">
+                                    <span className="block truncate font-medium text-neutral-900 dark:text-white">
+                                        {task.title}
+                                    </span>
+                                    {task.description && (
+                                        <span className="mt-0.5 block max-w-[40ch] truncate text-xs leading-5 text-neutral-500 dark:text-neutral-400">
+                                            {task.description}
+                                        </span>
+                                    )}
+                                </span>
+
+                                <time
+                                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-neutral-100/80 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-700/70 dark:text-neutral-300"
+                                    dateTime={task.completedAt ?? undefined}
+                                >
+                                    <Calendar className="size-3.5" />
+                                    <span>{formatDate(task.completedAt)}</span>
+                                </time>
+                            </button>
+
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => onRestoreTask(task.id)}
+                                icon={<RotateCcw className="size-4" />}
+                                className="shrink-0"
+                            >
+                                Wiederherstellen
+                            </Button>
+                        </div>
                     </li>
                 ))}
             </ul>
