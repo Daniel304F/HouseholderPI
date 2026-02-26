@@ -6,6 +6,7 @@ import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { MessageService } from "../services/message.service.js";
 import { AppError } from "../services/errors.js";
+import { v4 as uuidv4 } from "uuid";
 
 const getMessageService = (req: Request): MessageService => {
   const messageDAO = req.app.locals["messageDAO"] as GenericDAO<Message>;
@@ -31,10 +32,63 @@ export const createMessage = async (
     const message = await messageService.createMessage(
       groupId!,
       req.userId,
-      content
+      content || "",
     );
 
     // Emit socket event for real-time updates
+    const io = req.app.locals["io"];
+    if (io) {
+      io.to(`group:${groupId}`).emit("message:new", message);
+    }
+
+    res.status(201).json({
+      success: true,
+      data: message,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Erstellt eine neue Nachricht mit optionalem Bild
+ * POST /api/groups/:groupId/messages/image
+ */
+export const createImageMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const messageService = getMessageService(req);
+    const { groupId } = req.params;
+    const { content } = req.body;
+
+    const attachments = req.file
+      ? [
+          {
+            id: uuidv4(),
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+          },
+        ]
+      : [];
+
+    const message = await messageService.createMessage(
+      groupId!,
+      req.userId,
+      content || "",
+      attachments,
+    );
+
     const io = req.app.locals["io"];
     if (io) {
       io.to(`group:${groupId}`).emit("message:new", message);
@@ -159,6 +213,88 @@ export const deleteMessage = async (
     res.status(200).json({
       success: true,
       message: "Nachricht gelöscht",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Fuegt eine Reaktion hinzu
+ * POST /api/groups/:groupId/messages/:messageId/reactions
+ */
+export const addReaction = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const messageService = getMessageService(req);
+    const { groupId, messageId } = req.params;
+    const { emoji } = req.body;
+
+    const message = await messageService.addReaction(
+      groupId!,
+      messageId!,
+      req.userId,
+      emoji,
+    );
+
+    const io = req.app.locals["io"];
+    if (io) {
+      io.to(`group:${groupId}`).emit("message:update", message);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: message,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Entfernt eine Reaktion
+ * DELETE /api/groups/:groupId/messages/:messageId/reactions
+ */
+export const removeReaction = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const messageService = getMessageService(req);
+    const { groupId, messageId } = req.params;
+    const { emoji } = req.body;
+
+    const message = await messageService.removeReaction(
+      groupId!,
+      messageId!,
+      req.userId,
+      emoji,
+    );
+
+    const io = req.app.locals["io"];
+    if (io) {
+      io.to(`group:${groupId}`).emit("message:update", message);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: message,
     });
   } catch (error) {
     if (error instanceof AppError) {

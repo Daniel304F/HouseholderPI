@@ -67,3 +67,38 @@ export default tseslint.config([
   },
 ])
 ```
+
+## Capacitor (Android/iOS)
+
+Die App ist fuer Capacitor vorbereitet und nutzt bereits die Kamera-Integration
+(`@capacitor/camera`) in den Task-Anhaengen.
+
+### Android Workflow (bereits initialisiert)
+
+1. Web Build erzeugen:
+
+```bash
+npm run build
+```
+
+2. Native Assets/Plugins synchronisieren:
+
+```bash
+npm run cap:sync
+```
+
+3. Android Studio oeffnen:
+
+```bash
+npm run cap:open:android
+```
+
+### iOS Workflow (nur unter macOS)
+
+```bash
+npm run cap:add:ios
+npm run cap:sync
+npm run cap:open:ios
+```
+
+Hinweis: Auf iOS kann `cap add ios` nur auf macOS ausgefuehrt werden.

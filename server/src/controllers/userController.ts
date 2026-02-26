@@ -18,11 +18,11 @@ export const updateProfile = async (
   try {
     const userService = getUserService(req);
     const userId = (req as AuthenticatedRequest).userId;
-    const { name, avatar } = req.body;
+    const { name, avatar, bio } = req.body;
 
     console.log("updateProfile called with userId:", userId);
 
-    const user = await userService.updateProfile(userId, { name, avatar });
+    const user = await userService.updateProfile(userId, { name, avatar, bio });
 
     res.status(200).json({
       success: true,

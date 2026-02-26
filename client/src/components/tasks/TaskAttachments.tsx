@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     Paperclip,
     Upload,
+    Camera as CameraIcon,
     Trash2,
     Loader2,
     FileText,
@@ -15,6 +16,10 @@ import { Button, IconButton } from '../common'
 import { tasksApi, type TaskAttachment } from '../../api/tasks'
 import { useToast } from '../../contexts/ToastContext'
 import { getUploadUrl } from '../../lib/axios'
+import {
+    capturePhotoWithCapacitor,
+    isNativeCapacitorPlatform,
+} from '../../utils/camera.utils'
 
 interface TaskAttachmentsProps {
     groupId: string
@@ -23,17 +28,14 @@ interface TaskAttachmentsProps {
     readOnly?: boolean
 }
 
-// Helper to check if a mime type is an image
 const isImageMimeType = (mimeType: string) => mimeType.startsWith('image/')
 
-// Helper to format file size
 const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-// Helper to get file icon based on mime type
 const getFileIcon = (mimeType: string) => {
     if (isImageMimeType(mimeType)) return ImageIcon
     if (mimeType.includes('pdf') || mimeType.includes('document')) return FileText
@@ -49,6 +51,8 @@ export const TaskAttachments = ({
     const queryClient = useQueryClient()
     const toast = useToast()
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const cameraInputRef = useRef<HTMLInputElement>(null)
+    const [isCapturing, setIsCapturing] = useState(false)
 
     const uploadMutation = useMutation({
         mutationFn: (file: File) => tasksApi.uploadAttachment(groupId, taskId, file),
@@ -76,26 +80,58 @@ export const TaskAttachments = ({
             queryClient.invalidateQueries({
                 queryKey: ['tasks', groupId],
             })
-            toast.success('Anhang gelöscht')
+            toast.success('Anhang geloescht')
         },
         onError: () => {
-            toast.error('Anhang konnte nicht gelöscht werden')
+            toast.error('Anhang konnte nicht geloescht werden')
         },
     })
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            uploadMutation.mutate(file)
-            // Reset input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''
-            }
+        if (!file) return
+
+        uploadMutation.mutate(file)
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
         }
     }
 
     const handleUploadClick = () => {
         fileInputRef.current?.click()
+    }
+
+    const handleCameraFallbackSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        uploadMutation.mutate(file)
+        if (cameraInputRef.current) {
+            cameraInputRef.current.value = ''
+        }
+    }
+
+    const handleCapturePhoto = async () => {
+        if (uploadMutation.isPending || isCapturing) return
+
+        if (!isNativeCapacitorPlatform()) {
+            cameraInputRef.current?.click()
+            return
+        }
+
+        setIsCapturing(true)
+        try {
+            const capturedFile = await capturePhotoWithCapacitor()
+            if (!capturedFile) {
+                toast.error('Foto konnte nicht aufgenommen werden')
+                return
+            }
+            uploadMutation.mutate(capturedFile)
+        } catch {
+            toast.error('Kamera konnte nicht geoeffnet werden')
+        } finally {
+            setIsCapturing(false)
+        }
     }
 
     const formatDate = (dateString: string) => {
@@ -111,7 +147,7 @@ export const TaskAttachments = ({
         <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
                 <Paperclip className="size-4" />
-                Anhänge
+                Anhaenge
                 {attachments.length > 0 && (
                     <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400">
                         {attachments.length}
@@ -119,11 +155,10 @@ export const TaskAttachments = ({
                 )}
             </h3>
 
-            {/* Attachments Grid */}
             <div className="mb-4 space-y-2">
                 {attachments.length === 0 ? (
                     <p className="py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                        Keine Anhänge vorhanden
+                        Keine Anhaenge vorhanden
                     </p>
                 ) : (
                     attachments.map((attachment) => (
@@ -139,7 +174,6 @@ export const TaskAttachments = ({
                 )}
             </div>
 
-            {/* Upload Button */}
             {!readOnly && (
                 <>
                     <input
@@ -149,21 +183,48 @@ export const TaskAttachments = ({
                         className="hidden"
                         accept="image/*,.pdf,.doc,.docx,.txt"
                     />
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={handleUploadClick}
-                        disabled={uploadMutation.isPending}
-                        icon={
-                            uploadMutation.isPending ? (
-                                <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                                <Upload className="size-4" />
-                            )
-                        }
-                    >
-                        Anhang hinzufügen
-                    </Button>
+                    <input
+                        ref={cameraInputRef}
+                        type="file"
+                        onChange={handleCameraFallbackSelect}
+                        className="hidden"
+                        accept="image/*"
+                        capture="environment"
+                    />
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleUploadClick}
+                            disabled={uploadMutation.isPending || isCapturing}
+                            icon={
+                                uploadMutation.isPending ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                    <Upload className="size-4" />
+                                )
+                            }
+                        >
+                            Anhang hinzufuegen
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleCapturePhoto}
+                            disabled={uploadMutation.isPending || isCapturing}
+                            icon={
+                                isCapturing ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                    <CameraIcon className="size-4" />
+                                )
+                            }
+                        >
+                            Foto aufnehmen
+                        </Button>
+                    </div>
                 </>
             )}
         </div>
@@ -197,7 +258,6 @@ const AttachmentItem = ({
                 'hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors'
             )}
         >
-            {/* Preview/Icon */}
             {isImage ? (
                 <a
                     href={fullUrl}
@@ -208,7 +268,7 @@ const AttachmentItem = ({
                     <img
                         src={fullUrl}
                         alt={attachment.originalName}
-                        className="size-12 rounded-md object-cover hover:opacity-80 transition-opacity"
+                        className="size-12 rounded-md object-cover transition-opacity hover:opacity-80"
                     />
                 </a>
             ) : (
@@ -217,7 +277,6 @@ const AttachmentItem = ({
                 </div>
             )}
 
-            {/* File Info */}
             <div className="min-w-0 flex-1">
                 <a
                     href={fullUrl}
@@ -229,12 +288,11 @@ const AttachmentItem = ({
                     {attachment.originalName}
                 </a>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {formatFileSize(attachment.size)} · {formatDate(attachment.uploadedAt)}
+                    {formatFileSize(attachment.size)} - {formatDate(attachment.uploadedAt)}
                 </p>
             </div>
 
-            {/* Actions */}
-            <div className="flex shrink-0 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <a
                     href={fullUrl}
                     download={attachment.originalName}
@@ -248,12 +306,18 @@ const AttachmentItem = ({
                 </a>
                 {!readOnly && (
                     <IconButton
-                        icon={isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                        icon={
+                            isDeleting ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="size-4" />
+                            )
+                        }
                         variant="ghost"
                         size="sm"
                         onClick={onDelete}
                         disabled={isDeleting}
-                        aria-label="Löschen"
+                        aria-label="Loeschen"
                     />
                 )}
             </div>

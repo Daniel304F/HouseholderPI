@@ -27,6 +27,7 @@ const toTaskResponse = (task: Task): TaskResponse => ({
   groupId: task.groupId,
   title: task.title,
   ...(task.description !== undefined && { description: task.description }),
+  ...(task.notes !== undefined && { notes: task.notes }),
   status: task.status,
   priority: task.priority,
   assignedTo: task.assignedTo,
@@ -68,6 +69,7 @@ const getInverseLinkType = (linkType: string): string => {
 export interface CreateTaskInput {
   title: string;
   description?: string;
+  notes?: string;
   status?: string;
   priority?: string;
   assignedTo?: string | null;
@@ -77,6 +79,7 @@ export interface CreateTaskInput {
 export interface UpdateTaskInput {
   title?: string;
   description?: string;
+  notes?: string;
   status?: string;
   priority?: string;
   assignedTo?: string | null;
@@ -138,6 +141,7 @@ export class TaskService {
       groupId,
       title: input.title,
       description: input.description,
+      notes: input.notes,
       status: input.status || "pending",
       priority: input.priority || "medium",
       assignedTo: input.assignedTo || null,
@@ -210,6 +214,7 @@ export class TaskService {
       ...(input.description !== undefined && {
         description: input.description,
       }),
+      ...(input.notes !== undefined && { notes: input.notes }),
       ...(input.status !== undefined && { status: input.status }),
       ...(input.priority !== undefined && { priority: input.priority }),
       ...(input.assignedTo !== undefined && { assignedTo: input.assignedTo }),
@@ -307,6 +312,7 @@ export class TaskService {
       groupId,
       title: input.title,
       description: input.description,
+      notes: input.notes,
       status: input.status || "pending",
       priority: input.priority || "medium",
       assignedTo: input.assignedTo || null,
@@ -521,14 +527,56 @@ export class TaskService {
       (t) => t.status === "completed" && !t.archived,
     );
 
-    for (const task of completedTasks) {
-      await this.taskDAO.update({
-        id: task.id,
-        archived: true,
-      } as Partial<Task>);
-    }
+    await Promise.all(
+      completedTasks.map((task) =>
+        this.taskDAO.update({
+          id: task.id,
+          archived: true,
+        } as Partial<Task>),
+      ),
+    );
 
     return { archivedCount: completedTasks.length };
+  }
+
+  async restoreArchivedTask(
+    groupId: string,
+    taskId: string,
+    userId: string,
+  ): Promise<TaskResponse> {
+    await this.validateGroupAccess(groupId, userId);
+
+    const task = await this.taskDAO.findOne({
+      id: taskId,
+      groupId,
+    } as Partial<Task>);
+
+    if (!task) {
+      throw new NotFoundError("Aufgabe nicht gefunden");
+    }
+
+    if (!task.archived) {
+      throw new BadRequestError("Aufgabe ist nicht archiviert");
+    }
+
+    const updated = await this.taskDAO.update({
+      id: taskId,
+      archived: false,
+    } as Partial<Task>);
+
+    if (!updated) {
+      throw new InternalError("Wiederherstellung fehlgeschlagen");
+    }
+
+    const restoredTask = await this.taskDAO.findOne({
+      id: taskId,
+    } as Partial<Task>);
+
+    if (!restoredTask) {
+      throw new InternalError("Aufgabe nach Wiederherstellung nicht gefunden");
+    }
+
+    return toTaskResponse(restoredTask);
   }
 
   async getMyTasks(userId: string): Promise<TaskWithDetails[]> {

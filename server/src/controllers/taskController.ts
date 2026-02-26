@@ -91,12 +91,13 @@ export const createTask = async (
     const notificationService = getNotificationService(req);
     const groupDAO = getGroupDAO(req);
     const { groupId } = req.params;
-    const { title, description, status, priority, assignedTo, dueDate } =
+    const { title, description, notes, status, priority, assignedTo, dueDate } =
       req.body;
 
     const task = await taskService.createTask(groupId!, req.userId, {
       title,
       description,
+      notes,
       status,
       priority,
       assignedTo,
@@ -226,7 +227,7 @@ export const updateTask = async (
     const notificationService = getNotificationService(req);
     const groupDAO = getGroupDAO(req);
     const { groupId, taskId } = req.params;
-    const { title, description, status, priority, assignedTo, dueDate } =
+    const { title, description, notes, status, priority, assignedTo, dueDate } =
       req.body;
 
     // Get task before update to check status change
@@ -236,6 +237,7 @@ export const updateTask = async (
     const task = await taskService.updateTask(groupId!, taskId!, req.userId, {
       title,
       description,
+      notes,
       status,
       priority,
       assignedTo,
@@ -406,7 +408,7 @@ export const createSubtask = async (
   try {
     const taskService = getTaskService(req);
     const { groupId, taskId } = req.params;
-    const { title, description, status, priority, assignedTo, dueDate } =
+    const { title, description, notes, status, priority, assignedTo, dueDate } =
       req.body;
 
     const subtask = await taskService.createSubtask(
@@ -416,6 +418,7 @@ export const createSubtask = async (
       {
         title,
         description,
+        notes,
         status,
         priority,
         assignedTo,
@@ -632,6 +635,41 @@ export const archiveCompletedTasks = async (
       success: true,
       data: result,
       message: `${result.archivedCount} Aufgabe(n) archiviert`,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Stellt eine archivierte Aufgabe wieder her
+ * POST /api/groups/:groupId/tasks/:taskId/restore
+ */
+export const restoreArchivedTask = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const taskService = getTaskService(req);
+    const { groupId, taskId } = req.params;
+
+    const task = await taskService.restoreArchivedTask(
+      groupId!,
+      taskId!,
+      req.userId,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: task,
+      message: "Aufgabe wiederhergestellt",
     });
   } catch (error) {
     if (error instanceof AppError) {

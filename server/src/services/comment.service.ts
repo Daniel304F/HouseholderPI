@@ -129,23 +129,24 @@ export class CommentService {
       return dateA.getTime() - dateB.getTime();
     });
 
-    // Enrich with user info
-    const enrichedComments: CommentResponse[] = [];
-    for (const comment of comments) {
-      const user = await this.userDAO.findOne({
-        id: comment.userId,
-      } as Partial<User>);
+    // Enrich with user info in one batch to avoid N+1 roundtrips
+    const uniqueUserIds = [...new Set(comments.map((comment) => comment.userId))];
+    const users = await Promise.all(
+      uniqueUserIds.map((id) => this.userDAO.findOne({ id } as Partial<User>)),
+    );
+    const usersById = new Map<string, User | null>(
+      uniqueUserIds.map((id, index) => [id, users[index] ?? null]),
+    );
 
+    return comments.map((comment) => {
+      const user = usersById.get(comment.userId);
       const commentWithUser: CommentWithUser = {
         ...comment,
         userName: user?.name || "Unbekannt",
         userAvatar: user?.avatar,
       };
-
-      enrichedComments.push(this.toResponse(commentWithUser));
-    }
-
-    return enrichedComments;
+      return this.toResponse(commentWithUser);
+    });
   }
 
   async updateComment(

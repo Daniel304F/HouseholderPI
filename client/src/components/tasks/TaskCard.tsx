@@ -27,6 +27,7 @@ export const TaskCard = ({
     subtaskCount = 0,
 }: TaskCardProps) => {
     const StatusIcon = STATUS_ICONS[task.status]
+    const previewText = task.description || task.notes
 
     const isOverdue = useMemo(() => {
         if (task.status === 'completed') return false
@@ -127,9 +128,9 @@ export const TaskCard = ({
                         </div>
                     </header>
 
-                    {task.description && (
+                    {previewText && (
                         <p className="mt-1 max-w-[44ch] line-clamp-2 text-sm leading-5 text-neutral-500 dark:text-neutral-400">
-                            {task.description}
+                            {previewText}
                         </p>
                     )}
 

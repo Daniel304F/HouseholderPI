@@ -82,4 +82,13 @@ export const uploadCompletionProof = multer({
   },
 });
 
+// Multer instance for chat image uploads
+export const uploadChatImage = multer({
+  storage,
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 8 * 1024 * 1024, // 8MB max
+  },
+});
+
 export const UPLOAD_PATH = UPLOAD_DIR;

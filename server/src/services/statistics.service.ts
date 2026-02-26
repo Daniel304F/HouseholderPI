@@ -38,6 +38,8 @@ export interface MemberStats {
   completedTasks: number;
   assignedTasks: number;
   completionRate: number;
+  score: number;
+  achievementIds: string[];
 }
 
 export interface TaskFrequency {
@@ -75,6 +77,41 @@ export class StatisticsService {
     private groupDAO: GenericDAO<Group>,
     private userDAO: GenericDAO<User>,
   ) {}
+
+  private calculateMemberScore(member: {
+    completedTasks: number;
+    assignedTasks: number;
+    completionRate: number;
+  }): number {
+    return (
+      member.completedTasks * 12 +
+      member.completionRate * 2 +
+      member.assignedTasks
+    );
+  }
+
+  private getAchievementIds(member: {
+    completedTasks: number;
+    assignedTasks: number;
+    completionRate: number;
+  }): string[] {
+    const achievements: string[] = [];
+
+    if (member.completedTasks >= 1) {
+      achievements.push("starter");
+    }
+    if (member.completedTasks >= 10) {
+      achievements.push("sprinter");
+    }
+    if (member.completedTasks >= 25) {
+      achievements.push("task-master");
+    }
+    if (member.assignedTasks >= 10 && member.completionRate >= 85) {
+      achievements.push("reliable");
+    }
+
+    return achievements;
+  }
 
   async getGroupStatistics(
     groupId: string,
@@ -226,19 +263,38 @@ export class StatisticsService {
         (t) => t.status === "completed",
       );
 
+      const completionRate =
+        memberAssigned.length > 0
+          ? Math.round((memberCompleted.length / memberAssigned.length) * 100)
+          : 0;
+      const achievementIds = this.getAchievementIds({
+        completedTasks: memberCompleted.length,
+        assignedTasks: memberAssigned.length,
+        completionRate,
+      });
+      const score = this.calculateMemberScore({
+        completedTasks: memberCompleted.length,
+        assignedTasks: memberAssigned.length,
+        completionRate,
+      });
+
+      await this.userDAO.update({
+        id: member.userId,
+        achievements: achievementIds,
+      } as Partial<User>);
+
       memberStats.push({
         userId: member.userId,
         userName: user?.name || user?.email || "Unbekannt",
         completedTasks: memberCompleted.length,
         assignedTasks: memberAssigned.length,
-        completionRate:
-          memberAssigned.length > 0
-            ? Math.round((memberCompleted.length / memberAssigned.length) * 100)
-            : 0,
+        completionRate,
+        score,
+        achievementIds,
       });
     }
 
-    memberStats.sort((a, b) => b.completedTasks - a.completedTasks);
+    memberStats.sort((a, b) => b.score - a.score);
     return memberStats;
   }
 

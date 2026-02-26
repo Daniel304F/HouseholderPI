@@ -37,6 +37,7 @@ export interface Task extends Entity {
   groupId: string;
   title: string;
   description?: string;
+  notes?: string;
   status: TaskStatus;
   priority: TaskPriority;
   assignedTo: string | null;
@@ -84,6 +85,7 @@ export interface TaskResponse {
   groupId: string;
   title: string;
   description?: string;
+  notes?: string;
   status: TaskStatus;
   priority: TaskPriority;
   assignedTo: string | null;

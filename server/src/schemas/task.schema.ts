@@ -22,6 +22,10 @@ export const createTaskSchema = z.object({
       .string()
       .max(1000, "Beschreibung darf maximal 1000 Zeichen lang sein")
       .optional(),
+    notes: z
+      .string()
+      .max(2000, "Notizen duerfen maximal 2000 Zeichen lang sein")
+      .optional(),
     status: z.enum(["pending", "in-progress", "completed"]).default("pending"),
     priority: z.enum(["low", "medium", "high"]).default("medium"),
     assignedTo: z.string().uuid("Ungültige User-ID").nullable().optional(),
@@ -48,6 +52,10 @@ export const updateTaskSchema = z.object({
     description: z
       .string()
       .max(1000, "Beschreibung darf maximal 1000 Zeichen lang sein")
+      .optional(),
+    notes: z
+      .string()
+      .max(2000, "Notizen duerfen maximal 2000 Zeichen lang sein")
       .optional(),
     status: z.enum(["pending", "in-progress", "completed"]).optional(),
     priority: z.enum(["low", "medium", "high"]).optional(),
@@ -98,6 +106,10 @@ export const createSubtaskSchema = z.object({
     description: z
       .string()
       .max(1000, "Beschreibung darf maximal 1000 Zeichen lang sein")
+      .optional(),
+    notes: z
+      .string()
+      .max(2000, "Notizen duerfen maximal 2000 Zeichen lang sein")
       .optional(),
     status: z.enum(["pending", "in-progress", "completed"]).default("pending"),
     priority: z.enum(["low", "medium", "high"]).default("medium"),

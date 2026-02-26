@@ -7,6 +7,7 @@ import { queryKeys } from '../lib/queryKeys'
 export interface CreateTaskData {
     title: string
     description?: string
+    notes?: string
     status: Task['status']
     priority: Task['priority']
     assignedTo?: string | null
@@ -16,6 +17,7 @@ export interface CreateTaskData {
 export interface EditTaskData {
     title?: string
     description?: string
+    notes?: string
     status?: Task['status']
     priority?: Task['priority']
     assignedTo?: string | null
@@ -75,6 +77,7 @@ export const useTaskMutations = ({
             return tasksApi.createTask(groupId, {
                 title: data.title,
                 description: data.description,
+                notes: data.notes,
                 status: data.status,
                 priority: data.priority,
                 assignedTo: data.assignedTo,

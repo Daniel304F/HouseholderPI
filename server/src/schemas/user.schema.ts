@@ -8,6 +8,11 @@ export const updateProfileSchema = z.object({
       .max(50, "Name darf maximal 50 Zeichen lang sein")
       .optional(),
     avatar: z.string().optional().nullable(),
+    bio: z
+      .string()
+      .max(280, "Bio darf maximal 280 Zeichen lang sein")
+      .optional()
+      .nullable(),
   }),
 });
 

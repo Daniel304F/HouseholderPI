@@ -35,8 +35,11 @@ export class MongoGenericDAO<T extends Entity> implements GenericDAO<T> {
       .findOne(entityFilter as Filter<T>) as Promise<T | null>;
   }
 
-  public async update(entity: Partial<T> & Pick<Entity, "id">) {
+  public async update(entity: Partial<T>) {
     const { id, ...partialUpdate } = entity;
+    if (!id) {
+      return false;
+    }
     const result = await this.db
       .collection(this.collection)
       .updateOne(

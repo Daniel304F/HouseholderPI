@@ -41,6 +41,7 @@ export interface Task {
     groupId: string
     title: string
     description?: string
+    notes?: string
     status: TaskStatus
     priority: TaskPriority
     assignedTo: string | null
@@ -67,6 +68,7 @@ export interface TaskWithDetails extends Task {
 export interface CreateTaskRequest {
     title: string
     description?: string
+    notes?: string
     status?: TaskStatus
     priority?: TaskPriority
     assignedTo?: string | null
@@ -77,6 +79,7 @@ export interface CreateTaskRequest {
 export interface UpdateTaskRequest {
     title?: string
     description?: string
+    notes?: string
     status?: TaskStatus
     priority?: TaskPriority
     assignedTo?: string | null
@@ -233,6 +236,14 @@ export const tasksApi = {
         const response = await apiClient.post<
             ApiResponse<{ archivedCount: number }>
         >(`/groups/${groupId}/tasks/archive-completed`)
+        return response.data.data
+    },
+
+    // Restore a single archived task
+    restoreArchivedTask: async (groupId: string, taskId: string): Promise<Task> => {
+        const response = await apiClient.post<ApiResponse<Task>>(
+            `/groups/${groupId}/tasks/${taskId}/restore`
+        )
         return response.data.data
     },
 

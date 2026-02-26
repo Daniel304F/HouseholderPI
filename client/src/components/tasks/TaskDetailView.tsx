@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, AlertCircle, FileText } from 'lucide-react'
+import { ArrowLeft, AlertCircle, FileText, StickyNote } from 'lucide-react'
 import { Button, EditableText, EditableSection } from '../common'
 import { BaseModal } from '../modal'
 import { ModalWidth, ModalHeight } from '../modal/types'
@@ -47,12 +47,12 @@ export const TaskDetailView = ({
 
     // Inline update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: { description?: string }) =>
+        mutationFn: (data: { description?: string; notes?: string }) =>
             tasksApi.updateTask(groupId, taskId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['taskDetails', groupId, taskId] })
             queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
-            toast.success('Beschreibung aktualisiert')
+            toast.success('Aufgabe aktualisiert')
         },
         onError: () => {
             toast.error('Aktualisierung fehlgeschlagen')
@@ -61,6 +61,10 @@ export const TaskDetailView = ({
 
     const handleDescriptionSave = async (value: string) => {
         await updateMutation.mutateAsync({ description: value || undefined })
+    }
+
+    const handleNotesSave = async (value: string) => {
+        await updateMutation.mutateAsync({ notes: value || undefined })
     }
 
     if (isLoading) {
@@ -127,6 +131,27 @@ export const TaskDetailView = ({
                                 onSave={handleDescriptionSave}
                                 placeholder="Beschreibung hinzufügen..."
                                 emptyText="Keine Beschreibung vorhanden."
+                                multiline
+                                maxLength={2000}
+                            />
+                        )}
+                    </EditableSection>
+
+                    {/* Notes */}
+                    <EditableSection
+                        title="Notizen"
+                        icon={<StickyNote className="size-4" />}
+                    >
+                        {readOnly ? (
+                            <p className="text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+                                {taskDetails.notes || 'Keine Notizen vorhanden.'}
+                            </p>
+                        ) : (
+                            <EditableText
+                                value={taskDetails.notes || ''}
+                                onSave={handleNotesSave}
+                                placeholder="Notiz hinzufuegen..."
+                                emptyText="Keine Notizen vorhanden."
                                 multiline
                                 maxLength={2000}
                             />

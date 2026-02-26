@@ -51,6 +51,13 @@ router.post(
   taskController.archiveCompletedTasks as RequestHandler,
 );
 
+// Einzelne archivierte Aufgabe wiederherstellen
+router.post(
+  "/:taskId/restore",
+  validateResource(taskIdParamSchema),
+  taskController.restoreArchivedTask as RequestHandler,
+);
+
 router.get(
   "/:taskId",
   validateResource(taskIdParamSchema),

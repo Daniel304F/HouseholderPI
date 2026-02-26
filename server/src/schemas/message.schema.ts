@@ -25,6 +25,19 @@ export const updateMessageSchema = z.object({
   }),
 });
 
+export const messageReactionSchema = z.object({
+  params: z.object({
+    groupId: z.string().uuid("Ungueltige Gruppen-ID"),
+    messageId: z.string().uuid("Ungueltige Nachrichten-ID"),
+  }),
+  body: z.object({
+    emoji: z
+      .string()
+      .min(1, "Emoji ist erforderlich")
+      .max(16, "Emoji darf maximal 16 Zeichen lang sein"),
+  }),
+});
+
 export const deleteMessageSchema = z.object({
   params: z.object({
     groupId: z.string().uuid("Ungueltige Gruppen-ID"),
@@ -50,3 +63,4 @@ export type CreateMessageInput = z.infer<typeof createMessageSchema>;
 export type UpdateMessageInput = z.infer<typeof updateMessageSchema>;
 export type DeleteMessageInput = z.infer<typeof deleteMessageSchema>;
 export type GetMessagesInput = z.infer<typeof getMessagesSchema>;
+export type MessageReactionInput = z.infer<typeof messageReactionSchema>;

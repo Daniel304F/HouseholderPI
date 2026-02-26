@@ -13,6 +13,8 @@ export interface User extends Entity {
   name: string;
   password: string;
   avatar?: string;
+  bio?: string;
+  achievements?: string[];
   pushSubscriptions?: PushSubscriptionData[];
 }
 
@@ -21,6 +23,8 @@ export interface UserReponse {
   email: string;
   name: string;
   avatar?: string;
+  bio?: string;
+  achievements?: string[];
   createdAt: string;
   updatedAt: string;
 }

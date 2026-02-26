@@ -13,6 +13,7 @@ import type { GroupMember } from '../../api/groups'
 export interface TaskFormData {
     title: string
     description: string
+    notes: string
     status: TaskStatus
     priority: TaskPriority
     assignedTo: string | null
@@ -86,6 +87,24 @@ export const TaskForm = ({
                         value={data.description}
                         onChange={(e) => onChange('description', e.target.value)}
                         placeholder="Details zur Aufgabe..."
+                        rows={3}
+                        className={cn(
+                            inputStyles,
+                            normalBorderStyles,
+                            'placeholder:text-neutral-400 resize-none'
+                        )}
+                    />
+                </div>
+
+                {/* Notes */}
+                <div>
+                    <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Notizen (optional)
+                    </label>
+                    <textarea
+                        value={data.notes}
+                        onChange={(e) => onChange('notes', e.target.value)}
+                        placeholder="Eigene Hinweise zur Aufgabe..."
                         rows={3}
                         className={cn(
                             inputStyles,

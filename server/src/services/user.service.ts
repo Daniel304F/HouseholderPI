@@ -8,6 +8,7 @@ import config from "../config/config.js";
 export interface UpdateProfileInput {
   name?: string;
   avatar?: string | null;
+  bio?: string | null;
 }
 
 export interface ChangePasswordInput {
@@ -44,6 +45,14 @@ export class UserService {
         updateData.avatar = "";
       } else {
         updateData.avatar = data.avatar;
+      }
+    }
+
+    if (data.bio !== undefined) {
+      if (data.bio === null || data.bio.trim() === "") {
+        updateData.bio = "";
+      } else {
+        updateData.bio = data.bio.trim();
       }
     }
 
@@ -177,6 +186,10 @@ export class UserService {
     // Only include avatar if it's a non-empty string
     if (user.avatar && user.avatar.length > 0) {
       response.avatar = user.avatar;
+    }
+
+    if (user.bio && user.bio.length > 0) {
+      response.bio = user.bio;
     }
 
     return response;
