@@ -4,7 +4,7 @@ import { Group } from "../models/group.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
+import { unlink } from "fs/promises";
 import path from "path";
 import { UPLOAD_PATH } from "../config/upload.config.js";
 
@@ -162,10 +162,15 @@ export const deleteAttachment = async (
       return;
     }
 
-    // Delete file from disk
+    // Delete file from disk. Missing files are ignored.
     const filePath = path.join(UPLOAD_PATH, attachment.filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    try {
+      await unlink(filePath);
+    } catch (error) {
+      const unlinkError = error as NodeJS.ErrnoException;
+      if (unlinkError.code !== "ENOENT") {
+        throw error;
+      }
     }
 
     // Remove from task

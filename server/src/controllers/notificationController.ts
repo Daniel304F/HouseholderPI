@@ -39,3 +39,33 @@ export const subscribe = async (
     next(error);
   }
 };
+
+/**
+ * Entfernt eine Push-Subscription fuer den aktuellen User
+ * POST /api/notifications/unsubscribe
+ */
+export const unsubscribe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const notificationService = getNotificationService(req);
+    const { endpoint } = req.body;
+
+    await notificationService.removeSubscription(req.userId, endpoint);
+
+    res.status(200).json({
+      success: true,
+      message: "Subscription entfernt",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
