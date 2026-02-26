@@ -1,12 +1,18 @@
-import { Bell, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Bell, BellOff, CheckCircle, Loader2, XCircle } from 'lucide-react'
 import { Button, Card } from '../common'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 import { useToast } from '../../contexts/ToastContext'
 
 export const NotificationsSection = () => {
     const toast = useToast()
-    const { isSupported, permission, isSubscribed, isLoading, subscribeToPush } =
-        usePushNotifications()
+    const {
+        isSupported,
+        permission,
+        isSubscribed,
+        isLoading,
+        subscribeToPush,
+        unsubscribeFromPush,
+    } = usePushNotifications()
 
     const handleEnable = async () => {
         const success = await subscribeToPush()
@@ -18,6 +24,15 @@ export const NotificationsSection = () => {
             )
         } else {
             toast.error('Push-Benachrichtigungen konnten nicht aktiviert werden')
+        }
+    }
+
+    const handleDisable = async () => {
+        const success = await unsubscribeFromPush()
+        if (success) {
+            toast.success('Push-Benachrichtigungen deaktiviert')
+        } else {
+            toast.error('Push-Benachrichtigungen konnten nicht deaktiviert werden')
         }
     }
 
@@ -87,18 +102,34 @@ export const NotificationsSection = () => {
             )}
 
             {isSubscribed && permission === 'granted' && (
-                <Button
-                    onClick={handleEnable}
-                    variant="secondary"
-                    disabled={isLoading}
-                    icon={
-                        isLoading ? (
-                            <Loader2 className="size-4 animate-spin" />
-                        ) : undefined
-                    }
-                >
-                    {isLoading ? 'Wird erneuert...' : 'Subscription erneuern'}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        onClick={handleEnable}
+                        variant="secondary"
+                        disabled={isLoading}
+                        icon={
+                            isLoading ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : undefined
+                        }
+                    >
+                        {isLoading ? 'Wird erneuert...' : 'Subscription erneuern'}
+                    </Button>
+                    <Button
+                        onClick={handleDisable}
+                        variant="ghost"
+                        disabled={isLoading}
+                        icon={
+                            isLoading ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <BellOff className="size-4" />
+                            )
+                        }
+                    >
+                        Deaktivieren
+                    </Button>
+                </div>
             )}
         </Card>
     )

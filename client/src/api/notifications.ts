@@ -12,4 +12,7 @@ export const notificationsApi = {
     subscribe: async (subscription: PushSubscriptionPayload): Promise<void> => {
         await apiClient.post('/notifications/subscribe', subscription)
     },
+    unsubscribe: async (endpoint: string): Promise<void> => {
+        await apiClient.post('/notifications/unsubscribe', { endpoint })
+    },
 }
