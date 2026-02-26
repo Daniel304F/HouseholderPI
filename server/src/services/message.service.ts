@@ -117,21 +117,24 @@ export class MessageService {
     // Limit the results
     messages = messages.slice(0, limit);
 
-    // Enrich with user info
-    const enrichedMessages: MessageResponse[] = [];
-    for (const message of messages) {
-      const user = await this.userDAO.findOne({
-        id: message.userId,
-      } as Partial<User>);
+    // Enrich with user info in one batch to avoid N+1 roundtrips
+    const uniqueUserIds = [...new Set(messages.map((message) => message.userId))];
+    const users = await Promise.all(
+      uniqueUserIds.map((id) => this.userDAO.findOne({ id } as Partial<User>)),
+    );
+    const usersById = new Map<string, User | null>(
+      uniqueUserIds.map((id, index) => [id, users[index] ?? null]),
+    );
 
+    const enrichedMessages: MessageResponse[] = messages.map((message) => {
+      const user = usersById.get(message.userId);
       const messageWithUser: MessageWithUser = {
         ...message,
         userName: user?.name || "Unbekannt",
         userAvatar: user?.avatar,
       };
-
-      enrichedMessages.push(this.toResponse(messageWithUser));
-    }
+      return this.toResponse(messageWithUser);
+    });
 
     // Reverse to have oldest first in the returned array
     enrichedMessages.reverse();

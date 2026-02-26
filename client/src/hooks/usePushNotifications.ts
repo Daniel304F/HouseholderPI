@@ -79,12 +79,43 @@ export const usePushNotifications = () => {
         }
     }, [])
 
+    const unsubscribeFromPush = useCallback(async (): Promise<boolean> => {
+        if (!isPushSupported) return false
+
+        setIsLoading(true)
+        try {
+            const registration =
+                await navigator.serviceWorker.getRegistration('/service-worker.js')
+            if (!registration) {
+                setIsSubscribed(false)
+                return true
+            }
+
+            const subscription = await registration.pushManager.getSubscription()
+            if (!subscription) {
+                setIsSubscribed(false)
+                return true
+            }
+
+            await notificationsApi.unsubscribe(subscription.endpoint)
+            await subscription.unsubscribe()
+            setIsSubscribed(false)
+            return true
+        } catch (error) {
+            console.error('Push unsubscribe failed:', error)
+            return false
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
+
     return {
         isSupported: isPushSupported,
         permission,
         isSubscribed,
         isLoading,
         subscribeToPush,
+        unsubscribeFromPush,
     }
 }
 

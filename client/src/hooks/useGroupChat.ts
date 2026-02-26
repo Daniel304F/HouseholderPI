@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { messagesApi, type Message } from '../api/messages'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
+import { queryKeys } from '../lib/queryKeys'
 import { useSocket } from './useSocket'
 import type { MessageQueryData, TypingUser } from '../components/chat/chat.types'
 
-const getMessagesQueryKey = (groupId: string) => ['messages', groupId] as const
+const getMessagesQueryKey = (groupId: string) => queryKeys.messages.byGroup(groupId)
 
 const withDefaultMessages = (data?: MessageQueryData): MessageQueryData => ({
     messages: data?.messages ?? [],

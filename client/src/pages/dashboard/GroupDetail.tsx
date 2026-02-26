@@ -20,6 +20,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useTaskModal } from '../../hooks/useTaskModal'
 import { useTaskMutations } from '../../hooks/useTaskMutations'
 import { useViewport } from '../../hooks/useViewport'
+import { queryKeys } from '../../lib/queryKeys'
 import {
     GroupDetailContent,
     type GroupDetailTabId,
@@ -110,25 +111,25 @@ export const GroupDetail = () => {
         isError,
         refetch,
     } = useQuery({
-        queryKey: ['group', groupId],
+        queryKey: queryKeys.groups.detail(groupId || ''),
         queryFn: () => groupsApi.getGroup(groupId!),
         enabled: !!groupId,
     })
 
     const { data: tasks = [] } = useQuery({
-        queryKey: ['tasks', groupId],
+        queryKey: queryKeys.tasks.byGroup(groupId || ''),
         queryFn: () => tasksApi.getGroupTasks(groupId!),
         enabled: !!groupId,
     })
 
     const { data: recurringTasks = [] } = useQuery({
-        queryKey: ['recurringTasks', groupId],
+        queryKey: queryKeys.recurringTasks.byGroup(groupId || ''),
         queryFn: () => recurringTasksApi.getTemplates(groupId!),
         enabled: !!groupId,
     })
 
     const { data: archivedTasks = [], isLoading: isLoadingArchived } = useQuery({
-        queryKey: ['archivedTasks', groupId],
+        queryKey: queryKeys.tasks.archivedByGroup(groupId || ''),
         queryFn: () => tasksApi.getArchivedTasks(groupId!),
         enabled: !!groupId && activeTab === 'archive',
     })
@@ -160,8 +161,13 @@ export const GroupDetail = () => {
     const archiveCompleted = useMutation({
         mutationFn: () => tasksApi.archiveCompletedTasks(groupId!),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
-            queryClient.invalidateQueries({ queryKey: ['archivedTasks', groupId] })
+            if (!groupId) return
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.tasks.byGroup(groupId),
+            })
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.tasks.archivedByGroup(groupId),
+            })
             toast.success(`${data.archivedCount} Aufgabe(n) archiviert`)
         },
         onError: () => {

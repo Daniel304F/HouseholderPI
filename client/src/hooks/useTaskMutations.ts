@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tasksApi } from '../api/tasks'
 import type { Task } from '../api/tasks'
+import { queryKeys } from '../lib/queryKeys'
 
 // Types for mutation data
 export interface CreateTaskData {
@@ -56,10 +57,12 @@ export const useTaskMutations = ({
     const invalidateTaskQueries = () => {
         // Always invalidate group tasks
         if (groupId) {
-            queryClient.invalidateQueries({ queryKey: ['tasks', groupId] })
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.tasks.byGroup(groupId),
+            })
         }
         // Invalidate user's personal tasks
-        queryClient.invalidateQueries({ queryKey: ['myTasks'] })
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.my })
         // Invalidate any additional queries
         additionalInvalidateKeys.forEach((key) => {
             queryClient.invalidateQueries({ queryKey: key })

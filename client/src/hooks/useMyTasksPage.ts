@@ -8,9 +8,10 @@ import {
     type StatusFilter,
 } from '../constants/myTasks.constants'
 import { useToast } from '../contexts/ToastContext'
+import { queryKeys } from '../lib/queryKeys'
 import { useFilteredTasks, useTaskStats, useTasksByGroup } from './useMyTasks'
 
-const MY_TASKS_QUERY_KEY = ['myTasks'] as const
+const MY_TASKS_QUERY_KEY = queryKeys.tasks.my
 
 export const useMyTasksPage = () => {
     const queryClient = useQueryClient()

@@ -20,6 +20,21 @@ export const queryKeys = {
     tasks: {
         my: ['myTasks'] as const,
         byGroup: (groupId: string) => ['tasks', groupId] as const,
+        archivedByGroup: (groupId: string) => ['archivedTasks', groupId] as const,
+        details: (groupId: string, taskId: string) =>
+            ['taskDetails', groupId, taskId] as const,
+        comments: (groupId: string, taskId: string) =>
+            ['comments', groupId, taskId] as const,
+    },
+
+    // Recurring tasks
+    recurringTasks: {
+        byGroup: (groupId: string) => ['recurringTasks', groupId] as const,
+    },
+
+    // Messages
+    messages: {
+        byGroup: (groupId: string) => ['messages', groupId] as const,
     },
 
     // Statistics
