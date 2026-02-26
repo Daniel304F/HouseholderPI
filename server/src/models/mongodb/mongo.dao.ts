@@ -43,7 +43,7 @@ export class MongoGenericDAO<T extends Entity> implements GenericDAO<T> {
         { id },
         { $set: { ...partialUpdate, updatedAt: new Date() } as Partial<T> },
       );
-    return !!result.modifiedCount;
+    return result.matchedCount > 0;
   }
 
   public async delete(id: string) {

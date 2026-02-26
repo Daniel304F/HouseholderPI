@@ -7,7 +7,7 @@ export interface GenericDAO<T extends Entity> {
 
   findOne(entityFilter: Partial<T>): Promise<T | null>;
 
-  update(entity: Partial<T>): Promise<boolean>;
+  update(entity: Partial<T> & Pick<Entity, "id">): Promise<boolean>;
 
   delete(id: string): Promise<boolean>;
 
