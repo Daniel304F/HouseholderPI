@@ -19,6 +19,7 @@ interface EditTaskModalProps {
 export interface EditTaskData {
     title?: string
     description?: string
+    notes?: string
     status?: TaskStatus
     priority?: TaskPriority
     assignedTo?: string | null
@@ -29,6 +30,7 @@ export interface EditTaskData {
 const createFormDataFromTask = (task: Task): TaskFormData => ({
     title: task.title,
     description: task.description || '',
+    notes: task.notes || '',
     status: task.status,
     priority: task.priority,
     assignedTo: task.assignedTo,
@@ -49,6 +51,7 @@ export const EditTaskModal = ({
     const [formData, setFormData] = useState<TaskFormData>({
         title: '',
         description: '',
+        notes: '',
         status: 'pending',
         priority: 'medium',
         assignedTo: null,
@@ -104,6 +107,7 @@ export const EditTaskModal = ({
             await onSubmit(task.id, {
                 title: formData.title.trim(),
                 description: formData.description.trim() || undefined,
+                notes: formData.notes.trim() || undefined,
                 status: formData.status,
                 priority: formData.priority,
                 assignedTo: formData.assignedTo,

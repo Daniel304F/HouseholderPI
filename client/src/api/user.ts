@@ -4,6 +4,7 @@ import type { User } from './auth'
 export interface UpdateProfileRequest {
     name?: string
     avatar?: string | null
+    bio?: string | null
 }
 
 export interface ChangePasswordRequest {

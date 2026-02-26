@@ -17,6 +17,7 @@ interface CreateTaskModalProps {
 export interface CreateTaskData {
     title: string
     description?: string
+    notes?: string
     status: TaskStatus
     priority: TaskPriority
     assignedTo: string | null
@@ -27,6 +28,7 @@ export interface CreateTaskData {
 const createInitialData = (initialStatus: TaskStatus): TaskFormData => ({
     title: '',
     description: '',
+    notes: '',
     status: initialStatus,
     priority: 'medium',
     assignedTo: null,
@@ -91,6 +93,7 @@ export const CreateTaskModal = ({
             await onSubmit({
                 title: formData.title.trim(),
                 description: formData.description.trim() || undefined,
+                notes: formData.notes.trim() || undefined,
                 status: formData.status,
                 priority: formData.priority,
                 assignedTo: formData.assignedTo,

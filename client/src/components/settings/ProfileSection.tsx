@@ -1,12 +1,16 @@
 import { useState, useCallback } from 'react'
-import { User, Mail, Save, Loader2 } from 'lucide-react'
-import { Button, Input, Card } from '../common'
+import { User, Mail, Save, Loader2, FileText } from 'lucide-react'
+import { Button, Input, Card, Textarea } from '../common'
 import { AvatarUpload } from './AvatarUpload'
 import type { User as UserType } from '../../api/auth'
 
 interface ProfileSectionProps {
     user: UserType
-    onUpdateProfile: (data: { name?: string; avatar?: string | null }) => Promise<void>
+    onUpdateProfile: (data: {
+        name?: string
+        avatar?: string | null
+        bio?: string | null
+    }) => Promise<void>
     isUpdating: boolean
 }
 
@@ -17,6 +21,7 @@ export const ProfileSection = ({
 }: ProfileSectionProps) => {
     const [name, setName] = useState(user.name)
     const [avatar, setAvatar] = useState<string | null>(user.avatar || null)
+    const [bio, setBio] = useState(user.bio || '')
     const [hasChanges, setHasChanges] = useState(false)
 
     const handleNameChange = useCallback(
@@ -32,10 +37,18 @@ export const ProfileSection = ({
         setHasChanges(true)
     }, [])
 
+    const handleBioChange = useCallback(
+        (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            setBio(e.target.value)
+            setHasChanges(true)
+        },
+        []
+    )
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        const updates: { name?: string; avatar?: string | null } = {}
+        const updates: { name?: string; avatar?: string | null; bio?: string | null } = {}
 
         if (name !== user.name) {
             updates.name = name
@@ -43,6 +56,10 @@ export const ProfileSection = ({
 
         if (avatar !== (user.avatar || null)) {
             updates.avatar = avatar
+        }
+
+        if (bio !== (user.bio || '')) {
+            updates.bio = bio.trim() || null
         }
 
         if (Object.keys(updates).length === 0) return
@@ -67,6 +84,30 @@ export const ProfileSection = ({
                         isLoading={isUpdating}
                         size="xl"
                     />
+                </div>
+
+                {/* Bio Field */}
+                <div className="space-y-2">
+                    <label
+                        htmlFor="bio"
+                        className="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                    >
+                        <FileText className="size-4" />
+                        Kurz-Bio
+                    </label>
+                    <Textarea
+                        id="bio"
+                        value={bio}
+                        onChange={handleBioChange}
+                        placeholder="Erzaehl kurz etwas ueber dich..."
+                        maxLength={280}
+                        rows={4}
+                        disabled={isUpdating}
+                        className="min-h-[96px] resize-none"
+                    />
+                    <p className="text-right text-xs text-neutral-500">
+                        {bio.length}/280
+                    </p>
                 </div>
 
                 {/* Name Field */}

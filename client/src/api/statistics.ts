@@ -15,6 +15,8 @@ export interface MemberStats {
     completedTasks: number
     assignedTasks: number
     completionRate: number
+    score: number
+    achievementIds: string[]
 }
 
 export interface TaskFrequency {

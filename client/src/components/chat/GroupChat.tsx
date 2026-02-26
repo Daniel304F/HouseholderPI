@@ -32,6 +32,12 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
         cancelEdit,
         submitEdit,
         deleteMessage,
+        hasMoreMessages,
+        loadOlderMessages,
+        isLoadingOlder,
+        selectedImage,
+        setSelectedImage,
+        reactToMessage,
     } = useGroupChat({ groupId })
 
     useEffect(() => {
@@ -60,18 +66,25 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
                 onCancelEdit={cancelEdit}
                 onSubmitEdit={submitEdit}
                 onDeleteMessage={deleteMessage}
+                onReactToMessage={reactToMessage}
+                hasMore={hasMoreMessages}
+                isLoadingOlder={isLoadingOlder}
+                onLoadOlder={loadOlderMessages}
                 endRef={messagesEndRef}
             />
 
-            <ChatTypingIndicator isVisible={typingUsers.size > 0} />
+            <ChatTypingIndicator typingCount={typingUsers.size} />
 
             <ChatInputBar
                 value={newMessage}
                 isConnected={isConnected}
                 isSending={isSending}
+                selectedImageName={selectedImage?.name}
                 onChange={handleInputChange}
                 onKeyDown={handleInputKeyDown}
                 onSend={handleSendMessage}
+                onPickImage={(file) => setSelectedImage(file)}
+                onClearImage={() => setSelectedImage(null)}
             />
         </div>
     )
