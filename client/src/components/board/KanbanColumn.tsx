@@ -49,33 +49,24 @@ interface KanbanColumnProps {
 }
 
 const columnColors: Record<ColumnStatus, string> = {
-    pending: 'bg-gradient-to-r from-amber-400 to-orange-400',
-    'in-progress': 'bg-gradient-to-r from-blue-400 to-indigo-400',
-    completed: 'bg-gradient-to-r from-green-400 to-emerald-400',
+    pending: 'bg-warning-400',
+    'in-progress': 'bg-info-400',
+    completed: 'bg-brand-500',
 }
 
 const columnBgColors: Record<ColumnStatus, string> = {
-    pending:
-        'bg-gradient-to-b from-amber-50/80 to-amber-50/35 dark:from-amber-950/30 dark:to-amber-950/10',
-    'in-progress':
-        'bg-gradient-to-b from-blue-50/80 to-blue-50/35 dark:from-blue-950/30 dark:to-blue-950/10',
-    completed:
-        'bg-gradient-to-b from-green-50/80 to-green-50/35 dark:from-green-950/30 dark:to-green-950/10',
-}
-
-const columnGlowColors: Record<ColumnStatus, string> = {
-    pending: 'bg-amber-300/40 dark:bg-amber-700/30',
-    'in-progress': 'bg-blue-300/40 dark:bg-blue-700/30',
-    completed: 'bg-green-300/40 dark:bg-green-700/30',
+    pending: 'bg-neutral-50/80 dark:bg-neutral-900/50',
+    'in-progress': 'bg-neutral-50/80 dark:bg-neutral-900/50',
+    completed: 'bg-neutral-50/80 dark:bg-neutral-900/50',
 }
 
 const columnCountColors: Record<ColumnStatus, string> = {
     pending:
-        'bg-amber-200/90 text-amber-800 dark:bg-amber-900/55 dark:text-amber-200',
+        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
     'in-progress':
-        'bg-blue-200/90 text-blue-800 dark:bg-blue-900/55 dark:text-blue-200',
+        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
     completed:
-        'bg-green-200/90 text-green-800 dark:bg-green-900/55 dark:text-green-200',
+        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
 }
 
 export const KanbanColumn = ({
@@ -122,17 +113,6 @@ export const KanbanColumn = ({
             aria-label={column.title}
             {...dropZoneProps}
         >
-            <span
-                aria-hidden
-                className={cn(
-                    'pointer-events-none absolute -right-16 -top-16 size-44 rounded-full blur-3xl',
-                    columnGlowColors[column.id]
-                )}
-            />
-            <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-transparent dark:from-white/[0.03]"
-            />
 
             {!isMobile && (
                 <header

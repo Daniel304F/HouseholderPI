@@ -37,7 +37,7 @@ export const Groups = () => {
         return (
             <section className="space-y-6">
                 <PageHeaderSkeleton />
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <GroupCardSkeleton count={6} />
                 </div>
             </section>
@@ -97,7 +97,7 @@ export const Groups = () => {
                     onJoinClick={() => setShowJoinModal(true)}
                 />
             ) : (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {groups.map((group) => (
                         <GroupCard key={group.id} group={group} />
                     ))}

@@ -54,20 +54,23 @@ const renderLazyRoute = (Component: ComponentType) => (
 )
 
 export const routes: RouteObject[] = [
+    // ── Auth routes – standalone, ohne AppLayout ──────────────────────────
+    {
+        path: '/login',
+        element: <GuestRoute>{renderLazyRoute(Login)}</GuestRoute>,
+    },
+    {
+        path: '/register',
+        element: <GuestRoute>{renderLazyRoute(Register)}</GuestRoute>,
+    },
+
+    // ── App routes – mit AppLayout (Header / Footer) ───────────────────────
     {
         element: <AppLayout />,
         children: [
             {
                 path: '/',
                 element: renderLazyRoute(Homepage),
-            },
-            {
-                path: '/login',
-                element: <GuestRoute>{renderLazyRoute(Login)}</GuestRoute>,
-            },
-            {
-                path: '/register',
-                element: <GuestRoute>{renderLazyRoute(Register)}</GuestRoute>,
             },
             {
                 path: '/dashboard',

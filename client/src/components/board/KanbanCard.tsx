@@ -25,18 +25,6 @@ interface KanbanCardProps {
     assigneeInfo?: AssigneeInfo
 }
 
-const priorityTopLine: Record<Task['priority'], string> = {
-    high: 'bg-gradient-to-r from-error-400/70 via-error-300/55 to-error-200/40',
-    medium:
-        'bg-gradient-to-r from-warning-400/70 via-warning-300/55 to-warning-200/40',
-    low: 'bg-gradient-to-r from-success-400/70 via-success-300/55 to-success-200/40',
-}
-
-const priorityGlow: Record<Task['priority'], string> = {
-    high: 'bg-error-300/45 dark:bg-error-700/35',
-    medium: 'bg-warning-300/45 dark:bg-warning-700/35',
-    low: 'bg-success-300/45 dark:bg-success-700/35',
-}
 
 export const KanbanCard = ({
     task,
@@ -93,21 +81,6 @@ export const KanbanCard = ({
             )}
             {...dragProps}
         >
-            <span
-                aria-hidden
-                className={cn(
-                    'pointer-events-none absolute inset-x-0 top-0 h-px',
-                    priorityTopLine[task.priority]
-                )}
-            />
-            <span
-                aria-hidden
-                className={cn(
-                    'pointer-events-none absolute -right-10 -top-10 size-24 rounded-full blur-2xl',
-                    priorityGlow[task.priority]
-                )}
-            />
-
             <div className="relative z-10 p-4">
                 <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
                     {onEditClick && (
@@ -164,8 +137,7 @@ export const KanbanCard = ({
                                 <span
                                     className={cn(
                                         'flex size-6 items-center justify-center rounded-full',
-                                        'bg-gradient-to-br from-brand-100 to-brand-200',
-                                        'dark:from-brand-900/50 dark:to-brand-800/50',
+                                        'bg-brand-100 dark:bg-brand-900/50',
                                         'border-2 border-white dark:border-neutral-800',
                                         'text-[11px] font-bold text-brand-700 dark:text-brand-300',
                                         'shadow-[var(--shadow-sm)]'
