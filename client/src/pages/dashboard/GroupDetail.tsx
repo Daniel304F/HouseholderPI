@@ -1,12 +1,19 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Archive, Calendar as CalendarIcon, LayoutGrid, MessageSquare } from 'lucide-react'
+import {
+    Archive,
+    Calendar as CalendarIcon,
+    Download,
+    LayoutGrid,
+    MessageSquare,
+} from 'lucide-react'
 import { groupsApi } from '../../api/groups'
 import { recurringTasksApi, type RecurringTaskTemplate } from '../../api/recurringTasks'
 import { tasksApi, type Task } from '../../api/tasks'
 import type { ColumnStatus } from '../../components/board'
 import { Tabs, type Tab } from '../../components/display'
+import { Button } from '../../components/common'
 import {
     ErrorState,
     PageHeader,
@@ -21,6 +28,7 @@ import { useTaskModal } from '../../hooks/useTaskModal'
 import { useTaskMutations } from '../../hooks/useTaskMutations'
 import { useViewport } from '../../hooks/useViewport'
 import { queryKeys } from '../../lib/queryKeys'
+import { exportTasksToCalendar } from '../../utils/calendarExport.utils'
 import {
     GroupDetailContent,
     type GroupDetailTabId,
@@ -175,6 +183,23 @@ export const GroupDetail = () => {
         },
     })
 
+    const restoreArchivedTask = useMutation({
+        mutationFn: (taskId: string) => tasksApi.restoreArchivedTask(groupId!, taskId),
+        onSuccess: () => {
+            if (!groupId) return
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.tasks.byGroup(groupId),
+            })
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.tasks.archivedByGroup(groupId),
+            })
+            toast.success('Aufgabe wiederhergestellt')
+        },
+        onError: () => {
+            toast.error('Aufgabe konnte nicht wiederhergestellt werden')
+        },
+    })
+
     const tabs = useMemo(() => getTabs(isDesktop), [isDesktop])
 
     const members: MemberInfo[] = useMemo(
@@ -245,6 +270,12 @@ export const GroupDetail = () => {
         setSelectedPriorities([])
     }
 
+    const handleExportCalendar = () => {
+        if (!group) return
+        exportTasksToCalendar(filteredTasks, group.name)
+        toast.success('Kalenderdatei exportiert')
+    }
+
     if (isLoading) return <PageSkeleton />
 
     if (isError || !group) {
@@ -266,6 +297,20 @@ export const GroupDetail = () => {
                 activeTab={activeTab}
                 onTabChange={(id) => setActiveTab(id as GroupDetailTabId)}
             />
+
+            {(activeTab === 'board' || activeTab === 'calendar') && (
+                <div className="flex justify-end">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Download className="size-4" />}
+                        onClick={handleExportCalendar}
+                        disabled={filteredTasks.length === 0}
+                    >
+                        Kalender exportieren
+                    </Button>
+                </div>
+            )}
 
             {activeTab === 'board' && (
                 <Toolbar
@@ -296,6 +341,7 @@ export const GroupDetail = () => {
                 onAddTask={openCreateModal}
                 onTaskMove={handleTaskMove}
                 onArchiveCompleted={() => archiveCompleted.mutate()}
+                onRestoreArchivedTask={(taskId) => restoreArchivedTask.mutate(taskId)}
                 archivedTasks={archivedTasks}
                 isLoadingArchived={isLoadingArchived}
             />

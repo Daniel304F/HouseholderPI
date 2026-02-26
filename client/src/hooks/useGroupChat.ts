@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { messagesApi, type Message } from '../api/messages'
@@ -19,6 +19,12 @@ interface UseGroupChatOptions {
     groupId: string
 }
 
+interface ToggleReactionPayload {
+    messageId: string
+    emoji: string
+    remove: boolean
+}
+
 export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
     const queryClient = useQueryClient()
     const toast = useToast()
@@ -28,28 +34,35 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
     const [editingMessage, setEditingMessage] = useState<Message | null>(null)
     const [editContent, setEditContent] = useState('')
     const [typingUsers, setTypingUsers] = useState<Map<string, boolean>>(new Map())
+    const [selectedImage, setSelectedImage] = useState<File | null>(null)
 
     const { data, isLoading } = useQuery({
         queryKey: getMessagesQueryKey(groupId),
         queryFn: () => messagesApi.getMessages(groupId),
     })
 
-    const messages = data?.messages ?? []
+    const messages = useMemo(() => data?.messages ?? [], [data?.messages])
+    const hasMoreMessages = data?.hasMore ?? false
 
-    const updateMessagesCache = useCallback(
-        (updater: (current: Message[]) => Message[]) => {
+    const setMessagesCache = useCallback(
+        (updater: (current: MessageQueryData) => MessageQueryData) => {
             queryClient.setQueryData(
                 getMessagesQueryKey(groupId),
-                (oldData: MessageQueryData | undefined) => {
-                    const normalized = withDefaultMessages(oldData)
-                    return {
-                        ...normalized,
-                        messages: updater(normalized.messages),
-                    }
-                }
+                (oldData: MessageQueryData | undefined) =>
+                    updater(withDefaultMessages(oldData))
             )
         },
         [groupId, queryClient]
+    )
+
+    const updateMessagesCache = useCallback(
+        (updater: (current: Message[]) => Message[]) => {
+            setMessagesCache((current) => ({
+                ...current,
+                messages: updater(current.messages),
+            }))
+        },
+        [setMessagesCache]
     )
 
     const handleNewMessage = useCallback(
@@ -113,6 +126,8 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
                 userName: user?.name ?? '',
                 userAvatar: user?.avatar,
                 content,
+                attachments: [],
+                reactions: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 editedAt: null,
@@ -139,6 +154,44 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
                 )
             )
             toast.error('Nachricht konnte nicht gesendet werden')
+        },
+    })
+
+    const sendImageMessageMutation = useMutation({
+        mutationFn: ({
+            image,
+            content,
+        }: {
+            image: File
+            content?: string
+        }) => messagesApi.sendImageMessage(groupId, image, content),
+        onSuccess: (createdMessage) => {
+            updateMessagesCache((currentMessages) => [
+                ...currentMessages,
+                createdMessage,
+            ])
+        },
+        onError: () => {
+            toast.error('Bildnachricht konnte nicht gesendet werden')
+        },
+    })
+
+    const toggleReactionMutation = useMutation({
+        mutationFn: ({ messageId, emoji, remove }: ToggleReactionPayload) => {
+            if (remove) {
+                return messagesApi.removeReaction(groupId, messageId, emoji)
+            }
+            return messagesApi.addReaction(groupId, messageId, emoji)
+        },
+        onSuccess: (updatedMessage) => {
+            updateMessagesCache((currentMessages) =>
+                currentMessages.map((item) =>
+                    item.id === updatedMessage.id ? updatedMessage : item
+                )
+            )
+        },
+        onError: () => {
+            toast.error('Reaktion konnte nicht aktualisiert werden')
         },
     })
 
@@ -170,17 +223,55 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
         },
     })
 
+    const loadOlderMessagesMutation = useMutation({
+        mutationFn: async () => {
+            const oldestMessage = messages[0]
+            if (!oldestMessage) {
+                return { messages: [], hasMore: false }
+            }
+            return messagesApi.getMessages(groupId, 50, oldestMessage.id)
+        },
+        onSuccess: ({ messages: olderMessages, hasMore }) => {
+            setMessagesCache((current) => {
+                const existingMessageIds = new Set(current.messages.map((m) => m.id))
+                const uniqueOlderMessages = olderMessages.filter(
+                    (message) => !existingMessageIds.has(message.id)
+                )
+
+                return {
+                    messages: [...uniqueOlderMessages, ...current.messages],
+                    hasMore,
+                }
+            })
+        },
+        onError: () => {
+            toast.error('Aeltere Nachrichten konnten nicht geladen werden')
+        },
+    })
+
     const handleSendMessage = useCallback(() => {
         const content = newMessage.trim()
+
+        if (selectedImage) {
+            sendImageMessageMutation.mutate({
+                image: selectedImage,
+                content: content || undefined,
+            })
+            setSelectedImage(null)
+            setNewMessage('')
+            sendTyping(false)
+            return
+        }
+
         if (!content) return
 
         sendMessageMutation.mutate(content)
         setNewMessage('')
         sendTyping(false)
-    }, [newMessage, sendMessageMutation, sendTyping])
+    }, [newMessage, selectedImage, sendImageMessageMutation, sendMessageMutation, sendTyping])
 
     const handleInputKeyDown = useCallback(
-        (event: KeyboardEvent<HTMLInputElement>) => {
+        (event: KeyboardEvent<HTMLTextAreaElement>) => {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault()
                 handleSendMessage()
@@ -223,6 +314,31 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
         [deleteMessageMutation]
     )
 
+    const setSelectedImageFile = useCallback((file: File | null) => {
+        setSelectedImage(file)
+    }, [])
+
+    const reactToMessage = useCallback(
+        (messageId: string, emoji: string) => {
+            if (!user?.id) return
+
+            const targetMessage = messages.find((message) => message.id === messageId)
+            if (!targetMessage) return
+
+            const userAlreadyReacted = (targetMessage.reactions || []).some(
+                (reaction) =>
+                    reaction.emoji === emoji && reaction.userIds.includes(user.id)
+            )
+
+            toggleReactionMutation.mutate({
+                messageId,
+                emoji,
+                remove: userAlreadyReacted,
+            })
+        },
+        [messages, toggleReactionMutation, user?.id]
+    )
+
     return {
         messages,
         isLoading,
@@ -231,7 +347,9 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
         editingMessage,
         editContent,
         typingUsers,
-        isSending: sendMessageMutation.isPending,
+        selectedImage,
+        isSending:
+            sendMessageMutation.isPending || sendImageMessageMutation.isPending,
         handleInputChange,
         handleInputKeyDown,
         handleSendMessage,
@@ -240,5 +358,10 @@ export const useGroupChat = ({ groupId }: UseGroupChatOptions) => {
         cancelEdit,
         submitEdit,
         deleteMessage,
+        setSelectedImage: setSelectedImageFile,
+        reactToMessage,
+        hasMoreMessages,
+        loadOlderMessages: loadOlderMessagesMutation.mutate,
+        isLoadingOlder: loadOlderMessagesMutation.isPending,
     }
 }

@@ -53,6 +53,7 @@ interface GroupDetailContentProps {
     onAddTask: (status: ColumnStatus) => void
     onTaskMove: (taskId: string, newStatus: ColumnStatus) => Promise<void>
     onArchiveCompleted: () => void
+    onRestoreArchivedTask: (taskId: string) => void
     archivedTasks: Task[]
     isLoadingArchived: boolean
 }
@@ -72,6 +73,7 @@ export const GroupDetailContent = ({
     onAddTask,
     onTaskMove,
     onArchiveCompleted,
+    onRestoreArchivedTask,
     archivedTasks,
     isLoadingArchived,
 }: GroupDetailContentProps) => {
@@ -128,6 +130,7 @@ export const GroupDetailContent = ({
                             <ArchivedTasksList
                                 tasks={archivedTasks}
                                 onTaskClick={onTaskClick}
+                                onRestoreTask={onRestoreArchivedTask}
                                 isLoading={isLoadingArchived}
                             />
                         </Suspense>
