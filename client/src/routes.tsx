@@ -27,6 +27,11 @@ const GroupDetail = lazy(() =>
 const Friends = lazy(() =>
     import('./pages/dashboard/Friends').then((module) => ({ default: module.Friends }))
 )
+const FriendProfile = lazy(() =>
+    import('./pages/dashboard/FriendProfile').then((module) => ({
+        default: module.FriendProfile,
+    }))
+)
 const MyTasks = lazy(() =>
     import('./pages/dashboard/MyTasks').then((module) => ({ default: module.MyTasks }))
 )
@@ -103,6 +108,10 @@ export const routes: RouteObject[] = [
                     {
                         path: 'friends',
                         element: renderLazyRoute(Friends),
+                    },
+                    {
+                        path: 'friends/:friendId',
+                        element: renderLazyRoute(FriendProfile),
                     },
                     {
                         path: 'stats',

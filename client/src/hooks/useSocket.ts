@@ -13,6 +13,7 @@ interface UseSocketOptions {
     onMessageUpdate?: (message: unknown) => void
     onMessageDelete?: (data: { messageId: string }) => void
     onTypingChange?: (data: TypingUser) => void
+    onDirectMessage?: (message: unknown) => void
 }
 
 const WS_URL =
@@ -27,6 +28,7 @@ export const useSocket = ({
     onMessageUpdate,
     onMessageDelete,
     onTypingChange,
+    onDirectMessage,
 }: UseSocketOptions = {}) => {
     const { isAuthenticated } = useAuth()
     const socketRef = useRef<Socket | null>(null)
@@ -101,14 +103,25 @@ export const useSocket = ({
         if (onTypingChange) {
             socket.on('message:typing', onTypingChange)
         }
+        if (onDirectMessage) {
+            socket.on('direct-message:new', onDirectMessage)
+        }
 
         return () => {
             socket.off('message:new')
             socket.off('message:update')
             socket.off('message:delete')
             socket.off('message:typing')
+            socket.off('direct-message:new')
         }
-    }, [isConnected, onNewMessage, onMessageUpdate, onMessageDelete, onTypingChange])
+    }, [
+        isConnected,
+        onNewMessage,
+        onMessageUpdate,
+        onMessageDelete,
+        onTypingChange,
+        onDirectMessage,
+    ])
 
     // Send typing indicator
     const sendTyping = useCallback(

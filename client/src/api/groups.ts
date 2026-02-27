@@ -11,6 +11,118 @@ export interface GroupPermissions {
     manageRecurringTasks: PermissionLevel
 }
 
+export type GroupLlmProvider =
+    | 'openai'
+    | 'anthropic'
+    | 'google'
+    | 'openrouter'
+    | 'custom'
+
+export type GroupLlmCoordinationMode = 'planner' | 'multi_agent'
+
+export type GroupLlmAgentFramework =
+    | 'langgraph'
+    | 'autogen'
+    | 'semantic-kernel'
+    | 'custom'
+
+export interface GroupLlmDataAccess {
+    includeTasks: boolean
+    includeMessages: boolean
+    includeMemberProfiles: boolean
+}
+
+export interface GroupLlmConfig {
+    groupId: string
+    enabled: boolean
+    provider: GroupLlmProvider
+    model: string
+    coordinationMode: GroupLlmCoordinationMode
+    agentFramework: GroupLlmAgentFramework
+    dataAccess: GroupLlmDataAccess
+    hasApiKey: boolean
+    apiKeyHint?: string
+    updatedBy?: string
+    updatedAt: string | null
+}
+
+export interface UpdateGroupLlmConfigRequest {
+    enabled?: boolean
+    provider?: GroupLlmProvider
+    model?: string
+    apiKey?: string
+    coordinationMode?: GroupLlmCoordinationMode
+    agentFramework?: GroupLlmAgentFramework
+    dataAccess?: Partial<GroupLlmDataAccess>
+}
+
+export type GroupLlmIntent =
+    | 'chat_summary'
+    | 'task_creation'
+    | 'calendar_export'
+    | 'moderation'
+
+export interface GroupLlmCoordinateRequest {
+    prompt: string
+    intent: GroupLlmIntent
+    idempotencyKey?: string
+}
+
+export interface GroupLlmExecutionPlan {
+    runId: string
+    groupId: string
+    userId: string
+    intent: GroupLlmIntent
+    mode: 'read' | 'write'
+    canExecuteTools: boolean
+    toolScopes: string[]
+    agents: string[]
+    createdAt: string
+}
+
+export interface GroupLlmCoordinateResponse {
+    plan: GroupLlmExecutionPlan
+    runtime: {
+        provider: GroupLlmProvider
+        model: string
+        coordinationMode: GroupLlmCoordinationMode
+        agentFramework: GroupLlmAgentFramework
+        frameworkRecommendation: string
+        hasApiKey: boolean
+    }
+    context: {
+        group: {
+            id: string
+            name: string
+            memberCount: number
+            activeResidentsCount: number
+        }
+        tasks: Array<{
+            id: string
+            title: string
+            status: string
+            priority: string
+            assignedTo: string | null
+            dueDate: string
+        }>
+        messages: Array<{
+            id: string
+            userId: string
+            userName: string
+            content: string
+            createdAt: string
+        }>
+        memberProfiles: Array<{
+            userId: string
+            name: string
+            email: string
+            bio?: string
+            avatar?: string
+            achievements: string[]
+        }>
+    }
+}
+
 export interface GroupMember {
     userId: string
     role: 'owner' | 'admin' | 'member'
@@ -168,6 +280,38 @@ export const groupsApi = {
         const response = await apiClient.patch<ApiResponse<GroupPermissions>>(
             `/groups/${groupId}/permissions`,
             permissions
+        )
+        return response.data.data
+    },
+
+    // KI-Konfiguration abrufen
+    getLlmConfig: async (groupId: string): Promise<GroupLlmConfig> => {
+        const response = await apiClient.get<ApiResponse<GroupLlmConfig>>(
+            `/groups/${groupId}/llm`
+        )
+        return response.data.data
+    },
+
+    // KI-Konfiguration speichern
+    updateLlmConfig: async (
+        groupId: string,
+        data: UpdateGroupLlmConfigRequest
+    ): Promise<GroupLlmConfig> => {
+        const response = await apiClient.patch<ApiResponse<GroupLlmConfig>>(
+            `/groups/${groupId}/llm`,
+            data
+        )
+        return response.data.data
+    },
+
+    // Koordinationsplan fuer Gruppen-KI erzeugen
+    coordinateLlm: async (
+        groupId: string,
+        data: GroupLlmCoordinateRequest
+    ): Promise<GroupLlmCoordinateResponse> => {
+        const response = await apiClient.post<ApiResponse<GroupLlmCoordinateResponse>>(
+            `/groups/${groupId}/llm/coordinate`,
+            data
         )
         return response.data.data
     },

@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useSidebar } from '../hooks/useSidebar'
 import { useViewport } from '../hooks/useViewport'
 import { cn } from '../utils/cn'
+import { DirectMessagePopup } from '../components/chat/DirectMessagePopup'
 import {
     Sidebar,
     SidebarSection,
@@ -63,6 +64,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <main className={cn('h-full flex-1 overflow-y-auto', contentPadding)}>
                 {children ?? <Outlet />}
             </main>
+
+            <DirectMessagePopup />
         </div>
     )
 }

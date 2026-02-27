@@ -2,11 +2,13 @@ import { Router, RequestHandler } from "express";
 import * as friendController from "../controllers/friendController.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validateResource } from "../middlewares/validation.middleware.js";
+import { uploadChatImage } from "../config/upload.config.js";
 import {
   sendFriendRequestSchema,
   friendRequestIdParamSchema,
   friendIdParamSchema,
   respondToRequestSchema,
+  directMessagesQuerySchema,
 } from "../schemas/friend.schema.js";
 
 const router = Router();
@@ -52,6 +54,26 @@ router.delete(
   "/:friendId",
   validateResource(friendIdParamSchema),
   friendController.removeFriend as RequestHandler,
+);
+
+// Freund-Profil ansehen
+router.get(
+  "/:friendId/profile",
+  validateResource(friendIdParamSchema),
+  friendController.getFriendProfile as RequestHandler,
+);
+
+// Direktnachrichten mit Freund
+router.get(
+  "/:friendId/messages",
+  validateResource(directMessagesQuerySchema),
+  friendController.getDirectMessages as RequestHandler,
+);
+
+router.post(
+  "/:friendId/messages",
+  uploadChatImage.single("image"),
+  friendController.sendDirectMessage as RequestHandler,
 );
 
 export default router;

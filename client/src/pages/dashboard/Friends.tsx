@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { UserPlus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/common'
 import { Tabs as ContentTabs } from '../../components/display'
 import { AddFriendModal } from '../../components/friends'
@@ -16,8 +17,10 @@ import {
 import { PageIntro } from '../../components/ui'
 import { friendsApi } from '../../api/friends'
 import { useFriendsMutations } from '../../hooks'
+import { openDirectChat } from '../../components/chat/directChat.events'
 
 export const Friends = () => {
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('friends')
     const [showAddModal, setShowAddModal] = useState(false)
 
@@ -139,6 +142,8 @@ export const Friends = () => {
                 <FriendsTab
                     friends={friends}
                     onRemove={handleRemoveFriend}
+                    onViewProfile={(friendId) => navigate(`/dashboard/friends/${friendId}`)}
+                    onMessage={(friendId) => openDirectChat({ friendId })}
                     onAddFriend={() => setShowAddModal(true)}
                 />
             )}

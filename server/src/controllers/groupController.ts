@@ -1,15 +1,37 @@
 import { Response, NextFunction, Request } from "express";
 import { Group } from "../models/group.js";
+import { GroupLlmConfig } from "../models/groupLlmConfig.js";
+import { Message } from "../models/message.js";
+import { Task } from "../models/task.js";
 import { User } from "../models/user.js";
 import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { GroupService } from "../services/group.service.js";
+import { GroupLlmService } from "../services/group-llm.service.js";
 import { AppError } from "../services/errors.js";
 
 const getGroupService = (req: Request): GroupService => {
   const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
   const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
   return new GroupService(groupDAO, userDAO);
+};
+
+const getGroupLlmService = (req: Request): GroupLlmService => {
+  const groupDAO = req.app.locals["groupDAO"] as GenericDAO<Group>;
+  const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
+  const taskDAO = req.app.locals["taskDAO"] as GenericDAO<Task>;
+  const messageDAO = req.app.locals["messageDAO"] as GenericDAO<Message>;
+  const groupLlmConfigDAO = req.app.locals[
+    "groupLlmConfigDAO"
+  ] as GenericDAO<GroupLlmConfig>;
+
+  return new GroupLlmService(
+    groupDAO,
+    userDAO,
+    taskDAO,
+    messageDAO,
+    groupLlmConfigDAO,
+  );
 };
 
 /**
@@ -358,6 +380,98 @@ export const updatePermissions = async (
     res.status(200).json({
       success: true,
       data: permissions,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Holt die KI-Konfiguration einer Gruppe
+ * GET /api/groups/:groupId/llm
+ */
+export const getGroupLlmConfig = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const groupLlmService = getGroupLlmService(req);
+    const { groupId } = req.params;
+
+    const llmConfig = await groupLlmService.getConfig(groupId!, req.userId);
+
+    res.status(200).json({
+      success: true,
+      data: llmConfig,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Aktualisiert die KI-Konfiguration einer Gruppe
+ * PATCH /api/groups/:groupId/llm
+ */
+export const updateGroupLlmConfig = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const groupLlmService = getGroupLlmService(req);
+    const { groupId } = req.params;
+
+    const llmConfig = await groupLlmService.updateConfig(
+      groupId!,
+      req.userId,
+      req.body,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: llmConfig,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Erstellt einen Koordinationsplan fuer Gruppen-KI mit gruppenspezifischem Kontext
+ * POST /api/groups/:groupId/llm/coordinate
+ */
+export const coordinateGroupLlm = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const groupLlmService = getGroupLlmService(req);
+    const { groupId } = req.params;
+
+    const result = await groupLlmService.coordinate(
+      groupId!,
+      req.userId,
+      req.body,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     if (error instanceof AppError) {

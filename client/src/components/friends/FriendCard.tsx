@@ -1,4 +1,4 @@
-import { MoreHorizontal, UserMinus, MessageCircle } from 'lucide-react'
+import { MoreHorizontal, UserMinus, MessageCircle, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { Friend } from '../../api/friends'
 import { cn } from '../../utils/cn'
@@ -9,12 +9,19 @@ import { friendAvatarStyles, friendCardStyles, getInitials } from './friends.uti
 interface FriendCardProps {
     friend: Friend
     onRemove: (friendId: string) => void
+    onViewProfile?: (friendId: string) => void
     onMessage?: (friendId: string) => void
 }
 
-export const FriendCard = ({ friend, onRemove, onMessage }: FriendCardProps) => {
+export const FriendCard = ({
+    friend,
+    onRemove,
+    onViewProfile,
+    onMessage,
+}: FriendCardProps) => {
     const [showMenu, setShowMenu] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
+    const isProfileClickable = Boolean(onViewProfile)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -33,7 +40,25 @@ export const FriendCard = ({ friend, onRemove, onMessage }: FriendCardProps) => 
     }, [showMenu])
 
     return (
-        <div className={friendCardStyles}>
+        <div
+            className={cn(
+                friendCardStyles,
+                isProfileClickable &&
+                    'cursor-pointer transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40'
+            )}
+            onClick={() => onViewProfile?.(friend.friendId)}
+            onKeyDown={(event) => {
+                if (!isProfileClickable) return
+                if (event.key !== 'Enter' && event.key !== ' ') return
+                event.preventDefault()
+                onViewProfile?.(friend.friendId)
+            }}
+            role={isProfileClickable ? 'button' : undefined}
+            tabIndex={isProfileClickable ? 0 : undefined}
+            aria-label={
+                isProfileClickable ? `Profil von ${friend.friendName} oeffnen` : undefined
+            }
+        >
             {friend.friendAvatar ? (
                 <img
                     src={friend.friendAvatar}
@@ -53,12 +78,19 @@ export const FriendCard = ({ friend, onRemove, onMessage }: FriendCardProps) => 
                 </p>
             </div>
 
-            <div className="relative" ref={menuRef}>
+            <div
+                className="relative"
+                ref={menuRef}
+                onClick={(event) => event.stopPropagation()}
+            >
                 <IconButton
                     icon={<MoreHorizontal className="size-5" />}
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowMenu((prev) => !prev)}
+                    onClick={(event) => {
+                        event.stopPropagation()
+                        setShowMenu((prev) => !prev)
+                    }}
                     aria-label="Menue oeffnen"
                 />
 
@@ -69,10 +101,23 @@ export const FriendCard = ({ friend, onRemove, onMessage }: FriendCardProps) => 
                             'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
                         )}
                     >
+                        {onViewProfile && (
+                            <DropdownMenuItem
+                                icon={<User className="size-4" />}
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    onViewProfile(friend.friendId)
+                                    setShowMenu(false)
+                                }}
+                            >
+                                Profil ansehen
+                            </DropdownMenuItem>
+                        )}
                         {onMessage && (
                             <DropdownMenuItem
                                 icon={<MessageCircle className="size-4" />}
-                                onClick={() => {
+                                onClick={(event) => {
+                                    event.stopPropagation()
                                     onMessage(friend.friendId)
                                     setShowMenu(false)
                                 }}
@@ -83,7 +128,8 @@ export const FriendCard = ({ friend, onRemove, onMessage }: FriendCardProps) => 
                         <DropdownMenuItem
                             icon={<UserMinus className="size-4" />}
                             variant="danger"
-                            onClick={() => {
+                            onClick={(event) => {
+                                event.stopPropagation()
                                 onRemove(friend.friendId)
                                 setShowMenu(false)
                             }}

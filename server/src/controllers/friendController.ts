@@ -5,13 +5,18 @@ import { GenericDAO } from "../models/generic.dao.js";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { FriendService } from "../services/friend.service.js";
 import { AppError } from "../services/errors.js";
+import { DirectMessageAttachment, DirectMessage } from "../models/directMessage.js";
+import { v4 as uuidv4 } from "uuid";
 
 const getFriendService = (req: Request): FriendService => {
   const friendshipDAO = req.app.locals[
     "friendshipDAO"
   ] as GenericDAO<Friendship>;
   const userDAO = req.app.locals["userDAO"] as GenericDAO<User>;
-  return new FriendService(friendshipDAO, userDAO);
+  const directMessageDAO = req.app.locals[
+    "directMessageDAO"
+  ] as GenericDAO<DirectMessage>;
+  return new FriendService(friendshipDAO, userDAO, directMessageDAO);
 };
 
 /**
@@ -203,6 +208,122 @@ export const removeFriend = async (
     res.status(200).json({
       success: true,
       message: "Freund entfernt",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Get friend's public profile
+ * GET /api/friends/:friendId/profile
+ */
+export const getFriendProfile = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const friendService = getFriendService(req);
+    const { friendId } = req.params;
+
+    const profile = await friendService.getFriendProfile(req.userId, friendId!);
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Get direct messages with a friend
+ * GET /api/friends/:friendId/messages
+ */
+export const getDirectMessages = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const friendService = getFriendService(req);
+    const { friendId } = req.params;
+    const limit = parseInt(req.query["limit"] as string) || 50;
+    const before = req.query["before"] as string | undefined;
+
+    const result = await friendService.getDirectMessages(
+      req.userId,
+      friendId!,
+      limit,
+      before,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.messages,
+      hasMore: result.hasMore,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+};
+
+/**
+ * Send direct message to a friend
+ * POST /api/friends/:friendId/messages
+ */
+export const sendDirectMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const friendService = getFriendService(req);
+    const { friendId } = req.params;
+    const { content } = req.body;
+
+    const attachments: DirectMessageAttachment[] = req.file
+      ? [
+          {
+            id: uuidv4(),
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+          },
+        ]
+      : [];
+
+    const message = await friendService.sendDirectMessage(
+      req.userId,
+      friendId!,
+      content || "",
+      attachments,
+    );
+
+    const io = req.app.locals["io"];
+    if (io) {
+      io.to(`user:${friendId}`).emit("direct-message:new", message);
+      io.to(`user:${req.userId}`).emit("direct-message:new", message);
+    }
+
+    res.status(201).json({
+      success: true,
+      data: message,
     });
   } catch (error) {
     if (error instanceof AppError) {

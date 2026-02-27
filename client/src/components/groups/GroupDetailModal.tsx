@@ -9,6 +9,7 @@ import {
     GroupActions,
     RecurringTasksSection,
     PermissionsSection,
+    LlmCoordinationSection,
 } from './detail'
 import type { GroupPermissions } from '../../api/groups'
 
@@ -183,6 +184,9 @@ export const GroupDetailModal = ({
                     permissions={localGroup.permissions || DEFAULT_PERMISSIONS}
                     isOwner={isOwner}
                 />
+
+                {/* LLM Coordination */}
+                <LlmCoordinationSection groupId={localGroup.id} isAdmin={isAdmin} />
 
                 {/* Members */}
                 <MemberList

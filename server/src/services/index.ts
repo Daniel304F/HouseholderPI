@@ -6,3 +6,5 @@ export * from "./task.service.js";
 export * from "./group.service.js";
 export * from "./friend.service.js";
 export * from "./statistics.service.js";
+export * from "./group-llm-coordinator.service.js";
+export * from "./group-llm.service.js";

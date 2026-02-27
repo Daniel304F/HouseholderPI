@@ -11,6 +11,8 @@ import {
   updateMemberSchema,
   removeMemberSchema,
   updatePermissionsSchema,
+  updateGroupLlmConfigSchema,
+  groupLlmCoordinateSchema,
 } from "../schemas/group.schema.js";
 import taskRoutes from "./taskRoutes.js";
 import recurringTaskRoutes from "./recurringTaskRoutes.js";
@@ -99,6 +101,25 @@ router.patch(
   "/:groupId/permissions",
   validateResource(updatePermissionsSchema),
   groupController.updatePermissions as RequestHandler,
+);
+
+// Group LLM coordination
+router.get(
+  "/:groupId/llm",
+  validateResource(groupIdParamSchema),
+  groupController.getGroupLlmConfig as RequestHandler,
+);
+
+router.patch(
+  "/:groupId/llm",
+  validateResource(updateGroupLlmConfigSchema),
+  groupController.updateGroupLlmConfig as RequestHandler,
+);
+
+router.post(
+  "/:groupId/llm/coordinate",
+  validateResource(groupLlmCoordinateSchema),
+  groupController.coordinateGroupLlm as RequestHandler,
 );
 
 // Task-Routen (Sub-Router)

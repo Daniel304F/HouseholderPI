@@ -4,10 +4,18 @@ import { FriendCard, FriendsEmptyState } from '../friends'
 interface FriendsTabProps {
     friends: Friend[]
     onRemove: (friendId: string) => void
+    onViewProfile: (friendId: string) => void
+    onMessage: (friendId: string) => void
     onAddFriend: () => void
 }
 
-export const FriendsTab = ({ friends, onRemove, onAddFriend }: FriendsTabProps) => {
+export const FriendsTab = ({
+    friends,
+    onRemove,
+    onViewProfile,
+    onMessage,
+    onAddFriend,
+}: FriendsTabProps) => {
     if (friends.length === 0) {
         return <FriendsEmptyState onAddFriend={onAddFriend} />
     }
@@ -15,7 +23,13 @@ export const FriendsTab = ({ friends, onRemove, onAddFriend }: FriendsTabProps) 
     return (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {friends.map((friend) => (
-                <FriendCard key={friend.id} friend={friend} onRemove={onRemove} />
+                <FriendCard
+                    key={friend.id}
+                    friend={friend}
+                    onRemove={onRemove}
+                    onViewProfile={onViewProfile}
+                    onMessage={onMessage}
+                />
             ))}
         </div>
     )

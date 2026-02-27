@@ -8,6 +8,8 @@ import { ActivityLog } from "./models/activityLog.js";
 import { RecurringTaskTemplate } from "./models/recurringTaskTemplate.js";
 import { Comment } from "./models/comment.js";
 import { Message } from "./models/message.js";
+import { DirectMessage } from "./models/directMessage.js";
+import { GroupLlmConfig } from "./models/groupLlmConfig.js";
 import type { Express } from "express";
 import config from "./config/config.js";
 
@@ -41,6 +43,14 @@ async function startMongoDB(app: Express) {
   );
   app.locals["commentDAO"] = new MongoGenericDAO<Comment>(db, "comments");
   app.locals["messageDAO"] = new MongoGenericDAO<Message>(db, "messages");
+  app.locals["directMessageDAO"] = new MongoGenericDAO<DirectMessage>(
+    db,
+    "directMessages",
+  );
+  app.locals["groupLlmConfigDAO"] = new MongoGenericDAO<GroupLlmConfig>(
+    db,
+    "groupLlmConfigs",
+  );
 }
 
 async function startInMemoryDB(_app: Express) {

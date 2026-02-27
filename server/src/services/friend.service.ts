@@ -12,6 +12,11 @@ import {
   InternalError,
   NotFoundError,
 } from "./errors.js";
+import {
+  DirectMessage,
+  DirectMessageAttachment,
+  DirectMessageResponse,
+} from "../models/directMessage.js";
 
 export interface SentFriendRequest {
   id: string;
@@ -24,11 +29,70 @@ export interface SentFriendRequest {
   createdAt: string;
 }
 
+export interface FriendProfileResponse {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  achievements: string[];
+  friendSince: string;
+}
+
 export class FriendService {
   constructor(
     private friendshipDAO: GenericDAO<Friendship>,
     private userDAO: GenericDAO<User>,
+    private directMessageDAO: GenericDAO<DirectMessage>,
   ) {}
+
+  private async ensureFriendship(
+    userId: string,
+    friendId: string,
+  ): Promise<Friendship> {
+    const allFriendships = await this.friendshipDAO.findAll();
+    const friendship = allFriendships.find(
+      (f) =>
+        ((f.requesterId === userId && f.addresseeId === friendId) ||
+          (f.requesterId === friendId && f.addresseeId === userId)) &&
+        f.status === "accepted",
+    );
+
+    if (!friendship) {
+      throw new ForbiddenError("Nur Freunde koennen darauf zugreifen");
+    }
+
+    return friendship;
+  }
+
+  private async getUserOrThrow(userId: string): Promise<User> {
+    const user = await this.userDAO.findOne({ id: userId } as Partial<User>);
+    if (!user) {
+      throw new NotFoundError("Benutzer nicht gefunden");
+    }
+    return user;
+  }
+
+  private toDirectMessageResponse(
+    message: DirectMessage,
+    sender: User,
+  ): DirectMessageResponse {
+    return {
+      id: message.id,
+      senderId: message.senderId,
+      recipientId: message.recipientId,
+      senderName: sender.name,
+      ...(sender.avatar && { senderAvatar: sender.avatar }),
+      content: message.content,
+      attachments: (message.attachments || []).map((attachment) => ({
+        ...attachment,
+        url: `/uploads/${attachment.filename}`,
+      })),
+      createdAt: toISOString(message.createdAt),
+      updatedAt: toISOString(message.updatedAt),
+      readAt: message.readAt ? toISOString(message.readAt) : null,
+    };
+  }
 
   async getFriends(userId: string): Promise<FriendshipResponse[]> {
     const allFriendships = await this.friendshipDAO.findAll();
@@ -222,13 +286,13 @@ export class FriendService {
 
     if (friendship.requesterId !== userId) {
       throw new ForbiddenError(
-        "Du kannst nur deine eigenen Anfragen zurückziehen",
+        "Du kannst nur deine eigenen Anfragen zurueckziehen",
       );
     }
 
     if (friendship.status !== "pending") {
       throw new BadRequestError(
-        "Diese Anfrage kann nicht mehr zurückgezogen werden",
+        "Diese Anfrage kann nicht mehr zurueckgezogen werden",
       );
     }
 
@@ -249,5 +313,101 @@ export class FriendService {
     }
 
     await this.friendshipDAO.delete(friendship.id);
+  }
+
+  async getFriendProfile(
+    userId: string,
+    friendId: string,
+  ): Promise<FriendProfileResponse> {
+    const friend = await this.getUserOrThrow(friendId);
+    const friendship = await this.ensureFriendship(userId, friendId);
+
+    return {
+      id: friend.id,
+      name: friend.name,
+      email: friend.email,
+      ...(friend.avatar && { avatar: friend.avatar }),
+      ...(friend.bio && { bio: friend.bio }),
+      achievements: friend.achievements || [],
+      friendSince: toISOString(friendship.createdAt),
+    };
+  }
+
+  async getDirectMessages(
+    userId: string,
+    friendId: string,
+    limit: number = 50,
+    before?: string,
+  ): Promise<{ messages: DirectMessageResponse[]; hasMore: boolean }> {
+    await this.getUserOrThrow(friendId);
+    await this.ensureFriendship(userId, friendId);
+
+    let messages = await this.directMessageDAO.findAll();
+    messages = messages
+      .filter(
+        (message) =>
+          (message.senderId === userId && message.recipientId === friendId) ||
+          (message.senderId === friendId && message.recipientId === userId),
+      )
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    if (before) {
+      const beforeIndex = messages.findIndex((message) => message.id === before);
+      if (beforeIndex !== -1) {
+        messages = messages.slice(beforeIndex + 1);
+      }
+    }
+
+    const hasMore = messages.length > limit;
+    messages = messages.slice(0, limit);
+
+    const [currentUser, friendUser] = await Promise.all([
+      this.getUserOrThrow(userId),
+      this.getUserOrThrow(friendId),
+    ]);
+    const usersById = new Map<string, User>([
+      [currentUser.id, currentUser],
+      [friendUser.id, friendUser],
+    ]);
+
+    const response = messages
+      .map((message) => {
+        const sender = usersById.get(message.senderId);
+        if (!sender) return null;
+        return this.toDirectMessageResponse(message, sender);
+      })
+      .filter((message): message is DirectMessageResponse => Boolean(message))
+      .reverse();
+
+    return {
+      messages: response,
+      hasMore,
+    };
+  }
+
+  async sendDirectMessage(
+    userId: string,
+    friendId: string,
+    content: string,
+    attachments: DirectMessageAttachment[] = [],
+  ): Promise<DirectMessageResponse> {
+    await this.getUserOrThrow(friendId);
+    await this.ensureFriendship(userId, friendId);
+
+    const trimmedContent = content.trim();
+    if (!trimmedContent && attachments.length === 0) {
+      throw new BadRequestError("Nachricht darf nicht leer sein");
+    }
+
+    const createdMessage = await this.directMessageDAO.create({
+      senderId: userId,
+      recipientId: friendId,
+      content: trimmedContent,
+      attachments,
+      readAt: null,
+    } as Omit<DirectMessage, "id" | "createdAt" | "updatedAt">);
+
+    const sender = await this.getUserOrThrow(userId);
+    return this.toDirectMessageResponse(createdMessage, sender);
   }
 }
