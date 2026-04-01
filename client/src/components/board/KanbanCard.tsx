@@ -58,6 +58,12 @@ export const KanbanCard = ({
         onDeleteClick?.()
     }
 
+    const priorityAccent: Record<string, string> = {
+        high: 'before:bg-error-500',
+        medium: 'before:bg-warning-400',
+        low: 'before:bg-success-500',
+    }
+
     return (
         <article
             onClick={onClick}
@@ -75,6 +81,10 @@ export const KanbanCard = ({
                 'dark:hover:border-brand-600/60',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900',
                 'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
+                // Priority left accent
+                'before:absolute before:left-0 before:top-2.5 before:bottom-2.5 before:w-[3px] before:rounded-r-full',
+                'before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200',
+                priorityAccent[task.priority],
                 isDragging &&
                     'scale-[0.98] opacity-70 ring-2 ring-brand-500 shadow-[var(--shadow-lg)]',
                 dragProps?.draggable && 'cursor-grab active:cursor-grabbing'

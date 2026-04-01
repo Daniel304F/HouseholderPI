@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { UserPlus } from 'lucide-react'
+import { UserCircle, UserPlus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/common'
 import { Tabs as ContentTabs } from '../../components/display'
@@ -118,6 +118,7 @@ export const Friends = () => {
             <PageIntro
                 title="Freunde"
                 description={summary}
+                icon={<UserCircle className="size-5 text-brand-600 dark:text-brand-400" />}
                 action={
                     <Button
                         onClick={() => setShowAddModal(true)}

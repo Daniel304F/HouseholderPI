@@ -529,6 +529,52 @@ textarea {
     }
 }
 
+/* ── Hero / Homepage ── */
+@keyframes hero-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50%       { background-position: 100% 50%; }
+}
+
+@keyframes slide-up-fade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-animate-1 { animation: slide-up-fade 0.6s ease-out 0.05s both; }
+.hero-animate-2 { animation: slide-up-fade 0.6s ease-out 0.18s both; }
+.hero-animate-3 { animation: slide-up-fade 0.6s ease-out 0.32s both; }
+.hero-animate-4 { animation: slide-up-fade 0.6s ease-out 0.45s both; }
+
+/* Dashboard page subtle background */
+.dashboard-bg {
+    background-image:
+        radial-gradient(circle at 20% 20%, hsl(147, 78%, 93%, 0.45) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, hsl(183, 76%, 92%, 0.3) 0%, transparent 35%);
+}
+.dark .dashboard-bg {
+    background-image:
+        radial-gradient(circle at 20% 20%, hsl(153, 74%, 10%, 0.5) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, hsl(191, 78%, 9%, 0.3) 0%, transparent 35%);
+}
+
+/* Feature card icon container */
+.feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    flex-shrink: 0;
+}
+
+
 /* ── Login / Auth Page ── */
 @keyframes float-blob {
     0%, 100% { transform: translate(0, 0) scale(1); }

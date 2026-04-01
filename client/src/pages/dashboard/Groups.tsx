@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, UserPlus } from 'lucide-react'
+import { Plus, UserPlus, Users } from 'lucide-react'
 import { Button } from '../../components/common'
 import { ErrorState } from '../../components/feedback'
 import { PageHeaderSkeleton } from '../../components/feedback'
@@ -11,6 +11,7 @@ import {
     CreateGroupModal,
     JoinGroupModal,
 } from '../../components/groups'
+import { PageIntro } from '../../components/ui'
 import { groupsApi } from '../../api/groups'
 import { useToast } from '../../contexts/ToastContext'
 
@@ -56,17 +57,12 @@ export const Groups = () => {
 
     return (
         <section className="space-y-6">
-            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                    <h1 className="break-words text-2xl font-bold text-neutral-900 dark:text-white">
-                        Meine Gruppen
-                    </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400">
-                        {groups.length} Gruppe{groups.length !== 1 ? 'n' : ''}
-                    </p>
-                </div>
-                {groups.length > 0 && (
-                    <div className="hide-scrollbar overflow-x-auto pb-1 sm:pb-0">
+            <PageIntro
+                title="Meine Gruppen"
+                description={`${groups.length} Gruppe${groups.length !== 1 ? 'n' : ''} · Erstellt und beigetreten`}
+                icon={<Users className="size-5 text-brand-600 dark:text-brand-400" />}
+                action={
+                    groups.length > 0 ? (
                         <div className="flex gap-2">
                             <Button
                                 variant="secondary"
@@ -86,9 +82,9 @@ export const Groups = () => {
                                 <span className="sm:hidden">Neu</span>
                             </Button>
                         </div>
-                    </div>
-                )}
-            </header>
+                    ) : undefined
+                }
+            />
 
             {/* Groups List or Empty State */}
             {groups.length === 0 ? (

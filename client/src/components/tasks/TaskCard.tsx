@@ -56,6 +56,12 @@ export const TaskCard = ({
         onDeleteClick?.()
     }
 
+    const priorityAccent: Record<string, string> = {
+        high: 'before:bg-error-500',
+        medium: 'before:bg-warning-400',
+        low: 'before:bg-success-500',
+    }
+
     return (
         <article
             onClick={onClick}
@@ -72,6 +78,10 @@ export const TaskCard = ({
                 'dark:hover:border-brand-600/60',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/45',
                 'active:scale-[0.99] active:shadow-[var(--shadow-sm)]',
+                // Priority accent strip on left edge
+                'before:absolute before:left-0 before:top-2.5 before:bottom-2.5 before:w-[3px] before:rounded-r-full before:transition-opacity before:duration-200',
+                'before:opacity-0 hover:before:opacity-100',
+                priorityAccent[task.priority],
                 task.status === 'completed' && 'opacity-60',
                 isOverdue &&
                     task.status !== 'completed' &&

@@ -47,7 +47,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     onToggle={toggle}
                     onResizeStart={startResizing}
                 >
-                    <SidebarSection title="Menue">
+                    <SidebarSection title="Menü">
                         {dashboardNavItems.map((item) => (
                             <SidebarNavItem
                                 key={item.id}
@@ -61,7 +61,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </Sidebar>
             )}
 
-            <main className={cn('h-full flex-1 overflow-y-auto', contentPadding)}>
+            <main className={cn('dashboard-bg h-full flex-1 overflow-y-auto', contentPadding)}>
                 {children ?? <Outlet />}
             </main>
 

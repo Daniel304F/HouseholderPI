@@ -6,6 +6,7 @@ import {
     Target,
     Flame,
     Users,
+    BarChart3,
 } from 'lucide-react'
 import {
     StatCard,
@@ -20,7 +21,7 @@ import {
     StatCardsSkeleton,
     StatsErrorState,
 } from '../../components/feedback'
-import { PageHeader } from '../../components/common'
+import { PageIntro } from '../../components/ui'
 import { ContributionGraph, ActivityLog } from '../../components/activity'
 import { statisticsApi } from '../../api/statistics'
 import { queryKeys } from '../../lib/queryKeys'
@@ -73,10 +74,11 @@ export const PersonalStats = () => {
 
     return (
         <div className="space-y-6">
-            <PageHeader
+            <PageIntro
                 title="Meine Statistiken"
-                subtitle="Dein persönlicher Fortschritt auf einen Blick"
-                badge={streakBadge}
+                description="Dein persönlicher Fortschritt auf einen Blick"
+                icon={<BarChart3 className="size-5 text-brand-600 dark:text-brand-400" />}
+                action={streakBadge ?? undefined}
             />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

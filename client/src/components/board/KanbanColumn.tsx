@@ -55,18 +55,18 @@ const columnColors: Record<ColumnStatus, string> = {
 }
 
 const columnBgColors: Record<ColumnStatus, string> = {
-    pending: 'bg-neutral-50/80 dark:bg-neutral-900/50',
-    'in-progress': 'bg-neutral-50/80 dark:bg-neutral-900/50',
-    completed: 'bg-neutral-50/80 dark:bg-neutral-900/50',
+    pending: 'bg-warning-50/60 dark:bg-warning-950/20',
+    'in-progress': 'bg-info-50/60 dark:bg-info-950/20',
+    completed: 'bg-brand-50/60 dark:bg-brand-950/20',
 }
 
 const columnCountColors: Record<ColumnStatus, string> = {
     pending:
-        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
+        'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300',
     'in-progress':
-        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
+        'bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-300',
     completed:
-        'bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-300',
+        'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300',
 }
 
 export const KanbanColumn = ({
@@ -117,7 +117,11 @@ export const KanbanColumn = ({
             {!isMobile && (
                 <header
                     className={cn(
-                        'relative z-10 flex items-center justify-between border-b border-white/65 bg-white/35 backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-900/20',
+                        'relative z-10 flex items-center justify-between border-b backdrop-blur-sm',
+                        'border-white/70 dark:border-neutral-700/60',
+                        column.id === 'pending' && 'bg-warning-50/50 dark:bg-warning-950/30',
+                        column.id === 'in-progress' && 'bg-info-50/50 dark:bg-info-950/30',
+                        column.id === 'completed' && 'bg-brand-50/50 dark:bg-brand-950/30',
                         isCompact ? 'p-3' : 'p-4'
                     )}
                 >

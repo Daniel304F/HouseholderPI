@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react'
+import { Settings2 } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { PageHeader } from '../../components/common'
+import { PageIntro } from '../../components/ui'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { userApi, type UpdateProfileRequest } from '../../api/user'
@@ -119,9 +120,10 @@ export const Settings = () => {
 
     return (
         <div className="ui-page-enter space-y-6">
-            <PageHeader
+            <PageIntro
                 title="Einstellungen"
-                subtitle="Verwalte dein Profil und Kontoeinstellungen"
+                description="Verwalte dein Profil und Kontoeinstellungen"
+                icon={<Settings2 className="size-5 text-brand-600 dark:text-brand-400" />}
             />
 
             {/* 2-Column Grid Layout */}

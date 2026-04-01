@@ -55,9 +55,18 @@ export const Sidebar = ({
                 style={{ width: isCollapsed ? 0 : width }}
             >
                 <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200/80 px-4 dark:border-neutral-800/70">
-                    <span className="text-text font-semibold tracking-tight">
-                        Navigation
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm shadow-brand-500/30">
+                            <img
+                                src="/householderPI.svg"
+                                alt=""
+                                className="size-4 brightness-0 invert"
+                            />
+                        </div>
+                        <span className="text-text text-sm font-bold tracking-tight">
+                            HouseHolder
+                        </span>
+                    </div>
                     <button
                         onClick={onToggle}
                         className={cn(
